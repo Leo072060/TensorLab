@@ -1,0 +1,8 @@
+Language:   Cpp
+BasedOnStyle: Microsoft 
+
+AlignConsecutiveAssignments:    true
+AlignConsecutiveDeclarations:   true
+
+AllowShortFunctionsOnASingleLine:   Empty 
+AllowShortIfStatementsOnASingleLine:    true
