@@ -54,5 +54,8 @@
         "limits": "cpp",
         "new": "cpp",
         "typeinfo": "cpp"
-    }
+    },
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.generator": "Ninja"
 }

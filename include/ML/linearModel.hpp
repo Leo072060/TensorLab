@@ -31,7 +31,7 @@ template <typename T> void LinearRegression<T>::train_(const Mat<T> &x, const Ma
     Mat<T> thetas(1, x.size(Axis::col) + 1);
 
     // start training
-    for (size_t i = 0; i < iterations; ++i)
+    for (size_t I = 0; I < iterations; ++I)
     {
         if (x.size(Axis::row) < batch_size)
         {
@@ -57,7 +57,7 @@ template <typename T> void LinearRegression<T>::train_(const Mat<T> &x, const Ma
             {
                 tmp_theta_i +=
                     learning_rate *
-                    ((y.iloc(e, Axis::row) - thetas.dot(w.iloc(e, Axis::row).transpose()) * w.iloc(e, i)).iloc(0, 0));
+                    ((y.iloc(e, Axis::row) - thetas.dot(w.iloc(e, Axis::row).transpose()))* w.iloc(e, i)).iloc(0, 0);
             }
             tmp_thetas.iloc(0, i) += (tmp_theta_i / batch_size);
         }

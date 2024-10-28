@@ -7,7 +7,7 @@
 
 #include "ML/linearModel.hpp"
 #include "kits/loader.hpp"
-#include "mat/mat.hpp"
+#include "mat/mat.hpp" 
 
 using namespace std;
 
@@ -64,7 +64,8 @@ int main()
 
     auto x = data.extract(0, 5, Axis::col);
     auto y = data.loc("target", Axis::col);
-    model.train(x, y);
 
+    model.train(x, y);
+    display(model.get_thetas());
 #endif
 }

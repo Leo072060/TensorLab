@@ -5,6 +5,7 @@
 #include <cmath>
 #include <map>
 #include <set>
+#include <iomanip>
 
 #include "kits/managed.hpp"
 
@@ -471,7 +472,7 @@ template <typename T> Mat<T> Mat<T>::dot(const Mat<T> &rhs) const
 
     Mat<T> ret(rowSize, rhs.colSize);
     for (size_t r = 0; r < rowSize; ++r)
-        for (size_t c = 0; c < colSize; ++c)
+        for (size_t c = 0; c < rhs.colSize; ++c)
             for (size_t k = 0; k < colSize; ++k)
                 ret.data[r][c] += data[r][k] * rhs.data[k][c];
 
@@ -1101,7 +1102,7 @@ template <typename T> Mat<T> Mat<T>::concat(const Mat<T> &other, const Axis axis
             for (size_t r = 0; r < rowSize; ++r)
                 ret.data[r][c] = data[r][c];
         }
-        for (size_t c = 0; c < colSize; ++c)
+        for (size_t c = 0; c < other.colSize; ++c)
         {
             ret.colNames[c + colSize] = other.colNames[c];
             for (size_t r = 0; r < other.rowSize; ++r)
