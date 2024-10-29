@@ -87,7 +87,10 @@ template <typename T> T ManagedVal<T>::read() const
     using namespace std;
 
     if (!this->checkPermission(readable)) throw runtime_error("Error: Insufficient permissions for read operation.");
-    return *value;
+    if (value)
+        return *value;
+    else
+        return T();
 }
 template <typename T> void ManagedVal<T>::write(const T &val)
 {
@@ -104,7 +107,7 @@ class ManagedClass
     void                       refresh() const;
     template <typename Y>
     void copyManagedVal(ManagedVal<Y> &managedVal, const ManagedVal<Y> &otherManagedVal,
-                        const ManagedClass other) const;
+                        const ManagedClass &other) const;
     void copyManagedClass(const ManagedClass &other);
 
   protected:
@@ -120,7 +123,7 @@ template <typename Y> void ManagedClass::record(ManagedVal<Y> &managedVal, const
 }
 template <typename Y>
 void ManagedClass::copyManagedVal(ManagedVal<Y> &managedVal, const ManagedVal<Y> &otherManagedVal,
-                                  const ManagedClass other) const
+                                  const ManagedClass &other) const
 {
     PermissionType perm = otherManagedVal.getPermission();
     otherManagedVal.addPermission(other.administrator, readable);
