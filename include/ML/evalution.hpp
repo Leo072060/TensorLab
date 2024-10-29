@@ -12,12 +12,12 @@ template <typename T = double> class RegressionEvaluation : public ManagedClass
 {
   public:
     RegressionEvaluation();
-    RegressionEvaluation(const Mat<T> &pred_y, const Mat<T> &target_y);
+    RegressionEvaluation(const Mat<T> &y_pred, const Mat<T> &y_target);
 
   public:
-    void fit(const Mat<T> &pred_y, const Mat<T> &target_y)
+    void fit(const Mat<T> &y_pred, const Mat<T> &y_target)
     {
-        const_cast<const RegressionEvaluation *>(this)->fit(pred_y, target_y);
+        const_cast<const RegressionEvaluation *>(this)->fit(y_pred, y_target);
     }
     void report() const;
     T    mean_absolute_error() const;
@@ -27,13 +27,13 @@ template <typename T = double> class RegressionEvaluation : public ManagedClass
     T    r2_score() const;
 
   private:
-    void fit(const Mat<T> &pred_y, const Mat<T> &target_y) const;
+    void fit(const Mat<T> &y_pred, const Mat<T> &y_target) const;
 
   private:
-    mutable ManagedVal<Mat<T>> managed_target_y;
-    mutable ManagedVal<Mat<T>> managed_pred_y;
-    mutable ManagedVal<Mat<T>> managed_target_y_minus_pred_y;
-    mutable ManagedVal<Mat<T>> managed_target_y_minus_mean_target_y;
+    mutable ManagedVal<Mat<T>> managed_y_target;
+    mutable ManagedVal<Mat<T>> managed_y_pred;
+    mutable ManagedVal<Mat<T>> managed_y_target_minus_y_pred;
+    mutable ManagedVal<Mat<T>> managed_y_target_minus_mean_y_target;
     mutable ManagedVal<T>      managed_MAE;
     mutable ManagedVal<T>      managed_MSE;
     mutable ManagedVal<T>      managed_RMSE;
@@ -42,22 +42,22 @@ template <typename T = double> class RegressionEvaluation : public ManagedClass
 };
 template <typename T>
 RegressionEvaluation<T>::RegressionEvaluation()
-    : ManagedClass(), managed_target_y(this->administrator), managed_pred_y(this->administrator),
-      managed_target_y_minus_pred_y(this->administrator), managed_target_y_minus_mean_target_y(this->administrator),
+    : ManagedClass(), managed_y_target(this->administrator), managed_y_pred(this->administrator),
+      managed_y_target_minus_y_pred(this->administrator), managed_y_target_minus_mean_y_target(this->administrator),
       managed_MAE(this->administrator), managed_MSE(this->administrator), managed_RMSE(this->administrator),
       managed_MAPE(this->administrator), managed_R2(this->administrator)
 {
 }
 template <typename T>
-RegressionEvaluation<T>::RegressionEvaluation(const Mat<T> &pred_y, const Mat<T> &target_y) : RegressionEvaluation()
+RegressionEvaluation<T>::RegressionEvaluation(const Mat<T> &y_pred, const Mat<T> &y_target) : RegressionEvaluation()
 {
-    fit(pred_y, target_y);
+    fit(y_pred, y_target);
 }
 template <typename T> void RegressionEvaluation<T>::report() const
 {
     using namespace std;
 
-    if (!managed_target_y.isReadable())
+    if (!managed_y_target.isReadable())
     {
         cerr << "Error: The model must be fitted before generating the report." << endl;
         throw runtime_error("Model not fitted.");
@@ -81,13 +81,13 @@ template <typename T> T RegressionEvaluation<T>::mean_absolute_error() const
 
     if (managed_MAE.isReadable()) return managed_MAE.read();
 
-    if (!managed_target_y.isReadable())
+    if (!managed_y_target.isReadable())
     {
         cerr << "Error: The model must be fitted before generating mean absolute error." << endl;
         throw runtime_error("Model not fitted.");
     }
 
-    this->record(managed_MAE, managed_target_y_minus_pred_y.read().abs().mean(Axis::all).iloc(0,0));
+    this->record(managed_MAE, managed_y_target_minus_y_pred.read().abs().mean(Axis::all).iloc(0,0));
     return managed_MAE;
 }
 template <typename T> T RegressionEvaluation<T>::mean_squared_error() const
@@ -96,13 +96,13 @@ template <typename T> T RegressionEvaluation<T>::mean_squared_error() const
 
     if (managed_MSE.isReadable()) return managed_MSE.read();
 
-    if (!managed_target_y.isReadable())
+    if (!managed_y_target.isReadable())
     {
         cerr << "Error: The model must be fitted before generating mean squared error." << endl;
         throw runtime_error("Model not fitted.");
     }
 
-    this->record(managed_MSE, (managed_target_y_minus_pred_y.read() ^ 0.5).mean(Axis::all).iloc(0,0));
+    this->record(managed_MSE, (managed_y_target_minus_y_pred.read().abs() ^ 0.5).mean(Axis::all).iloc(0,0));
     return managed_MSE;
 }
 template <typename T> T RegressionEvaluation<T>::root_mean_squared_error() const
@@ -111,7 +111,7 @@ template <typename T> T RegressionEvaluation<T>::root_mean_squared_error() const
 
     if (managed_RMSE.isReadable()) return managed_RMSE.read();
 
-    if (!managed_target_y.isReadable())
+    if (!managed_y_target.isReadable())
     {
         cerr << "Error: The model must be fitted before generating root mean squared error." << endl;
         throw runtime_error("Model not fitted.");
@@ -126,13 +126,13 @@ template <typename T> T RegressionEvaluation<T>::mean_absolute_percentage_error(
 
     if (managed_MAPE.isReadable()) return managed_MAPE.read();
 
-    if (!managed_target_y.isReadable())
+    if (!managed_y_target.isReadable())
     {
         cerr << "Error: The model must be fitted before generating mean absolute percentage error." << endl;
         throw runtime_error("Model not fitted.");
     }
 
-    this->record(managed_MAPE, (managed_target_y_minus_pred_y.read() / managed_target_y).abs().mean(Axis::all).iloc(0,0));
+    this->record(managed_MAPE, (managed_y_target_minus_y_pred.read() / managed_y_target).abs().mean(Axis::all).iloc(0,0));
     return managed_MAPE;
 }
 template <typename T> T RegressionEvaluation<T>::r2_score() const
@@ -141,45 +141,45 @@ template <typename T> T RegressionEvaluation<T>::r2_score() const
 
     if (managed_R2.isReadable()) return managed_R2.read();
 
-    if (!managed_target_y.isReadable())
+    if (!managed_y_target.isReadable())
     {
         cerr << "Error: The model must be fitted before generating r2 score." << endl;
         throw runtime_error("Model not fitted.");
     }
 
-    this->record(managed_R2, 1 - ((managed_target_y_minus_pred_y.read() ^ 2).sum(Axis::all) /
-                                  (managed_target_y_minus_mean_target_y.read() ^ 2).sum(Axis::all)).iloc(0,0));
+    this->record(managed_R2, 1 - ((managed_y_target_minus_y_pred.read() ^ 2).sum(Axis::all) /
+                                  (managed_y_target_minus_mean_y_target.read() ^ 2).sum(Axis::all)).iloc(0,0));
     return managed_R2;
 }
-template <typename T> void RegressionEvaluation<T>::fit(const Mat<T> &pred_y, const Mat<T> &target_y) const
+template <typename T> void RegressionEvaluation<T>::fit(const Mat<T> &y_pred, const Mat<T> &y_target) const
 {
     using namespace std;
 
-    if (pred_y.size(Axis::row) != target_y.size(Axis::row))
+    if (y_pred.size(Axis::row) != y_target.size(Axis::row))
     {
         cerr << "Error: The number of rows in predicted values and target values must be the same." << endl;
         throw runtime_error("Dimension mismatch.");
     }
-    if (pred_y.size(Axis::row) < 1)
+    if (y_pred.size(Axis::row) < 1)
     {
         cerr << "Error: The input matrices must have at least one row." << endl;
         throw invalid_argument("The input matrices must have at least one row.");
     }
 
     this->refresh();
-    this->record(managed_target_y, target_y);
-    this->record(managed_pred_y, pred_y);
+    this->record(managed_y_target, y_target);
+    this->record(managed_y_pred, y_pred);
 
     // calculate
-    Mat<T> tmp(target_y.size(Axis::row), 1);
-    // calculate managed_target_y_minus_pred_y
-    for (size_t i = 0; i < target_y.size(Axis::row); ++i)
-        tmp.iloc(i, 0) = target_y.iloc(i, 0) - pred_y.iloc(i, 0);
-    this->record(managed_target_y_minus_pred_y, tmp);
-    // calculate managed_target_y_minus_mean_target_y
-    for (size_t i = 0; i < target_y.size(Axis::row); ++i)
-        tmp.iloc(i, 0) = target_y.iloc(i, 0) - managed_target_y.read().mean(Axis::all).iloc(0,0);
-    this->record(managed_target_y_minus_mean_target_y, tmp);
+    Mat<T> tmp(y_target.size(Axis::row), 1);
+    // calculate managed_y_target_minus_y_pred
+    for (size_t i = 0; i < y_target.size(Axis::row); ++i)
+        tmp.iloc(i, 0) = y_target.iloc(i, 0) - y_pred.iloc(i, 0);
+    this->record(managed_y_target_minus_y_pred, tmp);
+    // calculate managed_y_target_minus_mean_y_target
+    for (size_t i = 0; i < y_target.size(Axis::row); ++i)
+        tmp.iloc(i, 0) = y_target.iloc(i, 0) - managed_y_target.read().mean(Axis::all).iloc(0,0);
+    this->record(managed_y_target_minus_mean_y_target, tmp);
 }
 #pragma endregion
 
@@ -188,12 +188,12 @@ template <typename T> class ClassificationEvaluation : public ManagedClass
 {
   public:
     ClassificationEvaluation();
-    ClassificationEvaluation(const Mat<string> &pred_y, const Mat<string> &target_y);
+    ClassificationEvaluation(const Mat<string> &y_pred, const Mat<string> &y_target);
 
   public:
-    void fit(const Mat<string> &pred_y, const Mat<string> &target_y)
+    void fit(const Mat<string> &y_pred, const Mat<string> &y_target)
     {
-        const_cast<const ClassificationEvaluation<T> *>(this)->fit(pred_y, target_y);
+        const_cast<const ClassificationEvaluation<T> *>(this)->fit(y_pred, y_target);
     }
     void        report() const;
     Mat<size_t> confusionMatrix() const;
@@ -203,11 +203,11 @@ template <typename T> class ClassificationEvaluation : public ManagedClass
     Mat<T>      recall() const;
 
   private:
-    void fit(const Mat<string> &pred_y, const Mat<string> &target_y) const;
+    void fit(const Mat<string> &y_pred, const Mat<string> &y_target) const;
 
   private:
-    mutable ManagedVal<Mat<string>> managed_target_y;
-    mutable ManagedVal<Mat<string>> managed_pred_y;
+    mutable ManagedVal<Mat<string>> managed_y_target;
+    mutable ManagedVal<Mat<string>> managed_y_pred;
     mutable ManagedVal<Mat<size_t>> managed_confusionMatrix;
     mutable ManagedVal<T>           managed_accuracy;
     mutable ManagedVal<T>           managed_errorRate;
@@ -216,23 +216,23 @@ template <typename T> class ClassificationEvaluation : public ManagedClass
 };
 template <typename T>
 ClassificationEvaluation<T>::ClassificationEvaluation()
-    : ManagedClass(), managed_target_y(this->administrator), managed_pred_y(this->administrator),
+    : ManagedClass(), managed_y_target(this->administrator), managed_y_pred(this->administrator),
       managed_confusionMatrix(this->administrator), managed_accuracy(this->administrator),
       managed_errorRate(this->administrator), managed_percision(this->administrator),
       managed_recall(this->administrator)
 {
 }
 template <typename T>
-ClassificationEvaluation<T>::ClassificationEvaluation(const Mat<string> &pred_y, const Mat<string> &target_y)
+ClassificationEvaluation<T>::ClassificationEvaluation(const Mat<string> &y_pred, const Mat<string> &y_target)
     : ClassificationEvaluation()
 {
-    fit(pred_y, target_y);
+    fit(y_pred, y_target);
 }
 template <typename T> void ClassificationEvaluation<T>::report() const
 {
     using namespace std;
 
-    if (!managed_target_y.isReadable())
+    if (!managed_y_target.isReadable())
     {
         cerr << "Error: The model must be fitted before generating the report." << endl;
         throw runtime_error("Model not fitted.");
@@ -256,31 +256,31 @@ template <typename T> Mat<size_t> ClassificationEvaluation<T>::confusionMatrix()
 
     if (managed_confusionMatrix.isReadable()) return managed_confusionMatrix.read();
 
-    if (!managed_target_y.isReadable())
+    if (!managed_y_target.isReadable())
     {
         cerr << "Error: The model must be fitted before generating confusion matrix." << endl;
         throw runtime_error("Model not fitted.");
     }
 
-    Mat<string> types_target_y = managed_target_y.read().unique();
-    Mat<string> types_pred_y   = managed_pred_y.read().unique();
-    Mat<string> types_y        = types_target_y.concat(types_pred_y, Axis::col).unique();
-    if (types_y.size() > types_target_y.size())
+    Mat<string> types_y_target = managed_y_target.read().unique();
+    Mat<string> types_y_pred   = managed_y_pred.read().unique();
+    Mat<string> types_y        = types_y_target.concat(types_y_pred, Axis::col).unique();
+    if (types_y.size() > types_y_target.size())
     {
         cerr << "Error: Predicted labels contain classes not present in the target labels." << endl;
         throw logic_error("Predicted labels contain classes not present in the target labels.");
     }
-    types_target_y.sort(0, Order::asce, Axis::col);
-    Mat<size_t> confusionMat(types_target_y.size(Axis::col), types_target_y.size(Axis::col));
-    for (size_t i = 0; i < managed_target_y.read().size(Axis::row); ++i)
+    types_y_target.sort(0, Order::asce, Axis::col);
+    Mat<size_t> confusionMat(types_y_target.size(Axis::col), types_y_target.size(Axis::col));
+    for (size_t i = 0; i < managed_y_target.read().size(Axis::row); ++i)
     {
-        confusionMat.iloc(types_target_y.find(managed_target_y.read().iloc(i, 0)).cbegin()->second,
-                          types_target_y.find(managed_pred_y.read().iloc(i, 0)).cbegin()->second) += 1;
+        confusionMat.iloc(types_y_target.find(managed_y_target.read().iloc(i, 0)).cbegin()->second,
+                          types_y_target.find(managed_y_pred.read().iloc(i, 0)).cbegin()->second) += 1;
     }
     for (size_t i = 0; i < confusionMat.size(Axis::row); ++i)
     {
-        confusionMat.iloc_name(i, Axis::row) = types_target_y.iloc(0, i);
-        confusionMat.iloc_name(i, Axis::col) = types_target_y.iloc(0, i);
+        confusionMat.iloc_name(i, Axis::row) = types_y_target.iloc(0, i);
+        confusionMat.iloc_name(i, Axis::col) = types_y_target.iloc(0, i);
     }
 
     this->record(managed_confusionMatrix, confusionMat);
@@ -290,7 +290,7 @@ template <typename T> T ClassificationEvaluation<T>::accuracy() const
 {
     using namespace std;
 
-    if (!managed_target_y.isReadable())
+    if (!managed_y_target.isReadable())
     {
         cerr << "Error: The model must be fitted before generating accuracy." << endl;
         throw runtime_error("Model not fitted.");
@@ -312,7 +312,7 @@ template <typename T> T ClassificationEvaluation<T>::error_rate() const
 
     if (managed_errorRate.isReadable()) return managed_errorRate.read();
 
-    if (!managed_target_y.isReadable())
+    if (!managed_y_target.isReadable())
     {
         cerr << "Error: The model must be fitted before generating error rate." << endl;
         throw runtime_error("Model not fitted.");
@@ -327,7 +327,7 @@ template <typename T> Mat<T> ClassificationEvaluation<T>::percision() const
 
     if (managed_percision.isReadable()) return managed_percision.read();
 
-    if (!managed_target_y.isReadable())
+    if (!managed_y_target.isReadable())
     {
         cerr << "Error: The model must be fitted before generating percision." << endl;
         throw runtime_error("Model not fitted.");
@@ -351,7 +351,7 @@ template <typename T> Mat<T> ClassificationEvaluation<T>::recall() const
 
     if (managed_recall.isReadable()) return managed_recall.read();
 
-    if (!managed_target_y.isReadable())
+    if (!managed_y_target.isReadable())
     {
         cerr << "Error: The model must be fitted before generating recall." << endl;
         throw runtime_error("Model not fitted.");
@@ -370,26 +370,26 @@ template <typename T> Mat<T> ClassificationEvaluation<T>::recall() const
     return managed_recall;
 }
 template <typename T>
-void ClassificationEvaluation<T>::fit(const Mat<string> &pred_y, const Mat<string> &target_y) const
+void ClassificationEvaluation<T>::fit(const Mat<string> &y_pred, const Mat<string> &y_target) const
 {
     using namespace std;
 
-    if (pred_y.size(Axis::row) != target_y.size(Axis::row))
+    if (y_pred.size(Axis::row) != y_target.size(Axis::row))
     {
         cerr << "Error: The number of rows in predicted values and target values must be the same." << endl;
         throw runtime_error("Dimension mismatch.");
     }
-    if (pred_y.size(Axis::row) < 1)
+    if (y_pred.size(Axis::row) < 1)
     {
         cerr << "Error: The input matrices must have at least one row." << endl;
         throw invalid_argument("The input matrices must have at least one row.");
     }
 
     this->refresh();
-    this->record(managed_target_y, target_y);
-    this->record(managed_pred_y, pred_y);
-    Mat<string> types_pred_y   = pred_y.unique();
-    Mat<string> types_target_y = target_y.unique();
+    this->record(managed_y_target, y_target);
+    this->record(managed_y_pred, y_pred);
+    Mat<string> types_y_pred   = y_pred.unique();
+    Mat<string> types_y_target = y_target.unique();
 
     confusionMatrix();
 }

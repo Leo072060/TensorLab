@@ -5,10 +5,11 @@
 #include <random>
 #include <vector>
 
+#include "ML/evalution.hpp"
 #include "ML/linearModel.hpp"
 #include "kits/loader.hpp"
 #include "mat/mat.hpp"
-#include"ML/evalution.hpp"
+#include "preprocessor/split.hpp"
 
 using namespace std;
 
@@ -66,14 +67,23 @@ int main()
     auto x = data.extract(0, 5, Axis::col);
     auto y = data.loc("target", Axis::col);
 
-    model.train(x, y);
+    auto x_y = train_test_split(x, y, 0.2);
+
+    auto x_train = x_y["x_train"];
+    auto y_train = x_y["y_train"];
+    auto x_test  = x_y["x_test"];
+    auto y_test  = x_y["y_test"];
+
+    model.train(x_train, y_train);
     display(model.get_thetas());
     LinearRegression model_copy;
-    model_copy = model;
-    display_rainbow(model_copy.predict(x), no_name, 20);
+    model_copy  = model;
+    auto y_pred = model_copy.predict(x_test);
 
     RegressionEvaluation<double> evalution;
-    evalution.fit(y,y);
+    evalution.fit(y_pred, y_test);
+    display_rainbow(y_pred.concat(y_test, Axis::col));
     evalution.report();
+
 #endif
 }

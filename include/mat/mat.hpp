@@ -332,6 +332,8 @@ template <typename T> void Mat<T>::operator/=(const T rhs)
 }
 template <typename T> void Mat<T>::operator^=(const T rhs)
 {
+    using namespace std;
+
     for (size_t r = 0; r < rowSize; ++r)
         for (size_t c = 0; c < colSize; ++c)
             data[r][c] = pow(data[r][c], rhs);
@@ -479,7 +481,7 @@ template <typename T> Mat<T> Mat<T>::abs() const
     Mat<T> ret(*this);
     for (size_t r = 0; r < rowSize; ++r)
         for (size_t c = 0; c < colSize; ++c)
-            std::abs(ret.data[r][c]);
+            ret.data[r][c] = std::abs(ret.data[r][c]);
     return ret;
 }
 template <typename T> Mat<T> Mat<T>::dot(const Mat<T> &rhs) const
