@@ -33,7 +33,7 @@ ManagedItem::ManagedItem(const Administrator &admin) : administrator_ID(admin.ID
 {
     admin.registerManagedItem(*this);
 }
-bool ManagedItem::checkPermission(const Permission perm) const
+bool ManagedItem::checkPermission(const PermissionType perm) const
 {
     return CHECK_FLAG(permission, perm);
 }
@@ -49,13 +49,13 @@ bool ManagedItem::isWritable() const
 {
     return checkPermission(writable);
 }
-void ManagedItem::setPermission(const Administrator &admin, const Permission perm) const
+void ManagedItem::setPermission(const Administrator &admin, const PermissionType perm) const
 {
     if (admin.ID != this->administrator_ID)
         throw runtime_error("Error: This administrator does not have permission to modify.");
     permission = perm;
 }
-void ManagedItem::addPermission(const Administrator &admin, const Permission perm) const
+void ManagedItem::addPermission(const Administrator &admin, const PermissionType perm) const
 {
     if (admin.ID != this->administrator_ID)
         throw runtime_error("Error: This administrator does not have permission to modify.");
@@ -75,4 +75,8 @@ void ManagedClass::refresh() const
         administrator.getManagedItem(i).setPermission(administrator, lowest);
     }
     isrefreshed = true;
+}
+void ManagedClass::copyManagedClass(const ManagedClass &other)
+{
+    isrefreshed = other.isrefreshed;
 }

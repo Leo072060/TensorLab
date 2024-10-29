@@ -45,12 +45,12 @@ class ManagedItem
     ManagedItem(const Administrator &admin);
 
   public:
-    bool           checkPermission(const Permission perm) const;
+    bool           checkPermission(const PermissionType perm) const;
     PermissionType getPermission() const;
     bool           isReadable() const;
     bool           isWritable() const;
-    void           setPermission(const Administrator &admin, const Permission perm) const;
-    void           addPermission(const Administrator &admin, const Permission perm) const;
+    void           setPermission(const Administrator &admin, const PermissionType perm) const;
+    void           addPermission(const Administrator &admin, const PermissionType perm) const;
 
   public:
     const ADMINISTRATOR_ID administrator_ID;
@@ -64,9 +64,9 @@ template <class T> class ManagedVal : public ManagedItem
     ManagedVal(const Administrator &admin);
     ManagedVal(const Administrator &admin, const T &val);
 
-             operator const T &();
-    const T &read() const;
-    void     write(const T &val);
+         operator const T();
+    T    read() const;
+    void write(const T &val);
 
   private:
     std::unique_ptr<T> value;
@@ -78,11 +78,11 @@ template <typename T> ManagedVal<T>::ManagedVal(const Administrator &admin, cons
 
     value = make_unique<T>(val);
 }
-template <typename T> ManagedVal<T>::operator const T &()
+template <typename T> ManagedVal<T>::operator const T()
 {
     return read();
 }
-template <typename T> const T &ManagedVal<T>::read() const
+template <typename T> T ManagedVal<T>::read() const
 {
     using namespace std;
 
@@ -94,7 +94,7 @@ template <typename T> void ManagedVal<T>::write(const T &val)
     using namespace std;
 
     if (!this->checkPermission(writable)) throw runtime_error("Error: Insufficient permissions for write operation.");
-    value = std::make_unique<T>(val);
+    value = make_unique<T>(val);
 }
 
 class ManagedClass
@@ -102,7 +102,10 @@ class ManagedClass
   protected:
     template <typename Y> void record(ManagedVal<Y> &managedVal, const Y &val) const;
     void                       refresh() const;
-    template <typename Y> void copyIfReadable(ManagedVal<Y> &managedVal,const ManagedVal<Y> &other) const;
+    template <typename Y>
+    void copyManagedVal(ManagedVal<Y> &managedVal, const ManagedVal<Y> &otherManagedVal,
+                        const ManagedClass other) const;
+    void copyManagedClass(const ManagedClass &other);
 
   protected:
     const Administrator administrator;
@@ -115,8 +118,15 @@ template <typename Y> void ManagedClass::record(ManagedVal<Y> &managedVal, const
     managedVal.setPermission(administrator, readable);
     isrefreshed = false;
 }
-template <typename Y> void ManagedClass::copyIfReadable(ManagedVal<Y> &managedVal,const ManagedVal<Y> &other) const
+template <typename Y>
+void ManagedClass::copyManagedVal(ManagedVal<Y> &managedVal, const ManagedVal<Y> &otherManagedVal,
+                                  const ManagedClass other) const
 {
-    if (other.isReadable()) record(managedVal, other.read());
+    PermissionType perm = otherManagedVal.getPermission();
+    otherManagedVal.addPermission(other.administrator, readable);
+    managedVal.addPermission(administrator, writable);
+    managedVal.write(otherManagedVal.read());
+    otherManagedVal.setPermission(other.administrator, perm);
+    managedVal.setPermission(administrator, perm);
 }
 #endif // MANAGED_HPP

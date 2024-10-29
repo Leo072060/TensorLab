@@ -67,7 +67,8 @@ int main()
 
     model.train(x, y);
     display(model.get_thetas());
-    auto model_copy = model;
-    display_rainbow(model_copy.predict(x),no_name,20);
+    LinearRegression model_copy;
+    model_copy = model;
+    display_rainbow(model_copy.predict(x), no_name, 20);
 #endif
 }

@@ -10,9 +10,11 @@
 template <class T = double> class RegressionModelBase : public ManagedClass
 {
   protected:
-    RegressionModelBase() : ManagedClass(), managed_thetas(this->administrator) {}
+    RegressionModelBase();
     RegressionModelBase(const RegressionModelBase<T> &other);
     RegressionModelBase(RegressionModelBase<T> &&other) noexcept;
+    RegressionModelBase<T> &operator=(const RegressionModelBase<T> &rhs);
+    RegressionModelBase<T> &operator=(RegressionModelBase<T> &&rhs) noexcept;
     ~RegressionModelBase() = default;
 
   public:
@@ -32,15 +34,32 @@ template <class T = double> class RegressionModelBase : public ManagedClass
   private:
     ManagedVal<Mat<T>> managed_thetas;
 };
+template <class T> RegressionModelBase<T>::RegressionModelBase() : ManagedClass(), managed_thetas(this->administrator)
+{
+}
 template <class T>
 RegressionModelBase<T>::RegressionModelBase(const RegressionModelBase<T> &other) : RegressionModelBase()
 {
-    this->copyIfReadable(managed_thetas, other.managed_thetas);
+    this->copyManagedClass(other);
+    this->copyManagedVal(managed_thetas, other.managed_thetas, other);
 }
 template <class T>
 RegressionModelBase<T>::RegressionModelBase(RegressionModelBase<T> &&other) noexcept : RegressionModelBase()
 {
-    this->copyIfReadable(managed_thetas, other.managed_thetas);
+    this->copyManagedClass(other);
+    this->copyManagedVal(managed_thetas, other.managed_thetas, other);
+}
+template <class T> RegressionModelBase<T> &RegressionModelBase<T>::operator=(const RegressionModelBase<T> &rhs)
+{
+    this->copyManagedClass(rhs);
+    this->copyManagedVal(managed_thetas, rhs.managed_thetas, rhs);
+    return *this;
+}
+template <class T> RegressionModelBase<T> &RegressionModelBase<T>::operator=(RegressionModelBase<T> &&rhs) noexcept
+{
+    this->copyManagedClass(rhs);
+    this->copyManagedVal(managed_thetas, rhs.managed_thetas, rhs);
+    return *this;
 }
 template <class T> void RegressionModelBase<T>::train(const Mat<T> &x, const Mat<T> &y)
 {
@@ -95,13 +114,10 @@ template <class T = double> class ClassificationModelBase : public ManagedClass
 template <class T> class MultiClassificationModelBase : public ClassificationModelBase<T>
 {
   protected:
-    MultiClassificationModelBase()
-        : ClassificationModelBase<T>(), managed_thetas(this->administrator), managed_labels(this->administrator)
-    {
-    }
-    MultiClassificationModelBase(const MultiClassificationModelBase<T> &other) : MultiClassificationModelBase() {}
-    MultiClassificationModelBase(MultiClassificationModelBase<T> &&other) noexcept : MultiClassificationModelBase() {}
-    ~MultiClassificationModelBase() {}
+    MultiClassificationModelBase();
+    MultiClassificationModelBase(const MultiClassificationModelBase<T> &other);
+    MultiClassificationModelBase(MultiClassificationModelBase<T> &&other) noexcept;
+    ~MultiClassificationModelBase();
 
   public:
     void             train(const Mat<T> &x, const Mat<std::string> &y) override;
@@ -120,6 +136,26 @@ template <class T> class MultiClassificationModelBase : public ClassificationMod
   private:
     ManagedVal<Mat<T>> managed_thetas;
 };
+template <class T>
+MultiClassificationModelBase<T>::MultiClassificationModelBase()
+    : ClassificationModelBase<T>(), managed_thetas(this->administrator), managed_labels(this->administrator)
+{
+}
+template <class T>
+MultiClassificationModelBase<T>::MultiClassificationModelBase(const MultiClassificationModelBase<T> &other)
+    : MultiClassificationModelBase()
+{
+    this->copyIfReadable(managed_labels, other.managed_labels);
+    this->copyIfReadable(managed_thetas, other.managed_thetas);
+}
+template <class T>
+MultiClassificationModelBase<T>::MultiClassificationModelBase(MultiClassificationModelBase<T> &&other) noexcept
+    : MultiClassificationModelBase()
+{
+    this->copyIfReadable(managed_labels, other.managed_labels);
+    this->copyIfReadable(managed_thetas, other.managed_thetas);
+}
+template <class T> MultiClassificationModelBase<T>::~MultiClassificationModelBase() {}
 template <class T> void MultiClassificationModelBase<T>::train(const Mat<T> &x, const Mat<std::string> &y)
 {
     this->record(managed_thetas, this->train_multi(x, y));
