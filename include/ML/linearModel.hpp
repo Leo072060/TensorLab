@@ -8,8 +8,8 @@
 template <class T = double> class LinearRegression : public RegressionModelBase<T>
 {
   private:
-    void   train_(const Mat<T> &x, const Mat<T> &y) override;
-    Mat<T> predict_(const Mat<T> &x) const override;
+    Mat<T> train_(const Mat<T> &x, const Mat<T> &y) override;
+    Mat<T> predict_(const Mat<T> &x, const Mat<T> &thetas) const override;
 
   public:
     std::shared_ptr<RegressionModelBase<T>> clone() const override;
@@ -21,7 +21,7 @@ template <class T = double> class LinearRegression : public RegressionModelBase<
     size_t iterations    = 1700;
 };
 
-template <typename T> void LinearRegression<T>::train_(const Mat<T> &x, const Mat<T> &y)
+template <typename T> Mat<T> LinearRegression<T>::train_(const Mat<T> &x, const Mat<T> &y)
 {
     using namespace std;
 
@@ -57,29 +57,29 @@ template <typename T> void LinearRegression<T>::train_(const Mat<T> &x, const Ma
             {
                 tmp_theta_i +=
                     learning_rate *
-                    ((y.iloc(e, Axis::row) - thetas.dot(w.iloc(e, Axis::row).transpose()))* w.iloc(e, i)).iloc(0, 0);
+                    ((y.iloc(e, Axis::row) - thetas.dot(w.iloc(e, Axis::row).transpose())) * w.iloc(e, i)).iloc(0, 0);
             }
             tmp_thetas.iloc(0, i) += (tmp_theta_i / batch_size);
         }
         thetas = tmp_thetas;
     }
-    this->record(this->managed_thetas, thetas);
+    return thetas;
 }
-template <typename T> Mat<T> LinearRegression<T>::predict_(const Mat<T> &x) const
+template <typename T> Mat<T> LinearRegression<T>::predict_(const Mat<T> &x, const Mat<T> &thetas) const
 {
     using namespace std;
 
-    if (x.size(Axis::col) + 1 != this->managed_thetas.read().size(Axis::col))
+    if (x.size(Axis::col) + 1 != thetas.size(Axis::col))
     {
         cerr << "Error: The input matrix has incompatible dimensions with the model parameters." << endl;
-        cerr << "Expected columns: " << (this->managed_thetas.read().size(Axis::col) - 1)
+        cerr << "Expected columns: " << (thetas.size(Axis::col) - 1)
              << ", but got: " << x.size(Axis::col) << "." << endl;
         throw invalid_argument("The input matrix has incompatible dimensions with the model parameters.");
     }
     Mat<T> ones(x.size(Axis::row), 1);
     ones     = 1;
     Mat<T> w = x.concat(ones, Axis::col);
-    return w.dot(this->managed_thetas.read().transpose());
+    return w.dot(thetas.transpose());
 }
 template <typename T> std::shared_ptr<RegressionModelBase<T>> LinearRegression<T>::clone() const
 {

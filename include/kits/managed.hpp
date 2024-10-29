@@ -64,7 +64,7 @@ template <class T> class ManagedVal : public ManagedItem
     ManagedVal(const Administrator &admin);
     ManagedVal(const Administrator &admin, const T &val);
 
-    operator const T &();
+             operator const T &();
     const T &read() const;
     void     write(const T &val);
 
@@ -100,13 +100,9 @@ template <typename T> void ManagedVal<T>::write(const T &val)
 class ManagedClass
 {
   protected:
-    ManagedClass()                              = default;
-    ManagedClass(const ManagedClass &other)     = default;
-    ManagedClass(ManagedClass &&other) noexcept = default;
-    ~ManagedClass()                             = default;
-
     template <typename Y> void record(ManagedVal<Y> &managedVal, const Y &val) const;
     void                       refresh() const;
+    template <typename Y> void copyIfReadable(ManagedVal<Y> &managedVal,const ManagedVal<Y> &other) const;
 
   protected:
     const Administrator administrator;
@@ -119,5 +115,8 @@ template <typename Y> void ManagedClass::record(ManagedVal<Y> &managedVal, const
     managedVal.setPermission(administrator, readable);
     isrefreshed = false;
 }
-
+template <typename Y> void ManagedClass::copyIfReadable(ManagedVal<Y> &managedVal,const ManagedVal<Y> &other) const
+{
+    if (other.isReadable()) record(managedVal, other.read());
+}
 #endif // MANAGED_HPP

@@ -7,7 +7,7 @@
 
 #include "ML/linearModel.hpp"
 #include "kits/loader.hpp"
-#include "mat/mat.hpp" 
+#include "mat/mat.hpp"
 
 using namespace std;
 
@@ -58,7 +58,7 @@ int main()
     string dataFileName = "regression_data.csv";
     loader.nameFlag     = col_name;
     Mat data            = loader.load_matrix(dataFileName);
-    display_rainbow(data,col_name,5);
+    display_rainbow(data, col_name, 5);
 
     LinearRegression model;
 
@@ -67,5 +67,10 @@ int main()
 
     model.train(x, y);
     display(model.get_thetas());
+    model.predict(x);
+    auto model_copy = model;
+    model_copy.train(x, y);
+    display(model_copy.get_thetas());
+    model_copy.predict(x);
 #endif
 }

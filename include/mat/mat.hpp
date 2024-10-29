@@ -3,9 +3,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iomanip>
 #include <map>
 #include <set>
-#include <iomanip>
 
 #include "kits/managed.hpp"
 
@@ -158,6 +158,10 @@ template <typename T> Mat<T>::Mat(const Mat<T> &other) : Mat()
 
     for (size_t c = 0; c < colSize; ++c)
         colNames[c] = other.colNames[c];
+
+    this->copyIfReadable(managed_det, other.managed_det);
+    this->copyIfReadable(managed_mean, other.managed_mean);
+    this->copyIfReadable(managed_sum, other.managed_sum);
 }
 template <typename T> Mat<T>::Mat(Mat<T> &&other) noexcept : Mat()
 {
@@ -172,6 +176,10 @@ template <typename T> Mat<T>::Mat(Mat<T> &&other) noexcept : Mat()
     other.colNames = nullptr;
     other.rowSize  = 0;
     other.colSize  = 0;
+
+    this->copyIfReadable(managed_det, other.managed_det);
+    this->copyIfReadable(managed_mean, other.managed_mean);
+    this->copyIfReadable(managed_sum, other.managed_sum);
 }
 template <typename T> Mat<T> &Mat<T>::operator=(const Mat<T> &rhs)
 {
@@ -201,6 +209,10 @@ template <typename T> Mat<T> &Mat<T>::operator=(const Mat<T> &rhs)
     rowSize = rhs.rowSize;
     colSize = rhs.colSize;
 
+    this->copyIfReadable(managed_det, rhs.managed_det);
+    this->copyIfReadable(managed_mean, rhs.managed_mean);
+    this->copyIfReadable(managed_sum, rhs.managed_sum);
+
     return *this;
 }
 template <typename T> Mat<T> &Mat<T>::operator=(Mat<T> &&rhs) noexcept
@@ -225,6 +237,10 @@ template <typename T> Mat<T> &Mat<T>::operator=(Mat<T> &&rhs) noexcept
     rhs.colNames = nullptr;
     rhs.rowSize  = 0;
     rhs.colSize  = 0;
+
+    this->copyIfReadable(managed_det, rhs.managed_det);
+    this->copyIfReadable(managed_mean, rhs.managed_mean);
+    this->copyIfReadable(managed_sum, rhs.managed_sum);
 
     return *this;
 }

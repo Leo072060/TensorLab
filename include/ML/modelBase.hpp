@@ -11,9 +11,9 @@ template <class T = double> class RegressionModelBase : public ManagedClass
 {
   protected:
     RegressionModelBase() : ManagedClass(), managed_thetas(this->administrator) {}
-    RegressionModelBase(const RegressionModelBase<T> &other) : RegressionModelBase() {}
-    RegressionModelBase(RegressionModelBase<T> &&other) noexcept : RegressionModelBase() {}
-    ~RegressionModelBase() {}
+    RegressionModelBase(const RegressionModelBase<T> &other);
+    RegressionModelBase(RegressionModelBase<T> &&other) noexcept;
+    ~RegressionModelBase() = default;
 
   public:
     void   train(const Mat<T> &x, const Mat<T> &y);
@@ -25,16 +25,26 @@ template <class T = double> class RegressionModelBase : public ManagedClass
     virtual std::shared_ptr<RegressionModelBase<T>> clone() const = 0;
 
   protected:
-    virtual void   train_(const Mat<T> &x, const Mat<T> &y) = 0;
-    virtual Mat<T> predict_(const Mat<T> &x) const          = 0;
+    virtual Mat<T> train_(const Mat<T> &x, const Mat<T> &y)              = 0;
+    virtual Mat<T> predict_(const Mat<T> &x, const Mat<T> &thetas) const = 0;
     /////////////////////////////////////////////////
 
-  protected:
+  private:
     ManagedVal<Mat<T>> managed_thetas;
 };
+template <class T>
+RegressionModelBase<T>::RegressionModelBase(const RegressionModelBase<T> &other) : RegressionModelBase()
+{
+    this->copyIfReadable(managed_thetas, other.managed_thetas);
+}
+template <class T>
+RegressionModelBase<T>::RegressionModelBase(RegressionModelBase<T> &&other) noexcept : RegressionModelBase()
+{
+    this->copyIfReadable(managed_thetas, other.managed_thetas);
+}
 template <class T> void RegressionModelBase<T>::train(const Mat<T> &x, const Mat<T> &y)
 {
-    this->train_(x, y);
+    this->record(managed_thetas, this->train_(x, y));
 }
 template <class T> Mat<T> RegressionModelBase<T>::predict(const Mat<T> &x) const
 {
@@ -46,7 +56,7 @@ template <class T> Mat<T> RegressionModelBase<T>::predict(const Mat<T> &x) const
         throw runtime_error("The model has not been trained.");
     }
 
-    predict_(x);
+    predict_(x, managed_thetas.read());
 }
 template <class T> Mat<T> RegressionModelBase<T>::get_thetas() const
 {
@@ -105,12 +115,14 @@ template <class T> class MultiClassificationModelBase : public ClassificationMod
     /////////////////////////////////////////////////
 
   protected:
-    ManagedVal<Mat<T>>           managed_thetas;
     ManagedVal<Mat<std::string>> managed_labels;
+
+  private:
+    ManagedVal<Mat<T>> managed_thetas;
 };
 template <class T> void MultiClassificationModelBase<T>::train(const Mat<T> &x, const Mat<std::string> &y)
 {
-    this->train_multi(x, y);
+    this->record(managed_thetas, this->train_multi(x, y));
 }
 template <class T> Mat<std::string> MultiClassificationModelBase<T>::predict(const Mat<T> &x) const
 {
@@ -122,7 +134,7 @@ template <class T> Mat<std::string> MultiClassificationModelBase<T>::predict(con
         throw runtime_error("The model has not been trained.");
     }
 
-    predict_multi(x);
+    return predict_multi(x, managed_thetas.read());
 }
 template <class T> Mat<T> MultiClassificationModelBase<T>::get_thetas() const
 {
