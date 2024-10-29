@@ -56,7 +56,7 @@ template <class T> Mat<T> RegressionModelBase<T>::predict(const Mat<T> &x) const
         throw runtime_error("The model has not been trained.");
     }
 
-    predict_(x, managed_thetas.read());
+    return predict_(x, managed_thetas.read());
 }
 template <class T> Mat<T> RegressionModelBase<T>::get_thetas() const
 {

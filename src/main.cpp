@@ -67,10 +67,7 @@ int main()
 
     model.train(x, y);
     display(model.get_thetas());
-    model.predict(x);
     auto model_copy = model;
-    model_copy.train(x, y);
-    display(model_copy.get_thetas());
-    model_copy.predict(x);
+    display_rainbow(model_copy.predict(x),no_name,20);
 #endif
 }
