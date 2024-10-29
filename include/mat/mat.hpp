@@ -134,7 +134,9 @@ template <class T = double> class Mat : public ManagedClass
 
 // lifecycle management
 template <typename T>
-Mat<T>::Mat() : managed_det(this->administrator), managed_mean(this->administrator), managed_sum(this->administrator)
+Mat<T>::Mat()
+    : ManagedClass(), managed_det(this->administrator), managed_mean(this->administrator),
+      managed_sum(this->administrator)
 {
 }
 template <typename T> Mat<T>::Mat(const Mat<T> &other) : Mat()
@@ -474,9 +476,11 @@ template <typename T> Mat<T> Mat<T>::operator/(const Mat<T> &rhs) const
 }
 template <typename T> Mat<T> Mat<T>::abs() const
 {
+    Mat<T> ret(*this);
     for (size_t r = 0; r < rowSize; ++r)
         for (size_t c = 0; c < colSize; ++c)
-            std::abs(data[r][c]);
+            std::abs(ret.data[r][c]);
+    return ret;
 }
 template <typename T> Mat<T> Mat<T>::dot(const Mat<T> &rhs) const
 {

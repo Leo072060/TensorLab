@@ -8,6 +8,7 @@
 #include "ML/linearModel.hpp"
 #include "kits/loader.hpp"
 #include "mat/mat.hpp"
+#include"ML/evalution.hpp"
 
 using namespace std;
 
@@ -70,5 +71,9 @@ int main()
     LinearRegression model_copy;
     model_copy = model;
     display_rainbow(model_copy.predict(x), no_name, 20);
+
+    RegressionEvaluation<double> evalution;
+    evalution.fit(y,y);
+    evalution.report();
 #endif
 }
