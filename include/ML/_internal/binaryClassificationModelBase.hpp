@@ -45,7 +45,9 @@ template <typename T> class BinaryClassificationModelBase : public Classificatio
     void        generate_ecoc(const BinaryToMultiMethod method);
     void        train_ecoc();
     std::string predict_ecoc(const Mat<T> &x) const;
-    size_t      hammingDistance(const Mat<T> &lhs, const Mat<T> &rhs) const;
+
+  public:
+    static size_t hammingDistance(const Mat<T> &lhs, const Mat<T> &rhs);
 
     // model parameters
   public:
@@ -67,29 +69,41 @@ template <typename T> class BinaryClassificationModelBase : public Classificatio
 template <typename T>
 BinaryClassificationModelBase<T>::BinaryClassificationModelBase()
     : ClassificationModelBase<T>()
+    , binary2multi(OneVsRest)
     , managed_labels(this->administrator)
+    , managed_dimension(this->administrator)
     , managed_binary2multi(this->administrator)
     , managed_thetas(this->administrator)
     , managed_ecoc(this->administrator)
+    , managed_xs(this->administrator)
+    , managed_ys(this->administrator)
 {
 }
 template <typename T>
 BinaryClassificationModelBase<T>::BinaryClassificationModelBase(const BinaryClassificationModelBase<T> &other)
     : ClassificationModelBase<T>(other)
+    , binary2multi(OneVsRest)
     , managed_labels(this->administrator)
+    , managed_dimension(this->administrator)
     , managed_binary2multi(this->administrator)
     , managed_thetas(this->administrator)
     , managed_ecoc(this->administrator)
+    , managed_xs(this->administrator)
+    , managed_ys(this->administrator)
 {
     this->copyAfterConstructor(other);
 }
 template <typename T>
 BinaryClassificationModelBase<T>::BinaryClassificationModelBase(BinaryClassificationModelBase<T> &&other) noexcept
     : ClassificationModelBase<T>(std::move(other))
+    , binary2multi(OneVsRest)
     , managed_labels(this->administrator)
+    , managed_dimension(this->administrator)
     , managed_binary2multi(this->administrator)
     , managed_thetas(this->administrator)
     , managed_ecoc(this->administrator)
+    , managed_xs(this->administrator)
+    , managed_ys(this->administrator)
 {
     this->copyAfterConstructor(other);
 }
@@ -262,7 +276,7 @@ template <typename T> void BinaryClassificationModelBase<T>::train_ecoc()
     using namespace std;
 
     vector<Mat<T>> thetas;
-    const Mat<T>   ecoc = managed_ecoc.read();
+    const Mat<int> ecoc = managed_ecoc.read();
     for (size_t c = 0; c < ecoc.size(Axis::col); ++c)
     {
         Mat<T>      x;
@@ -271,7 +285,7 @@ template <typename T> void BinaryClassificationModelBase<T>::train_ecoc()
         {
             if (ecoc.iloc(r, c) != 0)
             {
-                x                 = x.concat(managed_xs.read()[r]);
+                x                 = x.concat(managed_xs.read()[r], Axis::row);
                 Mat<string> tmp_y = managed_ys.read()[r];
                 if (1 == ecoc.iloc(r, c))
                     tmp_y = "T";
@@ -290,13 +304,13 @@ template <typename T> std::string BinaryClassificationModelBase<T>::predict_ecoc
     Mat<int> pred_ecoc(1, ecoc.size(Axis::col));
     size_t   c = 0;
     for (const auto &e : managed_thetas.read())
-        pred_ecoc.iloc(0, c++) = (ipredict_binary(x, e).iloc(0, 0) == "T") ? 1 : -1;
+        pred_ecoc.iloc(0, c++) = (predict_binary(x, e).iloc(0, 0) == "T") ? 1 : -1;
 
-    size_t minHammingDistance = hammingDistance(ecoc.iloc(0, Axis::row), pred_ecoc);
+    size_t minHammingDistance = BinaryClassificationModelBase<int>::hammingDistance(ecoc.iloc(0, Axis::row), pred_ecoc);
     size_t pred_r             = 0;
     for (size_t r = 1; r < managed_ecoc.read().size(Axis::row); ++r)
     {
-        size_t distance = hammingDistance(ecoc.iloc(0, Axis::row), pred_ecoc);
+        size_t distance = BinaryClassificationModelBase<int>::hammingDistance(ecoc.iloc(0, Axis::row), pred_ecoc);
         if (distance < minHammingDistance)
         {
             minHammingDistance = distance;
@@ -306,8 +320,7 @@ template <typename T> std::string BinaryClassificationModelBase<T>::predict_ecoc
 
     return managed_labels.read().iloc(0, pred_r);
 }
-template <typename T>
-size_t BinaryClassificationModelBase<T>::hammingDistance(const Mat<T> &lhs, const Mat<T> &rhs) const
+template <typename T> size_t BinaryClassificationModelBase<T>::hammingDistance(const Mat<T> &lhs, const Mat<T> &rhs)
 {
     using namespace std;
 

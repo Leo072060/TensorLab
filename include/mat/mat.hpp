@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <map>
 #include <set>
+#include <sstream>
 
 #include "_internal/managed.hpp"
 
@@ -49,6 +50,8 @@ void display_rainbow(const Mat<T> &mat, const NameFlagType nameFlag = no_name, c
 
 template <class T = double> class Mat : public ManagedClass
 {
+    template <typename U> friend class Mat;
+
   public:
     // lifecycle management
     Mat();
@@ -58,6 +61,9 @@ template <class T = double> class Mat : public ManagedClass
     Mat<T> &operator=(Mat<T> &&rhs) noexcept;
     Mat(const size_t row, const size_t col);
     ~Mat();
+
+    // type conversion
+    template <typename U> operator Mat<U>() const;
 
     // metadata operations
     inline size_t size(const Axis axis = Axis::all) const;
@@ -140,14 +146,18 @@ template <class T = double> class Mat : public ManagedClass
 // lifecycle management
 template <typename T>
 Mat<T>::Mat()
-    : ManagedClass(), managed_det(this->administrator), managed_mean(this->administrator),
-      managed_sum(this->administrator)
+    : ManagedClass()
+    , managed_det(this->administrator)
+    , managed_mean(this->administrator)
+    , managed_sum(this->administrator)
 {
 }
 template <typename T>
 Mat<T>::Mat(const Mat<T> &other)
-    : ManagedClass(other), managed_det(this->administrator), managed_mean(this->administrator),
-      managed_sum(this->administrator)
+    : ManagedClass(other)
+    , managed_det(this->administrator)
+    , managed_mean(this->administrator)
+    , managed_sum(this->administrator)
 {
     using namespace std;
 
@@ -173,8 +183,10 @@ Mat<T>::Mat(const Mat<T> &other)
 }
 template <typename T>
 Mat<T>::Mat(Mat<T> &&other) noexcept
-    : ManagedClass(std::move(other)), managed_det(this->administrator), managed_mean(this->administrator),
-      managed_sum(this->administrator)
+    : ManagedClass(std::move(other))
+    , managed_det(this->administrator)
+    , managed_mean(this->administrator)
+    , managed_sum(this->administrator)
 {
     this->copyAfterConstructor(other);
 
@@ -249,7 +261,9 @@ template <typename T> Mat<T> &Mat<T>::operator=(Mat<T> &&rhs) noexcept
 
     return *this;
 }
-template <typename T> Mat<T>::Mat(const size_t row, const size_t col) : Mat()
+template <typename T>
+Mat<T>::Mat(const size_t row, const size_t col)
+    : Mat()
 {
     using namespace std;
 
@@ -277,6 +291,30 @@ template <typename T> Mat<T>::~Mat()
     data     = nullptr;
     rowNames = nullptr;
     colNames = nullptr;
+}
+
+// type conversion
+template <typename T> template <typename U> Mat<T>::operator Mat<U>() const
+{
+    using namespace std;
+
+    Mat<U> ret(rowSize, colSize);
+
+    for (size_t r = 0; r < rowSize; ++r)
+        ret.rowNames[r] = rowNames[r];
+    for (size_t c = 0; c < colSize; ++c)
+        ret.colNames[c] = colNames[c];
+    for (size_t r = 0; r < rowSize; ++r)
+        for (size_t c = 0; c < colSize; ++c)
+        {
+            stringstream ss;
+            ss << data[r][c]; 
+            U value;
+            ss >> value;           
+            ret.data[r][c] = value; 
+        }
+
+    return ret;
 }
 
 // metadata operations
@@ -933,7 +971,7 @@ template <typename T> std::string &Mat<T>::iloc_name(const size_t i, const Axis 
 {
     using namespace std;
     this->refresh();
-    return const_cast<string &>(static_cast<const Mat<T>&>(*this).iloc_name(i, axis));
+    return const_cast<string &>(static_cast<const Mat<T> &>(*this).iloc_name(i, axis));
 }
 template <typename T>
 Mat<T> Mat<T>::extract(const size_t row_begin, const size_t row_end, const size_t col_begin, const size_t col_end) const
@@ -1257,7 +1295,7 @@ template <typename T> void Mat<T>::sort(const size_t i, const Order order, const
         vector<size_t> index(rowSize);
         for (size_t r = 0; r < rowSize; ++r)
             index[r] = r;
-        sort(index.begin(), index.end(), [this, i, order](size_t a, size_t b) {
+        std::sort(index.begin(), index.end(), [this, i, order](size_t a, size_t b) {
             return (order == Order::asce) ? (data[a][i] < data[b][i]) : (data[a][i] > data[b][i]);
         });
 
@@ -1287,7 +1325,7 @@ template <typename T> void Mat<T>::sort(const size_t i, const Order order, const
         vector<size_t> index(colSize);
         for (size_t c = 0; c < colSize; ++c)
             index[c] = c;
-        sort(index.begin(), index.end(), [this, i, order](size_t a, size_t b) {
+        std::sort(index.begin(), index.end(), [this, i, order](size_t a, size_t b) {
             return (order == Order::asce) ? (data[i][a] < data[i][b]) : (data[i][a] > data[i][b]);
         });
 

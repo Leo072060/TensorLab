@@ -1,7 +1,7 @@
 #ifndef LOGISTIC_REGRESSION_HPP
 #define LOGISTIC_REGRESSION_HPP
 
-#include"ML/_internal/binaryClassificationModelBase.hpp"
+#include "ML/_internal/binaryClassificationModelBase.hpp"
 
 namespace TL
 {
@@ -58,7 +58,7 @@ template <typename T> Mat<T> LogisticRegression<T>::train_binary(const Mat<T> &x
         set<size_t>                randomNums;
         random_device              rd;
         mt19937                    gen(rd());
-        uniform_int_distribution<> dis(0, x.size_row() - 1);
+        uniform_int_distribution<> dis(0, x.size(Axis::row) - 1);
         while (randomNums.size() < batch_size)
             randomNums.insert(dis(gen));
 
@@ -88,7 +88,7 @@ template <typename T> Mat<std::string> LogisticRegression<T>::predict_binary(con
 {
     using namespace std;
 
-    Mat<T>      probabilities = predict_probabilities(x, this->thetas);
+    Mat<T>      probabilities = predict_probabilities(x, theta);
     Mat<string> ret(x.size(Axis::row), 1);
     for (size_t i = 0; i < x.size(Axis::row); ++i)
         ret.iloc(i, 0) = probabilities.iloc(i, 0) > 0.5 ? this->managed_labels.read().iloc(0, 0)
@@ -116,7 +116,7 @@ template <typename T> std::shared_ptr<ClassificationModelBase<T>> LogisticRegres
 {
     using namespace std;
 
-    return make_shared<ClassificationModelBase<T>>(*this);
+    return make_shared<LogisticRegression<T>>(*this);
 }
 } // namespace TL
 #endif // LOGISTIC_REGRESSION_HPP

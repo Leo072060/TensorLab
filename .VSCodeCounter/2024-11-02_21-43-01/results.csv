@@ -1,0 +1,21 @@
+"filename", "language", "CMake", "CMake Cache", "comment", "blank", "total"
+"/home/twh/TensorLab/CMakeLists.txt", "CMake", 6, 0, 0, 5, 11
+"/home/twh/TensorLab/build/CMakeCache.txt", "CMake Cache", 0, 304, 0, 66, 370
+"/home/twh/TensorLab/build/CMakeFiles/3.22.1/CMakeCCompiler.cmake", "CMake", 55, 0, 0, 18, 73
+"/home/twh/TensorLab/build/CMakeFiles/3.22.1/CMakeCXXCompiler.cmake", "CMake", 64, 0, 0, 20, 84
+"/home/twh/TensorLab/build/CMakeFiles/3.22.1/CMakeSystem.cmake", "CMake", 10, 0, 0, 6, 16
+"/home/twh/TensorLab/build/CMakeFiles/CMakeDirectoryInformation.cmake", "CMake", 12, 0, 0, 5, 17
+"/home/twh/TensorLab/build/CMakeFiles/ML.dir/DependInfo.cmake", "CMake", 15, 0, 0, 6, 21
+"/home/twh/TensorLab/build/CMakeFiles/ML.dir/cmake_clean.cmake", "CMake", 12, 0, 0, 2, 14
+"/home/twh/TensorLab/build/CMakeFiles/Makefile.cmake", "CMake", 42, 0, 0, 6, 48
+"/home/twh/TensorLab/build/cmake_install.cmake", "CMake", 46, 0, 0, 9, 55
+"/home/twh/TensorLab/test/CMakeCache.txt", "CMake Cache", 0, 304, 0, 66, 370
+"/home/twh/TensorLab/test/CMakeFiles/3.22.1/CMakeCCompiler.cmake", "CMake", 55, 0, 0, 18, 73
+"/home/twh/TensorLab/test/CMakeFiles/3.22.1/CMakeCXXCompiler.cmake", "CMake", 64, 0, 0, 20, 84
+"/home/twh/TensorLab/test/CMakeFiles/3.22.1/CMakeSystem.cmake", "CMake", 10, 0, 0, 6, 16
+"/home/twh/TensorLab/test/CMakeFiles/CMakeDirectoryInformation.cmake", "CMake", 12, 0, 0, 5, 17
+"/home/twh/TensorLab/test/CMakeFiles/ML.dir/DependInfo.cmake", "CMake", 15, 0, 0, 6, 21
+"/home/twh/TensorLab/test/CMakeFiles/ML.dir/cmake_clean.cmake", "CMake", 12, 0, 0, 2, 14
+"/home/twh/TensorLab/test/CMakeFiles/Makefile.cmake", "CMake", 42, 0, 0, 6, 48
+"/home/twh/TensorLab/test/cmake_install.cmake", "CMake", 46, 0, 0, 9, 55
+"Total", "-", 518, 608, 0, 281, 1407
