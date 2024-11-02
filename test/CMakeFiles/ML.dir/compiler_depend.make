@@ -258,6 +258,7 @@ CMakeFiles/ML.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/c++/11/pstl/glue_numeric_defs.h \
   /usr/include/c++/11/pstl/execution_defs.h \
   ../include/ML/evalution.hpp \
+  ../include/ML/classificationEvaluation.hpp \
   ../include/_internal/managed.hpp \
   /usr/include/c++/11/memory \
   /usr/include/c++/11/bits/stl_tempbuf.h \
@@ -292,8 +293,13 @@ CMakeFiles/ML.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/c++/11/set \
   /usr/include/c++/11/bits/stl_set.h \
   /usr/include/c++/11/bits/stl_multiset.h \
+  ../include/ML/regressionEvaluation.hpp \
   ../include/ML/linearModel.hpp \
-  ../include/ML/modelBase.hpp \
+  ../include/ML/linearRegression.hpp \
+  ../include/ML/_internal/regressionModelBase.hpp \
+  ../include/ML/logisticRegression.hpp \
+  ../include/ML/_internal/binaryClassificationModelBase.hpp \
+  ../include/ML/_internal/classificationModelBase.hpp \
   ../include/preprocessor/split.hpp \
   ../include/utility/loader.hpp \
   /usr/include/c++/11/fstream \
@@ -525,6 +531,10 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 ../include/utility/loader.hpp:
 
+../include/ML/linearRegression.hpp:
+
+../include/ML/regressionEvaluation.hpp:
+
 /usr/include/c++/11/bits/stl_multiset.h:
 
 /usr/include/c++/11/bits/stl_set.h:
@@ -559,8 +569,6 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 
 /usr/include/c++/11/bits/atomic_lockfree_defines.h:
 
-../include/ML/modelBase.hpp:
-
 /usr/include/c++/11/bits/atomic_base.h:
 
 /usr/include/c++/11/bits/shared_ptr_atomic.h:
@@ -576,6 +584,8 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 /usr/include/c++/11/memory:
 
 ../include/_internal/managed.hpp:
+
+../include/ML/classificationEvaluation.hpp:
 
 /usr/include/stdlib.h:
 
@@ -606,6 +616,8 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 /usr/include/c++/11/ext/new_allocator.h:
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
+
+../include/ML/_internal/regressionModelBase.hpp:
 
 /usr/include/c++/11/bits/allocated_ptr.h:
 
@@ -656,6 +668,8 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 /usr/include/c++/11/tr1/modified_bessel_func.tcc:
 
 /usr/include/locale.h:
+
+../include/ML/_internal/classificationModelBase.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h:
 
@@ -764,6 +778,8 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 /usr/include/x86_64-linux-gnu/asm/errno.h:
 
 /usr/include/x86_64-linux-gnu/sys/cdefs.h:
+
+../include/ML/logisticRegression.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
 
@@ -934,6 +950,8 @@ CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp \
 /usr/include/asm-generic/errno.h:
 
 /usr/include/c++/11/tr1/ell_integral.tcc:
+
+../include/ML/_internal/binaryClassificationModelBase.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/types/error_t.h:
 

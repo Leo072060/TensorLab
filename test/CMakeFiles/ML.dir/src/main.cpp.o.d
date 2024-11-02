@@ -207,6 +207,7 @@ CMakeFiles/ML.dir/src/main.cpp.o: /home/twh/TensorLab/src/main.cpp \
  /usr/include/c++/11/pstl/glue_numeric_defs.h \
  /usr/include/c++/11/pstl/execution_defs.h \
  /home/twh/TensorLab/include/ML/evalution.hpp \
+ /home/twh/TensorLab/include/ML/classificationEvaluation.hpp \
  /home/twh/TensorLab/include/_internal/managed.hpp \
  /usr/include/c++/11/memory /usr/include/c++/11/bits/stl_tempbuf.h \
  /usr/include/c++/11/bits/stl_raw_storage_iter.h \
@@ -234,8 +235,13 @@ CMakeFiles/ML.dir/src/main.cpp.o: /home/twh/TensorLab/src/main.cpp \
  /usr/include/c++/11/bits/stl_multimap.h /usr/include/c++/11/set \
  /usr/include/c++/11/bits/stl_set.h \
  /usr/include/c++/11/bits/stl_multiset.h \
+ /home/twh/TensorLab/include/ML/regressionEvaluation.hpp \
  /home/twh/TensorLab/include/ML/linearModel.hpp \
- /home/twh/TensorLab/include/ML/modelBase.hpp \
+ /home/twh/TensorLab/include/ML/linearRegression.hpp \
+ /home/twh/TensorLab/include/ML/_internal/regressionModelBase.hpp \
+ /home/twh/TensorLab/include/ML/logisticRegression.hpp \
+ /home/twh/TensorLab/include/ML/_internal/binaryClassificationModelBase.hpp \
+ /home/twh/TensorLab/include/ML/_internal/classificationModelBase.hpp \
  /home/twh/TensorLab/include/preprocessor/split.hpp \
  /home/twh/TensorLab/include/utility/loader.hpp \
  /usr/include/c++/11/fstream \

@@ -14,7 +14,7 @@
 using namespace std;
 using namespace TL;
 
-#define TEST_mat
+#define TEST_LinearRegression
 int main()
 {
     cout << "__main__" << endl;

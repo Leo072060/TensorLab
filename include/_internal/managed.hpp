@@ -129,7 +129,9 @@ void ManagedValImpl<T>::copy(const Administrator &admin, const Administrator &ad
 template <typename T> std::shared_ptr<ManagedValImpl<T>> ManagedValImpl<T>::getInstance(Administrator &admin)
 {
     using namespace std;
-    return shared_ptr<ManagedValImpl<T>>(new ManagedValImpl(admin));
+    shared_ptr<ManagedValImpl<T>> new_managedValImpl(new ManagedValImpl<T>(admin));
+    admin.registerManagedItem(new_managedValImpl);
+    return new_managedValImpl;
 }
 
 class ManagedClass;

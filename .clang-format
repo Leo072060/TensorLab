@@ -6,3 +6,6 @@ AlignConsecutiveDeclarations:   true
 
 AllowShortFunctionsOnASingleLine:   Empty 
 AllowShortIfStatementsOnASingleLine:    true
+
+BreakConstructorInitializersBeforeComma:	true
+BreakConstructorInitializers: BeforeColon

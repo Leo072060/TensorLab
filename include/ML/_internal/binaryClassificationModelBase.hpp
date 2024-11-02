@@ -1,222 +1,45 @@
-#ifndef MODELBASE_HPP
-#define MODELBASE_HPP
+#ifndef BINARY_CLASSIFICATION_MODEL_BASE_HPP
+#define BINARY_CLASSIFICATION_MODEL_BASE_HPP
 
 #include <vector>
 
+#include "ML/_internal/classificationModelBase.hpp"
 #include "_internal/managed.hpp"
 #include "mat/mat.hpp"
 
 namespace TL
 {
-using namespace _internal;
-
-#pragma region RegressionModelBase
-template <class T = double> class RegressionModelBase : public ManagedClass
+namespace _internal
 {
-  protected:
-    RegressionModelBase();
-    RegressionModelBase(const RegressionModelBase<T> &other);
-    RegressionModelBase(RegressionModelBase<T> &&other) noexcept;
-    RegressionModelBase<T> &operator=(const RegressionModelBase<T> &rhs);
-    RegressionModelBase<T> &operator=(RegressionModelBase<T> &&rhs) noexcept;
-    ~RegressionModelBase() = default;
-
-  public:
-    void   train(const Mat<T> &x, const Mat<T> &y);
-    Mat<T> predict(const Mat<T> &x) const;
-    Mat<T> get_thetas() const;
-
-    ///////////////////// API ////////////////////////////
-  public:
-    virtual std::shared_ptr<RegressionModelBase<T>> clone() const = 0;
-
-  protected:
-    virtual Mat<T> train_(const Mat<T> &x, const Mat<T> &y)              = 0;
-    virtual Mat<T> predict_(const Mat<T> &x, const Mat<T> &thetas) const = 0;
-    /////////////////////////////////////////////////
-
-  private:
-    ManagedVal<Mat<T>> managed_thetas;
-};
-template <class T> RegressionModelBase<T>::RegressionModelBase() : ManagedClass(), managed_thetas(this->administrator)
-{
-}
-template <class T>
-RegressionModelBase<T>::RegressionModelBase(const RegressionModelBase<T> &other)
-    : ManagedClass(other), managed_thetas(this->administrator)
-{
-    this->copyAfterConstructor(other);
-}
-template <class T>
-RegressionModelBase<T>::RegressionModelBase(RegressionModelBase<T> &&other) noexcept : RegressionModelBase()
-{
-    this->copyAfterConstructor(other);
-}
-template <class T> RegressionModelBase<T> &RegressionModelBase<T>::operator=(const RegressionModelBase<T> &rhs)
-{
-    ManagedClass::operator=(rhs);
-    return *this;
-}
-template <class T> RegressionModelBase<T> &RegressionModelBase<T>::operator=(RegressionModelBase<T> &&rhs) noexcept
-{
-    ManagedClass::operator=(rhs);
-    return *this;
-}
-template <class T> void RegressionModelBase<T>::train(const Mat<T> &x, const Mat<T> &y)
-{
-    this->record(managed_thetas, this->train_(x, y));
-}
-template <class T> Mat<T> RegressionModelBase<T>::predict(const Mat<T> &x) const
-{
-    using namespace std;
-
-    if (!managed_thetas.isReadable())
-    {
-        cerr << "Error: The model cannot predict before the model has been trained." << endl;
-        throw runtime_error("The model has not been trained.");
-    }
-
-    return predict_(x, managed_thetas.read());
-}
-template <class T> Mat<T> RegressionModelBase<T>::get_thetas() const
-{
-    using namespace std;
-
-    if (!managed_thetas.isReadable())
-    {
-        cerr << "Error: The model parameters (thetas) cannot be read before the model has been trained." << endl;
-        throw runtime_error("The model has not been trained.");
-    }
-    return managed_thetas.read();
-}
-#pragma endregion
-
-#pragma region ClassificationModelBase
-template <class T = double> class ClassificationModelBase : public ManagedClass
-{
-  protected:
-    ClassificationModelBase() : ManagedClass() {}
-    ClassificationModelBase(const ClassificationModelBase<T> &other) : ClassificationModelBase() {}
-    ClassificationModelBase(ClassificationModelBase<T> &&other) noexcept : ClassificationModelBase() {}
-    ~ClassificationModelBase() {}
-
-  public:
-    virtual void             train(const Mat<T> &x, const Mat<std::string> &y) = 0;
-    virtual Mat<std::string> predict(const Mat<T> &x) const                    = 0;
-
-    ///////////////////// API ////////////////////////////
-  public:
-    virtual std::shared_ptr<ClassificationModelBase> clone() const = 0;
-    /////////////////////////////////////////////////
-};
-#pragma endregion
-
-#pragma region MultiClassificationModelBase
-template <class T> class MultiClassificationModelBase : public ClassificationModelBase<T>
-{
-  protected:
-    MultiClassificationModelBase();
-    MultiClassificationModelBase(const MultiClassificationModelBase<T> &other);
-    MultiClassificationModelBase(MultiClassificationModelBase<T> &&other) noexcept;
-    ~MultiClassificationModelBase();
-
-  public:
-    void             train(const Mat<T> &x, const Mat<std::string> &y) override;
-    Mat<std::string> predict(const Mat<T> &x) const override;
-    Mat<T>           get_thetas() const;
-
-    ///////////////////// API ////////////////////////////
-  protected:
-    virtual Mat<T>           train_multi(const Mat<T> &x, const Mat<std::string> &y)   = 0;
-    virtual Mat<std::string> predict_multi(const Mat<T> &x, const Mat<T> &theta) const = 0;
-    /////////////////////////////////////////////////
-
-  protected:
-    ManagedVal<Mat<std::string>> managed_labels;
-
-  private:
-    ManagedVal<Mat<T>> managed_thetas;
-};
-template <class T>
-MultiClassificationModelBase<T>::MultiClassificationModelBase()
-    : ClassificationModelBase<T>(), managed_thetas(this->administrator), managed_labels(this->administrator)
-{
-}
-template <class T>
-MultiClassificationModelBase<T>::MultiClassificationModelBase(const MultiClassificationModelBase<T> &other)
-    : ClassificationModelBase<T>(other)
-{
-    this->copyIfReadable(managed_labels, other.managed_labels);
-    this->copyIfReadable(managed_thetas, other.managed_thetas);
-}
-template <class T>
-MultiClassificationModelBase<T>::MultiClassificationModelBase(MultiClassificationModelBase<T> &&other) noexcept
-    : ClassificationModelBase<T>(std::move(other))
-{
-    this->copyIfReadable(managed_labels, other.managed_labels);
-    this->copyIfReadable(managed_thetas, other.managed_thetas);
-}
-template <class T> MultiClassificationModelBase<T>::~MultiClassificationModelBase() {}
-template <class T> void MultiClassificationModelBase<T>::train(const Mat<T> &x, const Mat<std::string> &y)
-{
-    this->record(managed_thetas, this->train_multi(x, y));
-}
-template <class T> Mat<std::string> MultiClassificationModelBase<T>::predict(const Mat<T> &x) const
-{
-    using namespace std;
-
-    if (!managed_thetas.isReadable())
-    {
-        cerr << "Error: The model cannot predict before the model has been trained." << endl;
-        throw runtime_error("The model has not been trained.");
-    }
-
-    return predict_multi(x, managed_thetas.read());
-}
-template <class T> Mat<T> MultiClassificationModelBase<T>::get_thetas() const
-{
-    using namespace std;
-
-    if (!managed_thetas.isReadable())
-    {
-        cerr << "Error: The model parameters (thetas) cannot be read before the model has been trained." << endl;
-        throw runtime_error("The model has not been trained.");
-    }
-    return managed_thetas.read();
-}
-#pragma endregion
-
-#pragma region BinaryClassificationModelBase
 enum BinaryToMultiMethod : int
 {
     OneVsRest,
     OneVsOne
 };
+
 template <typename T> class BinaryClassificationModelBase : public ClassificationModelBase<T>
 {
+    // lifecycle management
   protected:
-    BinaryClassificationModelBase()
-        : ClassificationModelBase<T>(), managed_labels(this->administrator), managed_binary2multi(this->administrator),
-          managed_thetas(this->administrator), managed_ecoc(this->administrator)
-    {
-    }
-    BinaryClassificationModelBase(const BinaryClassificationModelBase<T> &other) : BinaryClassificationModelBase() {}
-    BinaryClassificationModelBase(BinaryClassificationModelBase<T> &&other) noexcept : BinaryClassificationModelBase()
-    {
-    }
+    BinaryClassificationModelBase();
+    BinaryClassificationModelBase(const BinaryClassificationModelBase<T> &other);
+    BinaryClassificationModelBase(BinaryClassificationModelBase<T> &&other) noexcept;
+    BinaryClassificationModelBase<T> &operator=(const BinaryClassificationModelBase<T> &rhs);
+    BinaryClassificationModelBase<T> &operator=(BinaryClassificationModelBase<T> &&rhs) noexcept;
     ~BinaryClassificationModelBase() {}
 
+    // interface functions
   public:
     void                train(const Mat<T> &x, const Mat<std::string> &y) override;
     Mat<std::string>    predict(const Mat<T> &x) const override;
     std::vector<Mat<T>> get_thetas() const;
 
-    ///////////////////// API ////////////////////////////
+    // hook functions
   protected:
     virtual Mat<T>           train_binary(const Mat<T> &x, const Mat<std::string> &y)   = 0;
     virtual Mat<std::string> predict_binary(const Mat<T> &x, const Mat<T> &theta) const = 0;
-    /////////////////////////////////////////////////
 
+    // internal implementation functions
   private:
     void        classify_labels(const Mat<T> &x, const Mat<std::string> &y);
     void        generate_ecoc(const BinaryToMultiMethod method);
@@ -224,6 +47,7 @@ template <typename T> class BinaryClassificationModelBase : public Classificatio
     std::string predict_ecoc(const Mat<T> &x) const;
     size_t      hammingDistance(const Mat<T> &lhs, const Mat<T> &rhs) const;
 
+    // model parameters
   public:
     BinaryToMultiMethod binary2multi;
 
@@ -238,6 +62,55 @@ template <typename T> class BinaryClassificationModelBase : public Classificatio
     ManagedVal<std::vector<Mat<T>>>           managed_xs;
     ManagedVal<std::vector<Mat<std::string>>> managed_ys;
 };
+
+// lifecycle management
+template <typename T>
+BinaryClassificationModelBase<T>::BinaryClassificationModelBase()
+    : ClassificationModelBase<T>()
+    , managed_labels(this->administrator)
+    , managed_binary2multi(this->administrator)
+    , managed_thetas(this->administrator)
+    , managed_ecoc(this->administrator)
+{
+}
+template <typename T>
+BinaryClassificationModelBase<T>::BinaryClassificationModelBase(const BinaryClassificationModelBase<T> &other)
+    : ClassificationModelBase<T>(other)
+    , managed_labels(this->administrator)
+    , managed_binary2multi(this->administrator)
+    , managed_thetas(this->administrator)
+    , managed_ecoc(this->administrator)
+{
+    this->copyAfterConstructor(other);
+}
+template <typename T>
+BinaryClassificationModelBase<T>::BinaryClassificationModelBase(BinaryClassificationModelBase<T> &&other) noexcept
+    : ClassificationModelBase<T>(std::move(other))
+    , managed_labels(this->administrator)
+    , managed_binary2multi(this->administrator)
+    , managed_thetas(this->administrator)
+    , managed_ecoc(this->administrator)
+{
+    this->copyAfterConstructor(other);
+}
+template <typename T>
+BinaryClassificationModelBase<T> &BinaryClassificationModelBase<T>::operator=(
+    const BinaryClassificationModelBase<T> &rhs)
+{
+    ClassificationModelBase<T>::operator=(rhs);
+    ManagedClass::              operator=(rhs);
+    return *this;
+}
+template <typename T>
+BinaryClassificationModelBase<T> &BinaryClassificationModelBase<T>::operator=(
+    BinaryClassificationModelBase<T> &&rhs) noexcept
+{
+    using namespace std;
+    ManagedClass::operator=(move(rhs));
+    return *this;
+}
+
+// interface functions
 template <typename T> void BinaryClassificationModelBase<T>::train(const Mat<T> &x, const Mat<std::string> &y)
 {
     using namespace std;
@@ -323,6 +196,8 @@ template <class T> std::vector<Mat<T>> BinaryClassificationModelBase<T>::get_the
     }
     return managed_thetas.read();
 }
+
+// internal implementation functions
 template <typename T> void BinaryClassificationModelBase<T>::classify_labels(const Mat<T> &x, const Mat<std::string> &y)
 {
     using namespace std;
@@ -451,6 +326,6 @@ size_t BinaryClassificationModelBase<T>::hammingDistance(const Mat<T> &lhs, cons
 
     return ret;
 }
-#pragma endregion
+} // namespace _internal
 } // namespace TL
-#endif // MODELBASE_HPP
+#endif // BINARY_CLASSIFICATION_MODEL_BASE_HPP

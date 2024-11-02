@@ -173,7 +173,7 @@ Mat<T>::Mat(const Mat<T> &other)
 }
 template <typename T>
 Mat<T>::Mat(Mat<T> &&other) noexcept
-    : ManagedClass(other), managed_det(this->administrator), managed_mean(this->administrator),
+    : ManagedClass(std::move(other)), managed_det(this->administrator), managed_mean(this->administrator),
       managed_sum(this->administrator)
 {
     this->copyAfterConstructor(other);
@@ -226,7 +226,7 @@ template <typename T> Mat<T> &Mat<T>::operator=(Mat<T> &&rhs) noexcept
 {
     using namespace std;
 
-    ManagedClass::operator=(rhs);
+    ManagedClass::operator=(move(rhs));
 
     if (this == &rhs) return *this;
 

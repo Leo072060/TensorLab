@@ -22,8 +22,6 @@ void Administrator::registerManagedItem(std::shared_ptr<ManagedItem> ptr_Managed
 #pragma region ManagedItem
 ManagedItem::ManagedItem(Administrator &admin) : administrator_ID(admin.ID), permission(Permission::lowest)
 {
-    using namespace std;
-    admin.registerManagedItem(shared_ptr<ManagedItem>(this));
 }
 bool ManagedItem::checkPermission(const PermissionType perm) const
 {
