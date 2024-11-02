@@ -2,16 +2,21 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "kits/managed.hpp"
+#include "_internal/managed.hpp"
 #include "mat/mat.hpp"
 
-using namespace std;
+namespace TL
+{
+using namespace _internal;
 
 #pragma region RegressionEvaluation
 template <typename T = double> class RegressionEvaluation : public ManagedClass
 {
   public:
     RegressionEvaluation();
+    RegressionEvaluation(const RegressionEvaluation &other);
+    RegressionEvaluation<T> &operator=(const RegressionEvaluation &rhs);
+    RegressionEvaluation<T> &operator=(RegressionEvaluation &&rhs) noexcept;
     RegressionEvaluation(const Mat<T> &y_pred, const Mat<T> &y_target);
 
   public:
@@ -49,7 +54,27 @@ RegressionEvaluation<T>::RegressionEvaluation()
 {
 }
 template <typename T>
-RegressionEvaluation<T>::RegressionEvaluation(const Mat<T> &y_pred, const Mat<T> &y_target) : RegressionEvaluation()
+RegressionEvaluation<T>::RegressionEvaluation(const RegressionEvaluation &other)
+    : ManagedClass(other), managed_y_target(this->administrator), managed_y_pred(this->administrator),
+      managed_y_target_minus_y_pred(this->administrator), managed_y_target_minus_mean_y_target(this->administrator),
+      managed_MAE(this->administrator), managed_MSE(this->administrator), managed_RMSE(this->administrator),
+      managed_MAPE(this->administrator), managed_R2(this->administrator)
+{
+}
+template <typename T> RegressionEvaluation<T> &RegressionEvaluation<T>::operator=(const RegressionEvaluation &rhs)
+{
+    ManagedClass::operator=(rhs);
+}
+template <typename T> RegressionEvaluation<T> &RegressionEvaluation<T>::operator=(RegressionEvaluation &&rhs) noexcept
+{
+    ManagedClass::operator=(rhs);
+}
+template <typename T>
+RegressionEvaluation<T>::RegressionEvaluation(const Mat<T> &y_pred, const Mat<T> &y_target)
+    : ManagedClass(), managed_y_target(this->administrator), managed_y_pred(this->administrator),
+      managed_y_target_minus_y_pred(this->administrator), managed_y_target_minus_mean_y_target(this->administrator),
+      managed_MAE(this->administrator), managed_MSE(this->administrator), managed_RMSE(this->administrator),
+      managed_MAPE(this->administrator), managed_R2(this->administrator)
 {
     fit(y_pred, y_target);
 }
@@ -87,7 +112,7 @@ template <typename T> T RegressionEvaluation<T>::mean_absolute_error() const
         throw runtime_error("Model not fitted.");
     }
 
-    this->record(managed_MAE, managed_y_target_minus_y_pred.read().abs().mean(Axis::all).iloc(0,0));
+    this->record(managed_MAE, managed_y_target_minus_y_pred.read().abs().mean(Axis::all).iloc(0, 0));
     return managed_MAE;
 }
 template <typename T> T RegressionEvaluation<T>::mean_squared_error() const
@@ -102,7 +127,7 @@ template <typename T> T RegressionEvaluation<T>::mean_squared_error() const
         throw runtime_error("Model not fitted.");
     }
 
-    this->record(managed_MSE, (managed_y_target_minus_y_pred.read().abs() ^ 0.5).mean(Axis::all).iloc(0,0));
+    this->record(managed_MSE, (managed_y_target_minus_y_pred.read().abs() ^ 0.5).mean(Axis::all).iloc(0, 0));
     return managed_MSE;
 }
 template <typename T> T RegressionEvaluation<T>::root_mean_squared_error() const
@@ -117,7 +142,7 @@ template <typename T> T RegressionEvaluation<T>::root_mean_squared_error() const
         throw runtime_error("Model not fitted.");
     }
 
-    this->record(managed_RMSE, pow(mean_squared_error(),0.5));
+    this->record(managed_RMSE, pow(mean_squared_error(), 0.5));
     return managed_RMSE;
 }
 template <typename T> T RegressionEvaluation<T>::mean_absolute_percentage_error() const
@@ -132,7 +157,8 @@ template <typename T> T RegressionEvaluation<T>::mean_absolute_percentage_error(
         throw runtime_error("Model not fitted.");
     }
 
-    this->record(managed_MAPE, (managed_y_target_minus_y_pred.read() / managed_y_target).abs().mean(Axis::all).iloc(0,0));
+    this->record(managed_MAPE,
+                 (managed_y_target_minus_y_pred.read() / managed_y_target).abs().mean(Axis::all).iloc(0, 0));
     return managed_MAPE;
 }
 template <typename T> T RegressionEvaluation<T>::r2_score() const
@@ -148,7 +174,8 @@ template <typename T> T RegressionEvaluation<T>::r2_score() const
     }
 
     this->record(managed_R2, 1 - ((managed_y_target_minus_y_pred.read() ^ 2).sum(Axis::all) /
-                                  (managed_y_target_minus_mean_y_target.read() ^ 2).sum(Axis::all)).iloc(0,0));
+                                  (managed_y_target_minus_mean_y_target.read() ^ 2).sum(Axis::all))
+                                     .iloc(0, 0));
     return managed_R2;
 }
 template <typename T> void RegressionEvaluation<T>::fit(const Mat<T> &y_pred, const Mat<T> &y_target) const
@@ -178,7 +205,7 @@ template <typename T> void RegressionEvaluation<T>::fit(const Mat<T> &y_pred, co
     this->record(managed_y_target_minus_y_pred, tmp);
     // calculate managed_y_target_minus_mean_y_target
     for (size_t i = 0; i < y_target.size(Axis::row); ++i)
-        tmp.iloc(i, 0) = y_target.iloc(i, 0) - managed_y_target.read().mean(Axis::all).iloc(0,0);
+        tmp.iloc(i, 0) = y_target.iloc(i, 0) - managed_y_target.read().mean(Axis::all).iloc(0, 0);
     this->record(managed_y_target_minus_mean_y_target, tmp);
 }
 #pragma endregion
@@ -188,10 +215,14 @@ template <typename T> class ClassificationEvaluation : public ManagedClass
 {
   public:
     ClassificationEvaluation();
-    ClassificationEvaluation(const Mat<string> &y_pred, const Mat<string> &y_target);
+    ClassificationEvaluation(const ClassificationEvaluation<T> &other);
+    ClassificationEvaluation(const ClassificationEvaluation<T> &&other);
+    ClassificationEvaluation<T> &operator=(const ClassificationEvaluation<T> &rhs);
+    ClassificationEvaluation<T> &operator=(ClassificationEvaluation<T> &&rhs) noexcept;
+    ClassificationEvaluation(const Mat<std::string> &y_pred, const Mat<std::string> &y_target);
 
   public:
-    void fit(const Mat<string> &y_pred, const Mat<string> &y_target)
+    void fit(const Mat<std::string> &y_pred, const Mat<std::string> &y_target)
     {
         const_cast<const ClassificationEvaluation<T> *>(this)->fit(y_pred, y_target);
     }
@@ -203,16 +234,16 @@ template <typename T> class ClassificationEvaluation : public ManagedClass
     Mat<T>      recall() const;
 
   private:
-    void fit(const Mat<string> &y_pred, const Mat<string> &y_target) const;
+    void fit(const Mat<std::string> &y_pred, const Mat<std::string> &y_target) const;
 
   private:
-    mutable ManagedVal<Mat<string>> managed_y_target;
-    mutable ManagedVal<Mat<string>> managed_y_pred;
-    mutable ManagedVal<Mat<size_t>> managed_confusionMatrix;
-    mutable ManagedVal<T>           managed_accuracy;
-    mutable ManagedVal<T>           managed_errorRate;
-    mutable ManagedVal<Mat<T>>      managed_percision;
-    mutable ManagedVal<Mat<T>>      managed_recall;
+    mutable ManagedVal<Mat<std::string>> managed_y_target;
+    mutable ManagedVal<Mat<std::string>> managed_y_pred;
+    mutable ManagedVal<Mat<size_t>>      managed_confusionMatrix;
+    mutable ManagedVal<T>                managed_accuracy;
+    mutable ManagedVal<T>                managed_errorRate;
+    mutable ManagedVal<Mat<T>>           managed_percision;
+    mutable ManagedVal<Mat<T>>           managed_recall;
 };
 template <typename T>
 ClassificationEvaluation<T>::ClassificationEvaluation()
@@ -223,7 +254,35 @@ ClassificationEvaluation<T>::ClassificationEvaluation()
 {
 }
 template <typename T>
-ClassificationEvaluation<T>::ClassificationEvaluation(const Mat<string> &y_pred, const Mat<string> &y_target)
+ClassificationEvaluation<T>::ClassificationEvaluation(const ClassificationEvaluation<T> &other)
+    : ManagedClass(other), managed_y_target(this->administrator), managed_y_pred(this->administrator),
+      managed_confusionMatrix(this->administrator), managed_accuracy(this->administrator),
+      managed_errorRate(this->administrator), managed_percision(this->administrator),
+      managed_recall(this->administrator)
+{
+    this->copyAfterConstructor(other);
+}
+template <typename T>
+ClassificationEvaluation<T>::ClassificationEvaluation(const ClassificationEvaluation<T> &&other)
+    : ManagedClass(other), managed_y_target(this->administrator), managed_y_pred(this->administrator),
+      managed_confusionMatrix(this->administrator), managed_accuracy(this->administrator),
+      managed_errorRate(this->administrator), managed_percision(this->administrator),
+      managed_recall(this->administrator)
+{
+    this->copyAfterConstructor(other);
+}
+template <typename T>
+ClassificationEvaluation<T> &ClassificationEvaluation<T>::operator=(const ClassificationEvaluation<T> &rhs)
+{
+    ManagedClass::operator=(rhs);
+}
+template <typename T>
+ClassificationEvaluation<T> &ClassificationEvaluation<T>::operator=(ClassificationEvaluation<T> &&rhs) noexcept
+{
+    ManagedClass::operator=(rhs);
+}
+template <typename T>
+ClassificationEvaluation<T>::ClassificationEvaluation(const Mat<std::string> &y_pred, const Mat<std::string> &y_target)
     : ClassificationEvaluation()
 {
     fit(y_pred, y_target);
@@ -284,7 +343,7 @@ template <typename T> Mat<size_t> ClassificationEvaluation<T>::confusionMatrix()
     }
 
     this->record(managed_confusionMatrix, confusionMat);
-    return managed_confusionMatrix;
+    return confusionMat;
 }
 template <typename T> T ClassificationEvaluation<T>::accuracy() const
 {
@@ -370,7 +429,7 @@ template <typename T> Mat<T> ClassificationEvaluation<T>::recall() const
     return managed_recall;
 }
 template <typename T>
-void ClassificationEvaluation<T>::fit(const Mat<string> &y_pred, const Mat<string> &y_target) const
+void ClassificationEvaluation<T>::fit(const Mat<std::string> &y_pred, const Mat<std::string> &y_target) const
 {
     using namespace std;
 
@@ -393,4 +452,5 @@ void ClassificationEvaluation<T>::fit(const Mat<string> &y_pred, const Mat<strin
 
     confusionMatrix();
 }
+} // namespace TL
 #pragma endregion

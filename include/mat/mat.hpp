@@ -7,8 +7,13 @@
 #include <map>
 #include <set>
 
-#include "kits/managed.hpp"
+#include "_internal/managed.hpp"
 
+namespace TL
+{
+using namespace _internal;
+
+using NameFlagType = uint8_t;
 enum NameFlag : uint8_t
 {
     no_name    = 0b11111111,
@@ -38,9 +43,9 @@ template <typename T> Mat<T> operator*(const T lhs, const Mat<T> &rhs);
 template <typename T> Mat<T> operator/(const T lhs, const Mat<T> &rhs);
 
 // display
-template <typename T> void display(const Mat<T> &mat, const NameFlag nameFlag = no_name, const size_t n_rows = -1);
+template <typename T> void display(const Mat<T> &mat, const NameFlagType nameFlag = no_name, const size_t n_rows = -1);
 template <typename T>
-void display_rainbow(const Mat<T> &mat, const NameFlag nameFlag = no_name, const size_t n_rows = -1);
+void display_rainbow(const Mat<T> &mat, const NameFlagType nameFlag = no_name, const size_t n_rows = -1);
 
 template <class T = double> class Mat : public ManagedClass
 {
@@ -58,16 +63,16 @@ template <class T = double> class Mat : public ManagedClass
     inline size_t size(const Axis axis = Axis::all) const;
 
     // arithmetic operations
-    void operator=(const T rhs);
-    void operator+=(const T rhs);
-    void operator-=(const T rhs);
-    void operator*=(const T rhs);
-    void operator/=(const T rhs);
-    void operator^=(const T rhs);
-    void operator+=(const Mat<T> &rhs);
-    void operator-=(const Mat<T> &rhs);
-    void operator*=(const Mat<T> &rhs);
-    void operator/=(const Mat<T> &rhs);
+    Mat<T> &operator=(const T rhs);
+    Mat<T> &operator+=(const T rhs);
+    Mat<T> &operator-=(const T rhs);
+    Mat<T> &operator*=(const T rhs);
+    Mat<T> &operator/=(const T rhs);
+    Mat<T> &operator^=(const T rhs);
+    Mat<T> &operator+=(const Mat<T> &rhs);
+    Mat<T> &operator-=(const Mat<T> &rhs);
+    Mat<T> &operator*=(const Mat<T> &rhs);
+    Mat<T> &operator/=(const Mat<T> &rhs);
 
     Mat<T> operator+(const T rhs) const;
     Mat<T> operator-(const T rhs) const;
@@ -92,13 +97,13 @@ template <class T = double> class Mat : public ManagedClass
     std::map<std::string, Mat<T>> LU() const;
 
     // indexing operations
-    T                 &iloc(const size_t r, const size_t c);
     const T           &iloc(const size_t r, const size_t c) const;
+    T                 &iloc(const size_t r, const size_t c);
     Mat<T>             iloc(const size_t i, const Axis axis) const;
-    T                 &loc(const std::string &rowName, const std::string &colName);
     const T           &loc(const std::string &rowName, const std::string &colName) const;
-    std::string       &iloc_name(const size_t i, const Axis axis);
+    T                 &loc(const std::string &rowName, const std::string &colName);
     const std::string &iloc_name(const size_t i, const Axis axis) const;
+    std::string       &iloc_name(const size_t i, const Axis axis);
     Mat<T>             loc(const std::string &name, const Axis axis) const;
     Mat<T> extract(const size_t row_begin, const size_t row_end, const size_t col_begin, const size_t col_end) const;
     Mat<T> extract(const size_t begin, const size_t end, const Axis axis) const;
@@ -139,9 +144,14 @@ Mat<T>::Mat()
       managed_sum(this->administrator)
 {
 }
-template <typename T> Mat<T>::Mat(const Mat<T> &other) : Mat()
+template <typename T>
+Mat<T>::Mat(const Mat<T> &other)
+    : ManagedClass(other), managed_det(this->administrator), managed_mean(this->administrator),
+      managed_sum(this->administrator)
 {
     using namespace std;
+
+    this->copyAfterConstructor(other);
 
     rowSize = other.rowSize;
     colSize = other.colSize;
@@ -160,14 +170,14 @@ template <typename T> Mat<T>::Mat(const Mat<T> &other) : Mat()
 
     for (size_t c = 0; c < colSize; ++c)
         colNames[c] = other.colNames[c];
-
-    this->copyManagedClass(other);
-    this->copyManagedVal(managed_det, other.managed_det, other);
-    this->copyManagedVal(managed_mean, other.managed_mean, other);
-    this->copyManagedVal(managed_sum, other.managed_sum, other);
 }
-template <typename T> Mat<T>::Mat(Mat<T> &&other) noexcept : Mat()
+template <typename T>
+Mat<T>::Mat(Mat<T> &&other) noexcept
+    : ManagedClass(other), managed_det(this->administrator), managed_mean(this->administrator),
+      managed_sum(this->administrator)
 {
+    this->copyAfterConstructor(other);
+
     data     = other.data;
     rowNames = other.rowNames;
     colNames = other.colNames;
@@ -179,15 +189,12 @@ template <typename T> Mat<T>::Mat(Mat<T> &&other) noexcept : Mat()
     other.colNames = nullptr;
     other.rowSize  = 0;
     other.colSize  = 0;
-
-    this->copyManagedClass(other);
-    this->copyManagedVal(managed_det, other.managed_det, other);
-    this->copyManagedVal(managed_mean, other.managed_mean, other);
-    this->copyManagedVal(managed_sum, other.managed_sum, other);
 }
 template <typename T> Mat<T> &Mat<T>::operator=(const Mat<T> &rhs)
 {
     using namespace std;
+
+    ManagedClass::operator=(rhs);
 
     if (this == &rhs) return *this;
 
@@ -213,16 +220,13 @@ template <typename T> Mat<T> &Mat<T>::operator=(const Mat<T> &rhs)
     rowSize = rhs.rowSize;
     colSize = rhs.colSize;
 
-    this->copyManagedClass(rhs);
-    this->copyManagedVal(managed_det, rhs.managed_det, rhs);
-    this->copyManagedVal(managed_mean, rhs.managed_mean, rhs);
-    this->copyManagedVal(managed_sum, rhs.managed_sum, rhs);
-
     return *this;
 }
 template <typename T> Mat<T> &Mat<T>::operator=(Mat<T> &&rhs) noexcept
 {
     using namespace std;
+
+    ManagedClass::operator=(rhs);
 
     if (this == &rhs) return *this;
 
@@ -242,11 +246,6 @@ template <typename T> Mat<T> &Mat<T>::operator=(Mat<T> &&rhs) noexcept
     rhs.colNames = nullptr;
     rhs.rowSize  = 0;
     rhs.colSize  = 0;
-
-    this->copyManagedClass(rhs);
-    this->copyManagedVal(managed_det, rhs.managed_det, rhs);
-    this->copyManagedVal(managed_mean, rhs.managed_mean, rhs);
-    this->copyManagedVal(managed_sum, rhs.managed_sum, rhs);
 
     return *this;
 }
@@ -300,45 +299,52 @@ template <typename T> size_t Mat<T>::size(const Axis axis) const
 }
 
 // arithmetic operations
-template <typename T> void Mat<T>::operator=(const T rhs)
+template <typename T> Mat<T> &Mat<T>::operator=(const T rhs)
 {
     for (size_t r = 0; r < rowSize; ++r)
         for (size_t c = 0; c < colSize; ++c)
             data[r][c] = rhs;
+    return *this;
 }
-template <typename T> void Mat<T>::operator+=(const T rhs)
+template <typename T> Mat<T> &Mat<T>::operator+=(const T rhs)
 {
     for (size_t r = 0; r < rowSize; ++r)
         for (size_t c = 0; c < colSize; ++c)
             data[r][c] += rhs;
+    return *this;
 }
-template <typename T> void Mat<T>::operator-=(const T rhs)
+template <typename T> Mat<T> &Mat<T>::operator-=(const T rhs)
 {
     for (size_t r = 0; r < rowSize; ++r)
         for (size_t c = 0; c < colSize; ++c)
             data[r][c] -= rhs;
+    return *this;
 }
-template <typename T> void Mat<T>::operator*=(const T rhs)
+template <typename T> Mat<T> &Mat<T>::operator*=(const T rhs)
 {
     for (size_t r = 0; r < rowSize; ++r)
         for (size_t c = 0; c < colSize; ++c)
             data[r][c] *= rhs;
+    return *this;
 }
-template <typename T> void Mat<T>::operator/=(const T rhs)
+template <typename T> Mat<T> &Mat<T>::operator/=(const T rhs)
 {
     for (size_t r = 0; r < rowSize; ++r)
         for (size_t c = 0; c < colSize; ++c)
             data[r][c] /= rhs;
+    return *this;
 }
-template <typename T> void Mat<T>::operator^=(const T rhs)
+template <typename T> Mat<T> &Mat<T>::operator^=(const T rhs)
 {
     using namespace std;
 
     for (size_t r = 0; r < rowSize; ++r)
         for (size_t c = 0; c < colSize; ++c)
             data[r][c] = pow(data[r][c], rhs);
+
+    return *this;
 }
-template <typename T> void Mat<T>::operator+=(const Mat<T> &rhs)
+template <typename T> Mat<T> &Mat<T>::operator+=(const Mat<T> &rhs)
 {
     using namespace std;
 
@@ -356,8 +362,10 @@ template <typename T> void Mat<T>::operator+=(const Mat<T> &rhs)
     for (size_t r = 0; r < rowSize; ++r)
         for (size_t c = 0; c < colSize; ++c)
             data[r][c] += rhs.data[r][c];
+
+    return *this;
 }
-template <typename T> void Mat<T>::operator-=(const Mat<T> &rhs)
+template <typename T> Mat<T> &Mat<T>::operator-=(const Mat<T> &rhs)
 {
     using namespace std;
 
@@ -375,8 +383,10 @@ template <typename T> void Mat<T>::operator-=(const Mat<T> &rhs)
     for (size_t r = 0; r < rowSize; ++r)
         for (size_t c = 0; c < colSize; ++c)
             data[r][c] -= rhs.data[r][c];
+
+    return *this;
 }
-template <typename T> void Mat<T>::operator*=(const Mat<T> &rhs)
+template <typename T> Mat<T> &Mat<T>::operator*=(const Mat<T> &rhs)
 {
     using namespace std;
 
@@ -394,8 +404,10 @@ template <typename T> void Mat<T>::operator*=(const Mat<T> &rhs)
     for (size_t r = 0; r < rowSize; ++r)
         for (size_t c = 0; c < colSize; ++c)
             data[r][c] *= rhs.data[r][c];
+
+    return *this;
 }
-template <typename T> void Mat<T>::operator/=(const Mat<T> &rhs)
+template <typename T> Mat<T> &Mat<T>::operator/=(const Mat<T> &rhs)
 {
     using namespace std;
 
@@ -413,36 +425,33 @@ template <typename T> void Mat<T>::operator/=(const Mat<T> &rhs)
     for (size_t r = 0; r < rowSize; ++r)
         for (size_t c = 0; c < colSize; ++c)
             data[r][c] /= rhs.data[r][c];
+
+    return *this;
 }
 template <typename T> Mat<T> Mat<T>::operator+(const T rhs) const
 {
     Mat<T> ret(*this);
-    ret += rhs;
-    return ret;
+    return ret += rhs;
 }
 template <typename T> Mat<T> Mat<T>::operator-(const T rhs) const
 {
     Mat<T> ret(*this);
-    ret -= rhs;
-    return ret;
+    return ret -= rhs;
 }
 template <typename T> Mat<T> Mat<T>::operator*(const T rhs) const
 {
     Mat<T> ret(*this);
-    ret *= rhs;
-    return ret;
+    return ret *= rhs;
 }
 template <typename T> Mat<T> Mat<T>::operator/(const T rhs) const
 {
     Mat<T> ret(*this);
-    ret /= rhs;
-    return ret;
+    return ret /= rhs;
 }
 template <typename T> Mat<T> Mat<T>::operator^(const T rhs) const
 {
     Mat<T> ret(*this);
-    ret ^= rhs;
-    return ret;
+    return ret ^= rhs;
 }
 template <typename T> bool Mat<T>::operator==(const Mat<T> &rhs) const
 {
@@ -455,26 +464,22 @@ template <typename T> bool Mat<T>::operator==(const Mat<T> &rhs) const
 template <typename T> Mat<T> Mat<T>::operator+(const Mat<T> &rhs) const
 {
     Mat<T> ret(*this);
-    ret += rhs;
-    return ret;
+    return ret += rhs;
 }
 template <typename T> Mat<T> Mat<T>::operator-(const Mat<T> &rhs) const
 {
     Mat<T> ret(*this);
-    ret -= rhs;
-    return ret;
+    return ret -= rhs;
 }
 template <typename T> Mat<T> Mat<T>::operator*(const Mat<T> &rhs) const
 {
     Mat<T> ret(*this);
-    ret *= rhs;
-    return ret;
+    return ret *= rhs;
 }
 template <typename T> Mat<T> Mat<T>::operator/(const Mat<T> &rhs) const
 {
     Mat<T> ret(*this);
-    ret /= rhs;
-    return ret;
+    return ret /= rhs;
 }
 template <typename T> Mat<T> Mat<T>::abs() const
 {
@@ -831,29 +836,6 @@ template <typename T> Mat<T> Mat<T>::iloc(const size_t i, const Axis axis) const
         throw invalid_argument("Invalid Axis for iloc operation.");
     }
 }
-template <typename T> T &Mat<T>::loc(const std::string &rowName, const std::string &colName)
-{
-    using namespace std;
-
-    size_t r = 0, c = 0;
-    for (; r < rowSize; ++r)
-        if (rowNames[r] == rowName) break;
-    if (r == rowSize)
-    {
-        cerr << "Error: Row name '" << rowName << "' not found." << endl;
-        throw invalid_argument("Row name not found.");
-    }
-    for (; c < colSize; ++c)
-        if (colNames[c] == colName) break;
-    if (c == colSize)
-    {
-        cerr << "Error: Column name '" << colName << "' not found." << endl;
-        throw invalid_argument("Column name not found.");
-    }
-
-    this->refresh();
-    return data[r][c];
-}
 template <typename T> const T &Mat<T>::loc(const std::string &rowName, const std::string &colName) const
 {
     using namespace std;
@@ -875,6 +857,11 @@ template <typename T> const T &Mat<T>::loc(const std::string &rowName, const std
     }
 
     return data[r][c];
+}
+template <typename T> T &Mat<T>::loc(const std::string &rowName, const std::string &colName)
+{
+    this->refresh();
+    return const_cast<T &>(static_cast<const Mat<T>>(*this).loc(rowName, colName));
 }
 template <typename T> Mat<T> Mat<T>::loc(const std::string &name, const Axis axis) const
 {
@@ -915,35 +902,6 @@ template <typename T> Mat<T> Mat<T>::loc(const std::string &name, const Axis axi
         throw invalid_argument("Invalid Axis for loc operation.");
     }
 }
-template <typename T> std::string &Mat<T>::iloc_name(const size_t i, const Axis axis)
-{
-    using namespace std;
-
-    switch (axis)
-    {
-    case Axis::row:
-        if (i >= rowSize)
-        {
-            cerr << "Error: Row index out of bounds. Provided index: " << i << ", but rowSize = " << rowSize << "."
-                 << endl;
-            throw out_of_range("Row index out of bounds.");
-        }
-        this->refresh();
-        return rowNames[i];
-    case Axis::col:
-        if (i >= colSize)
-        {
-            cerr << "Error: Column index out of bounds. Provided index: " << i << ", but colSize = " << colSize << "."
-                 << endl;
-            throw out_of_range("Column index out of bounds.");
-        }
-        this->refresh();
-        return colNames[i];
-    default:
-        cerr << "Error: Invalid Axis provided for iloc_name operation. " << endl;
-        throw invalid_argument("Invalid Axis for iloc_name operation.");
-    }
-}
 template <typename T> const std::string &Mat<T>::iloc_name(const size_t i, const Axis axis) const
 {
     using namespace std;
@@ -970,6 +928,12 @@ template <typename T> const std::string &Mat<T>::iloc_name(const size_t i, const
         cerr << "Error: Invalid Axis provided for iloc_name operation. " << endl;
         throw invalid_argument("Invalid Axis for iloc_name operation.");
     }
+}
+template <typename T> std::string &Mat<T>::iloc_name(const size_t i, const Axis axis)
+{
+    using namespace std;
+    this->refresh();
+    return const_cast<string &>(static_cast<const Mat<T>&>(*this).iloc_name(i, axis));
 }
 template <typename T>
 Mat<T> Mat<T>::extract(const size_t row_begin, const size_t row_end, const size_t col_begin, const size_t col_end) const
@@ -1399,7 +1363,7 @@ template <typename T> Mat<T> Mat<T>::identity(const size_t size)
 }
 
 // display
-template <typename T> void display(const Mat<T> &mat, const NameFlag nameFlag, const size_t n_rows)
+template <typename T> void display(const Mat<T> &mat, const NameFlagType nameFlag, const size_t n_rows)
 {
     using namespace std;
 
@@ -1409,9 +1373,9 @@ template <typename T> void display(const Mat<T> &mat, const NameFlag nameFlag, c
 
     cout << "Shape: " << mat.size(Axis::row) << " x " << mat.size(Axis::col) << endl;
 
-    if (CHECK_FLAG(nameFlag, col_name))
+    if (CheckFlag(nameFlag, NameFlag::col_name))
     {
-        if (CHECK_FLAG(nameFlag, row_name)) cout << fixed << setw(width_rowName) << " ";
+        if (CheckFlag(nameFlag, NameFlag::row_name)) cout << fixed << setw(width_rowName) << " ";
 
         for (size_t c = 0; c < mat.size(Axis::col); ++c)
             cout << fixed << setw(width_val) << mat.iloc_name(c, Axis::col);
@@ -1421,7 +1385,7 @@ template <typename T> void display(const Mat<T> &mat, const NameFlag nameFlag, c
     {
         if (r >= n_rows) return; // limit output lines
 
-        if (CHECK_FLAG(nameFlag, row_name)) cout << fixed << setw(width_rowName) << mat.iloc_name(r, Axis::row);
+        if (CheckFlag(nameFlag, row_name)) cout << fixed << setw(width_rowName) << mat.iloc_name(r, Axis::row);
 
         for (size_t c = 0; c < mat.size(Axis::col); ++c)
         {
@@ -1441,7 +1405,7 @@ template <typename T> void display(const Mat<T> &mat, const NameFlag nameFlag, c
         cout << endl;
     }
 }
-template <typename T> void display_rainbow(const Mat<T> &mat, const NameFlag nameFlag, const size_t n_rows)
+template <typename T> void display_rainbow(const Mat<T> &mat, const NameFlagType nameFlag, const size_t n_rows)
 {
     using namespace std;
 
@@ -1449,9 +1413,9 @@ template <typename T> void display_rainbow(const Mat<T> &mat, const NameFlag nam
     const int width_rowName = 10;
     const int precision     = 5;
     cout << "Shape: " << mat.size(Axis::row) << " x " << mat.size(Axis::col) << endl;
-    if (CHECK_FLAG(nameFlag, col_name))
+    if (CheckFlag(nameFlag, col_name))
     {
-        if (CHECK_FLAG(nameFlag, row_name)) cout << fixed << setw(width_rowName) << " ";
+        if (CheckFlag(nameFlag, row_name)) cout << fixed << setw(width_rowName) << " ";
 
         for (size_t c = 0; c < mat.size(Axis::col); ++c)
         {
@@ -1467,7 +1431,7 @@ template <typename T> void display_rainbow(const Mat<T> &mat, const NameFlag nam
 
         cout << "\033[" << (r % 2 == 0 ? "48;5;235" : "48;5;240") << "m"; // alternate background color
 
-        if (CHECK_FLAG(nameFlag, row_name)) cout << fixed << setw(width_rowName) << mat.iloc_name(r, Axis::row);
+        if (CheckFlag(nameFlag, row_name)) cout << fixed << setw(width_rowName) << mat.iloc_name(r, Axis::row);
 
         for (size_t c = 0; c < mat.size(Axis::col); ++c)
         {
@@ -1489,5 +1453,5 @@ template <typename T> void display_rainbow(const Mat<T> &mat, const NameFlag nam
         cout << "\033[0m" << endl; // reset colors
     }
 }
-
+} // namespace TL
 #endif // MAT_HPP

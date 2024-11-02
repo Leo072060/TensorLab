@@ -5,8 +5,11 @@
 #include <sstream>
 #include <vector>
 
+#include "_internal/managed.hpp"
 #include "mat/mat.hpp"
 
+namespace TL
+{
 template <typename T> T str2T(const std::string &str)
 {
     using namespace std;
@@ -33,13 +36,13 @@ template <class T = double> class csv_Loader : public Loader<T>
     Mat<T> load_matrix(const std::string &fileName) const override;
 
   public:
-    NameFlag nameFlag = no_name;
+    NameFlag nameFlag = NameFlag::no_name;
 };
 
 template <typename T> Mat<T> csv_Loader<T>::load_matrix(const std::string &fileName) const
 {
     using namespace std;
-
+    
     ifstream file(fileName);
     if (!file.is_open())
     {
@@ -80,17 +83,17 @@ template <typename T> Mat<T> csv_Loader<T>::load_matrix(const std::string &fileN
 
         while (getline(headerStream, headerCell, ','))
         {
-            if (CHECK_FLAG(nameFlag, col_name))
+            if (CheckFlag(nameFlag, col_name))
                 colNames.push_back(headerCell);
             else
                 line_data.push_back(str2T<T>(headerCell));
         }
-        if (!CHECK_FLAG(nameFlag, col_name))
+        if (!CheckFlag(nameFlag, col_name))
         {
             lines.push_back(line_data);
             ++rowSize;
         }
-        columnSize = CHECK_FLAG(nameFlag, col_name) ? colNames.size() : line_data.size();
+        columnSize = CheckFlag(nameFlag, col_name) ? colNames.size() : line_data.size();
     }
     else
         return Mat<T>();
@@ -102,7 +105,7 @@ template <typename T> Mat<T> csv_Loader<T>::load_matrix(const std::string &fileN
         string        cell;
         vector<T>     line_data;
         getline(ss, cell, ',');
-        if (CHECK_FLAG(nameFlag, row_name))
+        if (CheckFlag(nameFlag, row_name))
             rowNames.push_back(cell);
         else
             line_data.push_back(str2T<T>(cell));
@@ -119,18 +122,20 @@ template <typename T> Mat<T> csv_Loader<T>::load_matrix(const std::string &fileN
 
     // store in the matrix
     Mat<T> mat(rowSize, columnSize);
+    
     for (size_t i = 0; i < mat.size(Axis::row); ++i)
         for (size_t j = 0; j < mat.size(Axis::col); ++j)
             mat.iloc(i, j) = lines[i][j];
-    if (CHECK_FLAG(nameFlag, row_name))
+    if (CheckFlag(nameFlag, row_name))
         for (size_t i = 0; i < mat.size(Axis::row); ++i)
             mat.iloc_name(i, Axis::row) = rowNames[i];
-    if (CHECK_FLAG(nameFlag, col_name))
+    if (CheckFlag(nameFlag, col_name))
         for (size_t i = 0; i < mat.size(Axis::col); ++i)
             mat.iloc_name(i, Axis::col) = colNames[i];
 
     file.close();
+    
     return mat;
 }
-
+} // namespace TL
 #endif // DATA_LOADER_HPP

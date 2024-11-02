@@ -3,8 +3,12 @@
 
 #include <vector>
 
-#include "kits/managed.hpp"
+#include "_internal/managed.hpp"
 #include "mat/mat.hpp"
+
+namespace TL
+{
+using namespace _internal;
 
 #pragma region RegressionModelBase
 template <class T = double> class RegressionModelBase : public ManagedClass
@@ -38,27 +42,24 @@ template <class T> RegressionModelBase<T>::RegressionModelBase() : ManagedClass(
 {
 }
 template <class T>
-RegressionModelBase<T>::RegressionModelBase(const RegressionModelBase<T> &other) : RegressionModelBase()
+RegressionModelBase<T>::RegressionModelBase(const RegressionModelBase<T> &other)
+    : ManagedClass(other), managed_thetas(this->administrator)
 {
-    this->copyManagedClass(other);
-    this->copyManagedVal(managed_thetas, other.managed_thetas, other);
+    this->copyAfterConstructor(other);
 }
 template <class T>
 RegressionModelBase<T>::RegressionModelBase(RegressionModelBase<T> &&other) noexcept : RegressionModelBase()
 {
-    this->copyManagedClass(other);
-    this->copyManagedVal(managed_thetas, other.managed_thetas, other);
+    this->copyAfterConstructor(other);
 }
 template <class T> RegressionModelBase<T> &RegressionModelBase<T>::operator=(const RegressionModelBase<T> &rhs)
 {
-    this->copyManagedClass(rhs);
-    this->copyManagedVal(managed_thetas, rhs.managed_thetas, rhs);
+    ManagedClass::operator=(rhs);
     return *this;
 }
 template <class T> RegressionModelBase<T> &RegressionModelBase<T>::operator=(RegressionModelBase<T> &&rhs) noexcept
 {
-    this->copyManagedClass(rhs);
-    this->copyManagedVal(managed_thetas, rhs.managed_thetas, rhs);
+    ManagedClass::operator=(rhs);
     return *this;
 }
 template <class T> void RegressionModelBase<T>::train(const Mat<T> &x, const Mat<T> &y)
@@ -143,14 +144,14 @@ MultiClassificationModelBase<T>::MultiClassificationModelBase()
 }
 template <class T>
 MultiClassificationModelBase<T>::MultiClassificationModelBase(const MultiClassificationModelBase<T> &other)
-    : MultiClassificationModelBase()
+    : ClassificationModelBase<T>(other)
 {
     this->copyIfReadable(managed_labels, other.managed_labels);
     this->copyIfReadable(managed_thetas, other.managed_thetas);
 }
 template <class T>
 MultiClassificationModelBase<T>::MultiClassificationModelBase(MultiClassificationModelBase<T> &&other) noexcept
-    : MultiClassificationModelBase()
+    : ClassificationModelBase<T>(std::move(other))
 {
     this->copyIfReadable(managed_labels, other.managed_labels);
     this->copyIfReadable(managed_thetas, other.managed_thetas);
@@ -451,5 +452,5 @@ size_t BinaryClassificationModelBase<T>::hammingDistance(const Mat<T> &lhs, cons
     return ret;
 }
 #pragma endregion
-
+} // namespace TL
 #endif // MODELBASE_HPP

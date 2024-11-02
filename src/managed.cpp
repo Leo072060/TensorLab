@@ -1,41 +1,33 @@
-#include "kits/managed.hpp"
+#include "_internal/managed.hpp"
 
-using namespace std;
+using namespace TL;
+using namespace TL::_internal;
 
+#pragma region Administrator
 ADMINISTRATOR_ID Administrator::GlobalID = 0;
-
-size_t Administrator::constManagedItemsSize() const
-{
-    return constManagedItemList.size();
-}
-size_t Administrator::managedItemsSize() const
+size_t           Administrator::managedItemsSize() const
 {
     return managedItemList.size();
 }
-const ManagedItem &Administrator::getConstManagedItem(const size_t i) const
+std::shared_ptr<ManagedItem> Administrator::getManagedItem(const size_t i) const
 {
-    return *constManagedItemList[i];
+    return managedItemList[i];
 }
-ManagedItem &Administrator::getManagedItem(const size_t i) const
+void Administrator::registerManagedItem(std::shared_ptr<ManagedItem> ptr_ManagedItem)
 {
-    return *managedItemList[i];
+    managedItemList.push_back(ptr_ManagedItem);
 }
-void Administrator::registerConstManagedItem(const ManagedItem &managedItem) const
-{
-    constManagedItemList.push_back(make_unique<const ManagedItem>(managedItem));
-}
-void Administrator::registerManagedItem(ManagedItem &managedItem) const
-{
-    managedItemList.push_back(make_unique<ManagedItem>(managedItem));
-}
+#pragma endregion
 
-ManagedItem::ManagedItem(const Administrator &admin) : administrator_ID(admin.ID)
+#pragma region ManagedItem
+ManagedItem::ManagedItem(Administrator &admin) : administrator_ID(admin.ID), permission(Permission::lowest)
 {
-    admin.registerManagedItem(*this);
+    using namespace std;
+    admin.registerManagedItem(shared_ptr<ManagedItem>(this));
 }
 bool ManagedItem::checkPermission(const PermissionType perm) const
 {
-    return CHECK_FLAG(permission, perm);
+    return CheckFlag(permission, perm);
 }
 PermissionType ManagedItem::getPermission() const
 {
@@ -43,40 +35,88 @@ PermissionType ManagedItem::getPermission() const
 }
 bool ManagedItem::isReadable() const
 {
-    return checkPermission(readable);
+    return checkPermission(Permission::readable);
 }
 bool ManagedItem::isWritable() const
 {
-    return checkPermission(writable);
+    return checkPermission(Permission::writable);
 }
-void ManagedItem::setPermission(const Administrator &admin, const PermissionType perm) const
+void ManagedItem::setPermission(const Administrator &admin, const PermissionType perm)
 {
+    using namespace std;
+
     if (admin.ID != this->administrator_ID)
-        throw runtime_error("Error: This administrator does not have permission to modify.");
+    {
+        cerr << "Error: Permission denied: administrator ID mismatch. "
+             << "Provided administrator ID: " << admin.ID << ", expected administrator ID: " << this->administrator_ID
+             << "." << endl;
+        throw runtime_error("Permission denied.");
+    }
+
     permission = perm;
 }
-void ManagedItem::addPermission(const Administrator &admin, const PermissionType perm) const
+void ManagedItem::addPermission(const Administrator &admin, const PermissionType perm)
 {
-    if (admin.ID != this->administrator_ID)
-        throw runtime_error("Error: This administrator does not have permission to modify.");
-    if (this->checkPermission(perm)) return;
-    permission = permission & perm;
-}
+    using namespace std;
 
+    if (admin.ID != this->administrator_ID)
+    {
+        cerr << "Error: Permission denied: administrator ID mismatch. "
+             << "Provided administrator ID: " << admin.ID << ", expected administrator ID: " << this->administrator_ID
+             << "." << endl;
+        throw runtime_error("Permission denied.");
+    }
+
+    AddFlag(permission, perm);
+}
+void ManagedItem::delPermission(const Administrator &admin, const PermissionType perm)
+{
+    using namespace std;
+
+    if (admin.ID != this->administrator_ID)
+    {
+        cerr << "Error: Permission denied: administrator ID mismatch. "
+             << "Provided administrator ID: " << admin.ID << ", expected administrator ID: " << this->administrator_ID
+             << "." << endl;
+        throw runtime_error("Permission denied.");
+    }
+
+    DelFlag(permission, perm);
+}
+#pragma endregion
+
+#pragma region ManagedClass
+ManagedClass::ManagedClass(const ManagedClass &other) : administrator(), isrefreshed(other.isrefreshed) {}
+ManagedClass::ManagedClass(ManagedClass &&other) noexcept : administrator(), isrefreshed(other.isrefreshed) {}
+ManagedClass &ManagedClass::operator=(const ManagedClass &rhs)
+{
+    for (size_t i = 0; i < administrator.managedItemsSize(); ++i)
+    {
+        administrator.getManagedItem(i)->copy(administrator, rhs.administrator, *rhs.administrator.getManagedItem(i));
+    }
+    return *this;
+}
+ManagedClass &ManagedClass::operator=(ManagedClass &&rhs) noexcept
+{
+    for (size_t i = 0; i < administrator.managedItemsSize(); ++i)
+    {
+        administrator.getManagedItem(i)->copy(administrator, rhs.administrator, *rhs.administrator.getManagedItem(i));
+    }
+    return *this;
+}
+void ManagedClass::copyAfterConstructor(const ManagedClass &other)
+{
+    for (size_t i = 0; i < administrator.managedItemsSize(); ++i)
+    {
+        administrator.getManagedItem(i)->copy(administrator, other.administrator,
+                                              *other.administrator.getManagedItem(i));
+    }
+}
 void ManagedClass::refresh() const
 {
     if (isrefreshed) return;
-    for (size_t i = 0; i < administrator.constManagedItemsSize(); ++i)
-    {
-        administrator.getConstManagedItem(i).setPermission(administrator, lowest);
-    }
     for (size_t i = 0; i < administrator.managedItemsSize(); ++i)
-    {
-        administrator.getManagedItem(i).setPermission(administrator, lowest);
-    }
+        administrator.getManagedItem(i)->setPermission(administrator, lowest);
     isrefreshed = true;
 }
-void ManagedClass::copyManagedClass(const ManagedClass &other)
-{
-    isrefreshed = other.isrefreshed;
-}
+#pragma endregion

@@ -1,3 +1,6 @@
+#ifndef SPLIT_HPP
+#define SPLIT_HPP
+
 #include <algorithm>
 #include <iostream>
 #include <map>
@@ -7,6 +10,8 @@
 
 #include "mat/mat.hpp"
 
+namespace TL
+{
 template <typename T> std::map<std::string, Mat<T>> train_test_split(const Mat<T> &x, const Mat<T> &y, double test_size)
 {
     using namespace std;
@@ -57,3 +62,5 @@ template <typename T> std::map<std::string, Mat<T>> train_test_split(const Mat<T
 
     return {{"x_train", x_train}, {"y_train", y_train}, {"x_test", x_test}, {"y_test", y_test}};
 }
+} // namespace TL
+#endif // SPLIT_HPP

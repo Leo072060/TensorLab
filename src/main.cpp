@@ -7,17 +7,18 @@
 
 #include "ML/evalution.hpp"
 #include "ML/linearModel.hpp"
-#include "kits/loader.hpp"
 #include "mat/mat.hpp"
 #include "preprocessor/split.hpp"
+#include "utility/loader.hpp"
 
 using namespace std;
+using namespace TL;
 
-#define TEST_linearModel
+#define TEST_mat
 int main()
 {
     cout << "__main__" << endl;
-
+    cout << "FLAG" << endl;
 #ifdef TEST_mat
     csv_Loader<double> loader;
 
@@ -54,7 +55,7 @@ int main()
     cout << origin_data.det() << endl;
 #endif
 
-#ifdef TEST_linearModel
+#ifdef TEST_LinearRegression
     csv_Loader loader;
 
     string dataFileName = "regression_data.csv";
@@ -84,6 +85,15 @@ int main()
     evalution.fit(y_pred, y_test);
     display_rainbow(y_pred.concat(y_test, Axis::col));
     evalution.report();
+#endif
+
+#ifdef TEST_LogisticRegression
+    csv_Loader loader;
+    string     dataFileName = "classification_data.csv";
+    loader.nameFlag         = col_name;
+    Mat data                = loader.load_matrix(dataFileName);
+    display_rainbow(data, col_name, 5);
+    LogisticRegression model;
 
 #endif
 }

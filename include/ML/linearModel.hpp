@@ -4,6 +4,8 @@
 #include "ML/modelBase.hpp"
 #include "mat/mat.hpp"
 
+namespace TL
+{
 #pragma region LinearRegression
 template <class T = double> class LinearRegression : public RegressionModelBase<T>
 {
@@ -90,21 +92,20 @@ template <typename T> std::shared_ptr<RegressionModelBase<T>> LinearRegression<T
 #pragma endregion
 
 #pragma region LogisticRegression
-template <typename T> class LogisticRegression : public BinaryClassificationModelBase<T>
+template <typename T = double> class LogisticRegression : public BinaryClassificationModelBase<T>
 {
-
   private:
     Mat<T>           train_binary(const Mat<T> &x, const Mat<std::string> &y) override;
     Mat<std::string> predict_binary(const Mat<T> &x, const Mat<T> &theta) const override;
     static Mat<T>    predict_probabilities(const Mat<T> &x, const Mat<T> &thetas);
 
   public:
-    std::shared_ptr<LogisticRegression<T>> clone() const override;
+    std::shared_ptr<ClassificationModelBase<T>> clone() const override;
 
   public:
     // model parameters
     double learning_rate = 0.0003;
-    size_t batch_size    = 100;
+    size_t batch_size    = 50;
     size_t iterations    = 1700;
 };
 
@@ -172,11 +173,11 @@ template <typename T> Mat<std::string> LogisticRegression<T>::predict_binary(con
 {
     using namespace std;
 
-    Mat<T>      probabilities = predict_probabilities(x,this->thetas);
+    Mat<T>      probabilities = predict_probabilities(x, this->thetas);
     Mat<string> ret(x.size(Axis::row), 1);
     for (size_t i = 0; i < x.size(Axis::row); ++i)
-        ret.iloc(i, 0) =
-            probabilities.iloc(i, 0) > 0.5 ? this->managed_labels.read().iloc(0, 0) : this->managed_labels.read().iloc(0, 1);
+        ret.iloc(i, 0) = probabilities.iloc(i, 0) > 0.5 ? this->managed_labels.read().iloc(0, 0)
+                                                        : this->managed_labels.read().iloc(0, 1);
     return ret;
 }
 template <typename T> Mat<T> LogisticRegression<T>::predict_probabilities(const Mat<T> &x, const Mat<T> &thetas)
@@ -188,20 +189,20 @@ template <typename T> Mat<T> LogisticRegression<T>::predict_probabilities(const 
 
     Mat<T> y(x.size(Axis::row), 1);
     Mat<T> ones(x.size(Axis::row), 1);
-    ones=1;
-    Mat<T> w = x.concat(ones,Axis::col);
+    ones     = 1;
+    Mat<T> w = x.concat(ones, Axis::col);
     w.dot(thetas.transpose());
     for (size_t i = 0; i < x.size(Axis::row); ++i)
         y.iloc(i, 0) = 1 / (1 + exp(-w.iloc(i, 0)));
 
     return y;
 }
-template <typename T> std::shared_ptr<LogisticRegression<T>> LogisticRegression<T>::clone() const
+template <typename T> std::shared_ptr<ClassificationModelBase<T>> LogisticRegression<T>::clone() const
 {
     using namespace std;
 
-    return make_shared<LogisticRegression<T>>(*this);
+    return make_shared<ClassificationModelBase<T>>(*this);
 }
 #pragma endregion
-
+} // namespace TL
 #endif // LINEAR_MODEL_H
