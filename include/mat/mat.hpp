@@ -155,13 +155,11 @@ Mat<T>::Mat()
 template <typename T>
 Mat<T>::Mat(const Mat<T> &other)
     : ManagedClass(other)
-    , managed_det(this->administrator)
-    , managed_mean(this->administrator)
-    , managed_sum(this->administrator)
+    , managed_det(this->administrator, other.administrator, other.managed_det)
+    , managed_mean(this->administrator, other.administrator, other.managed_mean)
+    , managed_sum(this->administrator, other.administrator, other.managed_sum)
 {
     using namespace std;
-
-    this->copyAfterConstructor(other);
 
     rowSize = other.rowSize;
     colSize = other.colSize;
@@ -184,12 +182,10 @@ Mat<T>::Mat(const Mat<T> &other)
 template <typename T>
 Mat<T>::Mat(Mat<T> &&other) noexcept
     : ManagedClass(std::move(other))
-    , managed_det(this->administrator)
-    , managed_mean(this->administrator)
-    , managed_sum(this->administrator)
+    , managed_det(this->administrator, other.administrator, other.managed_det)
+    , managed_mean(this->administrator, other.administrator, other.managed_mean)
+    , managed_sum(this->administrator, other.administrator, other.managed_sum)
 {
-    this->copyAfterConstructor(other);
-
     data     = other.data;
     rowNames = other.rowNames;
     colNames = other.colNames;
@@ -207,6 +203,9 @@ template <typename T> Mat<T> &Mat<T>::operator=(const Mat<T> &rhs)
     using namespace std;
 
     ManagedClass::operator=(rhs);
+    managed_det.copy(this->administrator, rhs.administrator, rhs.managed_det);
+    managed_mean.copy(this->administrator, rhs.administrator, rhs.managed_mean);
+    managed_sum.copy(this->administrator, rhs.administrator, rhs.managed_sum);
 
     if (this == &rhs) return *this;
 
@@ -239,6 +238,9 @@ template <typename T> Mat<T> &Mat<T>::operator=(Mat<T> &&rhs) noexcept
     using namespace std;
 
     ManagedClass::operator=(move(rhs));
+    managed_det.copy(this->administrator, rhs.administrator, rhs.managed_det);
+    managed_mean.copy(this->administrator, rhs.administrator, rhs.managed_mean);
+    managed_sum.copy(this->administrator, rhs.administrator, rhs.managed_sum);
 
     if (this == &rhs) return *this;
 
@@ -308,10 +310,10 @@ template <typename T> template <typename U> Mat<T>::operator Mat<U>() const
         for (size_t c = 0; c < colSize; ++c)
         {
             stringstream ss;
-            ss << data[r][c]; 
+            ss << data[r][c];
             U value;
-            ss >> value;           
-            ret.data[r][c] = value; 
+            ss >> value;
+            ret.data[r][c] = value;
         }
 
     return ret;

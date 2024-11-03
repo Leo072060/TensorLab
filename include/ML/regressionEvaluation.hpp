@@ -16,22 +16,15 @@ template <typename T = double> class RegressionEvaluation : public ManagedClass
     RegressionEvaluation(RegressionEvaluation &&other) noexcept;
     RegressionEvaluation<T> &operator=(const RegressionEvaluation &rhs);
     RegressionEvaluation<T> &operator=(RegressionEvaluation &&rhs) noexcept;
-    RegressionEvaluation(const Mat<T> &y_pred, const Mat<T> &y_target);
 
   public:
-    void fit(const Mat<T> &y_pred, const Mat<T> &y_target)
-    {
-        const_cast<const RegressionEvaluation *>(this)->fit(y_pred, y_target);
-    }
+    void fit(const Mat<T> &y_pred, const Mat<T> &y_target);
     void report() const;
     T    mean_absolute_error() const;
     T    mean_squared_error() const;
     T    root_mean_squared_error() const;
     T    mean_absolute_percentage_error() const;
     T    r2_score() const;
-
-  private:
-    void fit(const Mat<T> &y_pred, const Mat<T> &y_target) const;
 
   private:
     mutable ManagedVal<Mat<T>> managed_y_target;
@@ -61,55 +54,91 @@ RegressionEvaluation<T>::RegressionEvaluation()
 template <typename T>
 RegressionEvaluation<T>::RegressionEvaluation(const RegressionEvaluation &other)
     : ManagedClass(other)
-    , managed_y_target(this->administrator)
-    , managed_y_pred(this->administrator)
-    , managed_y_target_minus_y_pred(this->administrator)
-    , managed_y_target_minus_mean_y_target(this->administrator)
-    , managed_MAE(this->administrator)
-    , managed_MSE(this->administrator)
-    , managed_RMSE(this->administrator)
-    , managed_MAPE(this->administrator)
-    , managed_R2(this->administrator)
+    , managed_y_target(this->administrator, other.administrator, other.managed_y_target)
+    , managed_y_pred(this->administrator, other.administrator, other.managed_y_pred)
+    , managed_y_target_minus_y_pred(this->administrator, other.administrator, other.managed_y_target_minus_y_pred)
+    , managed_y_target_minus_mean_y_target(this->administrator, other.administrator,
+                                           other.managed_y_target_minus_mean_y_target)
+    , managed_MAE(this->administrator, other.administrator, other.managed_MAE)
+    , managed_MSE(this->administrator, other.administrator, other.managed_MSE)
+    , managed_RMSE(this->administrator, other.administrator, other.managed_RMSE)
+    , managed_MAPE(this->administrator, other.administrator, other.managed_MAPE)
+    , managed_R2(this->administrator, other.administrator, other.managed_R2)
 {
 }
 template <typename T>
 RegressionEvaluation<T>::RegressionEvaluation(RegressionEvaluation &&other) noexcept
     : ManagedClass(std::move(other))
-    , managed_y_target(this->administrator)
-    , managed_y_pred(this->administrator)
-    , managed_y_target_minus_y_pred(this->administrator)
-    , managed_y_target_minus_mean_y_target(this->administrator)
-    , managed_MAE(this->administrator)
-    , managed_MSE(this->administrator)
-    , managed_RMSE(this->administrator)
-    , managed_MAPE(this->administrator)
-    , managed_R2(this->administrator)
+    , managed_y_target(this->administrator, other.administrator, other.managed_y_target)
+    , managed_y_pred(this->administrator, other.administrator, other.managed_y_pred)
+    , managed_y_target_minus_y_pred(this->administrator, other.administrator, other.managed_y_target_minus_y_pred)
+    , managed_y_target_minus_mean_y_target(this->administrator, other.administrator,
+                                           other.managed_y_target_minus_mean_y_target)
+    , managed_MAE(this->administrator, other.administrator, other.managed_MAE)
+    , managed_MSE(this->administrator, other.administrator, other.managed_MSE)
+    , managed_RMSE(this->administrator, other.administrator, other.managed_RMSE)
+    , managed_MAPE(this->administrator, other.administrator, other.managed_MAPE)
+    , managed_R2(this->administrator, other.administrator, other.managed_R2)
 {
-    this->copyAfterConstructor(other);
 }
 template <typename T> RegressionEvaluation<T> &RegressionEvaluation<T>::operator=(const RegressionEvaluation &rhs)
 {
     ManagedClass::operator=(rhs);
+    managed_y_target.copy(this->administrator, rhs.administrator, rhs.managed_y_target);
+    managed_y_pred.copy(this->administrator, rhs.administrator, rhs.managed_y_pred);
+    managed_y_target_minus_y_pred.copy(this->administrator, rhs.administrator, rhs.managed_y_target_minus_y_pred);
+    managed_y_target_minus_mean_y_target.copy(this->administrator, rhs.administrator,
+                                              rhs.managed_y_target_minus_mean_y_target);
+    managed_MAE.copy(this->administrator, rhs.administrator, rhs.managed_MAE);
+    managed_MSE.copy(this->administrator, rhs.administrator, rhs.managed_MSE);
+    managed_RMSE.copy(this->administrator, rhs.administrator, rhs.managed_RMSE);
+    managed_MAPE.copy(this->administrator, rhs.administrator, rhs.managed_MAPE);
+    managed_R2.copy(this->administrator, rhs.administrator, rhs.managed_R2);
 }
 template <typename T> RegressionEvaluation<T> &RegressionEvaluation<T>::operator=(RegressionEvaluation &&rhs) noexcept
 {
     using namespace std;
     ManagedClass::operator=(move(rhs));
+    managed_y_target.copy(this->administrator, rhs.administrator, rhs.managed_y_target);
+    managed_y_pred.copy(this->administrator, rhs.administrator, rhs.managed_y_pred);
+    managed_y_target_minus_y_pred.copy(this->administrator, rhs.administrator, rhs.managed_y_target_minus_y_pred);
+    managed_y_target_minus_mean_y_target.copy(this->administrator, rhs.administrator,
+                                              rhs.managed_y_target_minus_mean_y_target);
+    managed_MAE.copy(this->administrator, rhs.administrator, rhs.managed_MAE);
+    managed_MSE.copy(this->administrator, rhs.administrator, rhs.managed_MSE);
+    managed_RMSE.copy(this->administrator, rhs.administrator, rhs.managed_RMSE);
+    managed_MAPE.copy(this->administrator, rhs.administrator, rhs.managed_MAPE);
+    managed_R2.copy(this->administrator, rhs.administrator, rhs.managed_R2);
 }
-template <typename T>
-RegressionEvaluation<T>::RegressionEvaluation(const Mat<T> &y_pred, const Mat<T> &y_target)
-    : ManagedClass()
-    , managed_y_target(this->administrator)
-    , managed_y_pred(this->administrator)
-    , managed_y_target_minus_y_pred(this->administrator)
-    , managed_y_target_minus_mean_y_target(this->administrator)
-    , managed_MAE(this->administrator)
-    , managed_MSE(this->administrator)
-    , managed_RMSE(this->administrator)
-    , managed_MAPE(this->administrator)
-    , managed_R2(this->administrator)
+template <typename T> void RegressionEvaluation<T>::fit(const Mat<T> &y_pred, const Mat<T> &y_target)
 {
-    fit(y_pred, y_target);
+    using namespace std;
+
+    if (y_pred.size(Axis::row) != y_target.size(Axis::row))
+    {
+        cerr << "Error: The number of rows in predicted values and target values must be the same." << endl;
+        throw runtime_error("Dimension mismatch.");
+    }
+    if (y_pred.size(Axis::row) < 1)
+    {
+        cerr << "Error: The input matrices must have at least one row." << endl;
+        throw invalid_argument("The input matrices must have at least one row.");
+    }
+
+    this->refresh();
+    this->record(managed_y_target, y_target);
+    this->record(managed_y_pred, y_pred);
+
+    // calculate
+    Mat<T> tmp(y_target.size(Axis::row), 1);
+    // calculate managed_y_target_minus_y_pred
+    for (size_t i = 0; i < y_target.size(Axis::row); ++i)
+        tmp.iloc(i, 0) = y_target.iloc(i, 0) - y_pred.iloc(i, 0);
+    this->record(managed_y_target_minus_y_pred, tmp);
+    // calculate managed_y_target_minus_mean_y_target
+    for (size_t i = 0; i < y_target.size(Axis::row); ++i)
+        tmp.iloc(i, 0) = y_target.iloc(i, 0) - managed_y_target.read().mean(Axis::all).iloc(0, 0);
+    this->record(managed_y_target_minus_mean_y_target, tmp);
 }
 template <typename T> void RegressionEvaluation<T>::report() const
 {
@@ -219,36 +248,6 @@ template <typename T> T RegressionEvaluation<T>::r2_score() const
 
     this->record(managed_R2, ret);
     return ret;
-}
-template <typename T> void RegressionEvaluation<T>::fit(const Mat<T> &y_pred, const Mat<T> &y_target) const
-{
-    using namespace std;
-
-    if (y_pred.size(Axis::row) != y_target.size(Axis::row))
-    {
-        cerr << "Error: The number of rows in predicted values and target values must be the same." << endl;
-        throw runtime_error("Dimension mismatch.");
-    }
-    if (y_pred.size(Axis::row) < 1)
-    {
-        cerr << "Error: The input matrices must have at least one row." << endl;
-        throw invalid_argument("The input matrices must have at least one row.");
-    }
-
-    this->refresh();
-    this->record(managed_y_target, y_target);
-    this->record(managed_y_pred, y_pred);
-
-    // calculate
-    Mat<T> tmp(y_target.size(Axis::row), 1);
-    // calculate managed_y_target_minus_y_pred
-    for (size_t i = 0; i < y_target.size(Axis::row); ++i)
-        tmp.iloc(i, 0) = y_target.iloc(i, 0) - y_pred.iloc(i, 0);
-    this->record(managed_y_target_minus_y_pred, tmp);
-    // calculate managed_y_target_minus_mean_y_target
-    for (size_t i = 0; i < y_target.size(Axis::row); ++i)
-        tmp.iloc(i, 0) = y_target.iloc(i, 0) - managed_y_target.read().mean(Axis::all).iloc(0, 0);
-    this->record(managed_y_target_minus_mean_y_target, tmp);
 }
 } // namespace TL
 #endif // REGRESSION_EVALUATION_HPP

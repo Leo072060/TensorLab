@@ -33,7 +33,7 @@ template <class T> class MultiClassificationModelBase : public ClassificationMod
 
     // model parammeters
   protected:
-    ManagedVal<Mat<std::string>> managed_labels;
+    mutable ManagedVal<Mat<std::string>> managed_labels;
 
   private:
     ManagedVal<Mat<T>> managed_thetas;
@@ -43,26 +43,30 @@ template <class T> class MultiClassificationModelBase : public ClassificationMod
 template <class T>
 MultiClassificationModelBase<T>::MultiClassificationModelBase()
     : ClassificationModelBase<T>()
-    , managed_thetas(this->administrator)
-    , managed_labels(this->administrator)
+    , managed_thetas(this->administrator, other.administrator, other.managed_thetas)
+    , managed_labels(this->administrator, other.administrator, other.managed_labels)
 {
 }
 template <class T>
 MultiClassificationModelBase<T>::MultiClassificationModelBase(const MultiClassificationModelBase<T> &other)
     : ClassificationModelBase<T>(other)
+    , managed_thetas(this->administrator, other.administrator, other.managed_thetas)
+    , managed_labels(this->administrator, other.administrator, other.managed_labels)
 {
-    this->copyAfterConstructor(other);
 }
 template <class T>
 MultiClassificationModelBase<T>::MultiClassificationModelBase(MultiClassificationModelBase<T> &&other) noexcept
     : ClassificationModelBase<T>(std::move(other))
+    , managed_thetas(this->administrator, other.administrator, other.managed_thetas)
+    , managed_labels(this->administrator, other.administrator, other.managed_labels)
 {
-    this->copyAfterConstructor(other);
 }
 template <class T>
 MultiClassificationModelBase<T> &MultiClassificationModelBase<T>::operator=(const MultiClassificationModelBase<T> &rhs)
 {
     ManagedClass<T>::operator=(rhs);
+    managed_thetas.copy(this->administrator, rhs.administrator, rhs.managed_thetas);
+    managed_labels.copy(this->administrator, rhs.administrator, rhs.managed_labels);
 }
 template <class T>
 MultiClassificationModelBase<T> &MultiClassificationModelBase<T>::operator=(
@@ -70,6 +74,8 @@ MultiClassificationModelBase<T> &MultiClassificationModelBase<T>::operator=(
 {
     using namespace std;
     ManagedClass<T>::operator=(move(rhs));
+    managed_thetas.copy(this->administrator, rhs.administrator, rhs.managed_thetas);
+    managed_labels.copy(this->administrator, rhs.administrator, rhs.managed_labels);
 }
 template <class T> MultiClassificationModelBase<T>::~MultiClassificationModelBase() {}
 

@@ -3,7 +3,7 @@
 using namespace TL;
 using namespace TL::_internal;
 
-#pragma region Administrator
+#pragma region   Administrator
 ADMINISTRATOR_ID Administrator::GlobalID = 0;
 size_t           Administrator::managedItemsSize() const
 {
@@ -20,8 +20,14 @@ void Administrator::registerManagedItem(std::shared_ptr<ManagedItem> ptr_Managed
 #pragma endregion
 
 #pragma region ManagedItem
-ManagedItem::ManagedItem(Administrator &admin) : administrator_ID(admin.ID), permission(Permission::lowest)
+ManagedItem::ManagedItem(Administrator &admin, const PermissionType perm)
+    : administrator_ID(admin.ID)
+    , permission(perm)
 {
+}
+bool ManagedItem::authenticate(const Administrator &admin) const
+{
+    return administrator_ID == admin.ID;
 }
 bool ManagedItem::checkPermission(const PermissionType perm) const
 {
@@ -84,31 +90,35 @@ void ManagedItem::delPermission(const Administrator &admin, const PermissionType
 #pragma endregion
 
 #pragma region ManagedClass
-ManagedClass::ManagedClass(const ManagedClass &other) : administrator(), isrefreshed(other.isrefreshed) {}
-ManagedClass::ManagedClass(ManagedClass &&other) noexcept : administrator(), isrefreshed(other.isrefreshed) {}
+ManagedClass::ManagedClass(const ManagedClass &other)
+    : administrator()
+    , isrefreshed(other.isrefreshed)
+{
+}
+ManagedClass::ManagedClass(ManagedClass &&other) noexcept
+    : administrator()
+    , isrefreshed(other.isrefreshed)
+{
+}
 ManagedClass &ManagedClass::operator=(const ManagedClass &rhs)
 {
-    for (size_t i = 0; i < administrator.managedItemsSize(); ++i)
-    {
-        administrator.getManagedItem(i)->copy(administrator, rhs.administrator, *rhs.administrator.getManagedItem(i));
-    }
+    // for (size_t i = 0; i < administrator.managedItemsSize(); ++i)
+    // {
+    //     administrator.getManagedItem(i)->copy(administrator, rhs.administrator,
+    //     *rhs.administrator.getManagedItem(i));
+    // }
+    isrefreshed = rhs.isrefreshed;
     return *this;
 }
 ManagedClass &ManagedClass::operator=(ManagedClass &&rhs) noexcept
 {
-    for (size_t i = 0; i < administrator.managedItemsSize(); ++i)
-    {
-        administrator.getManagedItem(i)->copy(administrator, rhs.administrator, *rhs.administrator.getManagedItem(i));
-    }
+    // for (size_t i = 0; i < administrator.managedItemsSize(); ++i)
+    // {
+    //     administrator.getManagedItem(i)->copy(administrator, rhs.administrator,
+    //     *rhs.administrator.getManagedItem(i));
+    // }
+    isrefreshed = rhs.isrefreshed;
     return *this;
-}
-void ManagedClass::copyAfterConstructor(const ManagedClass &other)
-{
-    for (size_t i = 0; i < administrator.managedItemsSize(); ++i)
-    {
-        administrator.getManagedItem(i)->copy(administrator, other.administrator,
-                                              *other.administrator.getManagedItem(i));
-    }
 }
 void ManagedClass::refresh() const
 {
@@ -116,5 +126,13 @@ void ManagedClass::refresh() const
     for (size_t i = 0; i < administrator.managedItemsSize(); ++i)
         administrator.getManagedItem(i)->setPermission(administrator, lowest);
     isrefreshed = true;
+}
+void ManagedClass::copyManagedVals(const ManagedClass &other) const
+{
+    for (size_t i = 0; i < administrator.managedItemsSize(); ++i)
+    {
+        administrator.getManagedItem(i)->copy(administrator, other.administrator,
+                                              *other.administrator.getManagedItem(i));
+    }
 }
 #pragma endregion

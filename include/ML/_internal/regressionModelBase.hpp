@@ -38,7 +38,7 @@ template <class T = double> class RegressionModelBase : public ManagedClass
 
     // model parameters
   private:
-    ManagedVal<Mat<T>> managed_thetas;
+    mutable ManagedVal<Mat<T>> managed_thetas;
 };
 
 // lifecycle management
@@ -51,25 +51,26 @@ RegressionModelBase<T>::RegressionModelBase()
 template <class T>
 RegressionModelBase<T>::RegressionModelBase(const RegressionModelBase<T> &other)
     : ManagedClass(other)
-    , managed_thetas(this->administrator)
+    , managed_thetas(this->administrator, other.administrator, other.managed_thetas)
 {
-    this->copyAfterConstructor(other);
 }
 template <class T>
 RegressionModelBase<T>::RegressionModelBase(RegressionModelBase<T> &&other) noexcept
-    : RegressionModelBase(std::move(other))
+    : ManagedClass(std::move(other))
+    , managed_thetas(this->administrator, other.administrator, other.managed_thetas)
 {
-    this->copyAfterConstructor(other);
 }
 template <class T> RegressionModelBase<T> &RegressionModelBase<T>::operator=(const RegressionModelBase<T> &rhs)
 {
     ManagedClass::operator=(rhs);
+    managed_thetas.copy(this->administrator, rhs.administrator, rhs.managed_thetas);
     return *this;
 }
 template <class T> RegressionModelBase<T> &RegressionModelBase<T>::operator=(RegressionModelBase<T> &&rhs) noexcept
 {
     using namespace std;
     ManagedClass::operator=(move(rhs));
+    managed_thetas.copy(this->administrator, rhs.administrator, rhs.managed_thetas);
     return *this;
 }
 

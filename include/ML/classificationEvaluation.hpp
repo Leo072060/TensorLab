@@ -16,22 +16,15 @@ template <typename T> class ClassificationEvaluation : public ManagedClass
     ClassificationEvaluation(const ClassificationEvaluation<T> &&other);
     ClassificationEvaluation<T> &operator=(const ClassificationEvaluation<T> &rhs);
     ClassificationEvaluation<T> &operator=(ClassificationEvaluation<T> &&rhs) noexcept;
-    ClassificationEvaluation(const Mat<std::string> &y_pred, const Mat<std::string> &y_target);
 
   public:
-    void fit(const Mat<std::string> &y_pred, const Mat<std::string> &y_target)
-    {
-        const_cast<const ClassificationEvaluation<T> *>(this)->fit(y_pred, y_target);
-    }
+    void        fit(const Mat<std::string> &y_pred, const Mat<std::string> &y_target);
     void        report() const;
     Mat<size_t> confusionMatrix() const;
     T           accuracy() const;
     T           error_rate() const;
     Mat<T>      percision() const;
     Mat<T>      recall() const;
-
-  private:
-    void fit(const Mat<std::string> &y_pred, const Mat<std::string> &y_target) const;
 
   private:
     mutable ManagedVal<Mat<std::string>> managed_y_target;
@@ -57,44 +50,74 @@ ClassificationEvaluation<T>::ClassificationEvaluation()
 template <typename T>
 ClassificationEvaluation<T>::ClassificationEvaluation(const ClassificationEvaluation<T> &other)
     : ManagedClass(other)
-    , managed_y_target(this->administrator)
-    , managed_y_pred(this->administrator)
-    , managed_confusionMatrix(this->administrator)
-    , managed_accuracy(this->administrator)
-    , managed_errorRate(this->administrator)
-    , managed_percision(this->administrator)
-    , managed_recall(this->administrator)
+    , managed_y_target(this->administrator, other.administrator, other.managed_y_target)
+    , managed_y_pred(this->administrator, other.administrator, other.managed_y_pred)
+    , managed_confusionMatrix(this->administrator, other.administrator, other.managed_confusionMatrix)
+    , managed_accuracy(this->administrator, other.administrator, other.managed_accuracy)
+    , managed_errorRate(this->administrator, other.administrator, other.managed_errorRate)
+    , managed_percision(this->administrator, other.administrator, other.managed_percision)
+    , managed_recall(this->administrator, other.administrator, other.managed_recall)
 {
-    this->copyAfterConstructor(other);
 }
 template <typename T>
 ClassificationEvaluation<T>::ClassificationEvaluation(const ClassificationEvaluation<T> &&other)
     : ManagedClass(other)
-    , managed_y_target(this->administrator)
-    , managed_y_pred(this->administrator)
-    , managed_confusionMatrix(this->administrator)
-    , managed_accuracy(this->administrator)
-    , managed_errorRate(this->administrator)
-    , managed_percision(this->administrator)
-    , managed_recall(this->administrator)
+    , managed_y_target(this->administrator, other.administrator, other.managed_y_target)
+    , managed_y_pred(this->administrator, other.administrator, other.managed_y_pred)
+    , managed_confusionMatrix(this->administrator, other.administrator, other.managed_confusionMatrix)
+    , managed_accuracy(this->administrator, other.administrator, other.managed_accuracy)
+    , managed_errorRate(this->administrator, other.administrator, other.managed_errorRate)
+    , managed_percision(this->administrator, other.administrator, other.managed_percision)
+    , managed_recall(this->administrator, other.administrator, other.managed_recall)
 {
-    this->copyAfterConstructor(other);
 }
 template <typename T>
 ClassificationEvaluation<T> &ClassificationEvaluation<T>::operator=(const ClassificationEvaluation<T> &rhs)
 {
     ManagedClass::operator=(rhs);
+    managed_y_target.copy(this->administrator, rhs.administrator, rhs.managed_y_target);
+    managed_y_pred.copy(this->administrator, rhs.administrator, rhs.managed_y_pred);
+    managed_confusionMatrix.copy(this->administrator, rhs.administrator, rhs.managed_confusionMatrix);
+    managed_accuracy.copy(this->administrator, rhs.administrator, rhs.managed_accuracy);
+    managed_errorRate.copy(this->administrator, rhs.administrator, rhs.managed_errorRate);
+    managed_percision.copy(this->administrator, rhs.administrator, rhs.managed_percision);
+    managed_recall.copy(this->administrator, rhs.administrator, rhs.managed_recall);
 }
 template <typename T>
 ClassificationEvaluation<T> &ClassificationEvaluation<T>::operator=(ClassificationEvaluation<T> &&rhs) noexcept
 {
     ManagedClass::operator=(rhs);
+    managed_y_target.copy(this->administrator, rhs.administrator, rhs.managed_y_target);
+    managed_y_pred.copy(this->administrator, rhs.administrator, rhs.managed_y_pred);
+    managed_confusionMatrix.copy(this->administrator, rhs.administrator, rhs.managed_confusionMatrix);
+    managed_accuracy.copy(this->administrator, rhs.administrator, rhs.managed_accuracy);
+    managed_errorRate.copy(this->administrator, rhs.administrator, rhs.managed_errorRate);
+    managed_percision.copy(this->administrator, rhs.administrator, rhs.managed_percision);
+    managed_recall.copy(this->administrator, rhs.administrator, rhs.managed_recall);
 }
 template <typename T>
-ClassificationEvaluation<T>::ClassificationEvaluation(const Mat<std::string> &y_pred, const Mat<std::string> &y_target)
-    : ClassificationEvaluation()
+void ClassificationEvaluation<T>::fit(const Mat<std::string> &y_pred, const Mat<std::string> &y_target)
 {
-    fit(y_pred, y_target);
+    using namespace std;
+
+    if (y_pred.size(Axis::row) != y_target.size(Axis::row))
+    {
+        cerr << "Error: The number of rows in predicted values and target values must be the same." << endl;
+        throw runtime_error("Dimension mismatch.");
+    }
+    if (y_pred.size(Axis::row) < 1)
+    {
+        cerr << "Error: The input matrices must have at least one row." << endl;
+        throw invalid_argument("The input matrices must have at least one row.");
+    }
+
+    this->refresh();
+    this->record(managed_y_target, y_target);
+    this->record(managed_y_pred, y_pred);
+    Mat<string> types_y_pred   = y_pred.unique();
+    Mat<string> types_y_target = y_target.unique();
+
+    confusionMatrix();
 }
 template <typename T> void ClassificationEvaluation<T>::report() const
 {
@@ -240,30 +263,6 @@ template <typename T> Mat<T> ClassificationEvaluation<T>::recall() const
 
     this->record(managed_recall, ret);
     return ret;
-}
-template <typename T>
-void ClassificationEvaluation<T>::fit(const Mat<std::string> &y_pred, const Mat<std::string> &y_target) const
-{
-    using namespace std;
-
-    if (y_pred.size(Axis::row) != y_target.size(Axis::row))
-    {
-        cerr << "Error: The number of rows in predicted values and target values must be the same." << endl;
-        throw runtime_error("Dimension mismatch.");
-    }
-    if (y_pred.size(Axis::row) < 1)
-    {
-        cerr << "Error: The input matrices must have at least one row." << endl;
-        throw invalid_argument("The input matrices must have at least one row.");
-    }
-
-    this->refresh();
-    this->record(managed_y_target, y_target);
-    this->record(managed_y_pred, y_pred);
-    Mat<string> types_y_pred   = y_pred.unique();
-    Mat<string> types_y_target = y_target.unique();
-
-    confusionMatrix();
 }
 } // namespace TL
 

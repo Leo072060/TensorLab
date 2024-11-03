@@ -57,12 +57,12 @@ template <typename T> class BinaryClassificationModelBase : public Classificatio
     ManagedVal<Mat<std::string>> managed_labels;
 
   private:
-    ManagedVal<size_t>                        managed_dimension;
-    ManagedVal<BinaryToMultiMethod>           managed_binary2multi;
-    ManagedVal<std::vector<Mat<T>>>           managed_thetas;
-    ManagedVal<Mat<int>>                      managed_ecoc;
-    ManagedVal<std::vector<Mat<T>>>           managed_xs;
-    ManagedVal<std::vector<Mat<std::string>>> managed_ys;
+    mutable ManagedVal<size_t>                        managed_dimension;
+    mutable ManagedVal<BinaryToMultiMethod>           managed_binary2multi;
+    mutable ManagedVal<std::vector<Mat<T>>>           managed_thetas;
+    mutable ManagedVal<Mat<int>>                      managed_ecoc;
+    mutable ManagedVal<std::vector<Mat<T>>>           managed_xs;
+    mutable ManagedVal<std::vector<Mat<std::string>>> managed_ys;
 };
 
 // lifecycle management
@@ -83,36 +83,40 @@ template <typename T>
 BinaryClassificationModelBase<T>::BinaryClassificationModelBase(const BinaryClassificationModelBase<T> &other)
     : ClassificationModelBase<T>(other)
     , binary2multi(OneVsRest)
-    , managed_labels(this->administrator)
-    , managed_dimension(this->administrator)
-    , managed_binary2multi(this->administrator)
-    , managed_thetas(this->administrator)
-    , managed_ecoc(this->administrator)
-    , managed_xs(this->administrator)
-    , managed_ys(this->administrator)
+    , managed_labels(this->administrator, other.administrator, other.managed_labels)
+    , managed_dimension(this->administrator, other.administrator, other.managed_dimension)
+    , managed_binary2multi(this->administrator, other.administrator, other.managed_binary2multi)
+    , managed_thetas(this->administrator, other.administrator, managed_thetas)
+    , managed_ecoc(this->administrator, other.administrator, managed_ecoc)
+    , managed_xs(this->administrator, other.administrator, other.managed_xs)
+    , managed_ys(this->administrator, other.administrator, other.managed_ys)
 {
-    this->copyAfterConstructor(other);
 }
 template <typename T>
 BinaryClassificationModelBase<T>::BinaryClassificationModelBase(BinaryClassificationModelBase<T> &&other) noexcept
     : ClassificationModelBase<T>(std::move(other))
     , binary2multi(OneVsRest)
-    , managed_labels(this->administrator)
-    , managed_dimension(this->administrator)
-    , managed_binary2multi(this->administrator)
-    , managed_thetas(this->administrator)
-    , managed_ecoc(this->administrator)
-    , managed_xs(this->administrator)
-    , managed_ys(this->administrator)
+    , managed_labels(this->administrator, other.administrator, other.managed_labels)
+    , managed_dimension(this->administrator, other.administrator, other.managed_dimension)
+    , managed_binary2multi(this->administrator, other.administrator, other.managed_binary2multi)
+    , managed_thetas(this->administrator, other.administrator, managed_thetas)
+    , managed_ecoc(this->administrator, other.administrator, managed_ecoc)
+    , managed_xs(this->administrator, other.administrator, other.managed_xs)
+    , managed_ys(this->administrator, other.administrator, other.managed_ys)
 {
-    this->copyAfterConstructor(other);
 }
 template <typename T>
 BinaryClassificationModelBase<T> &BinaryClassificationModelBase<T>::operator=(
     const BinaryClassificationModelBase<T> &rhs)
 {
     ClassificationModelBase<T>::operator=(rhs);
-    ManagedClass::              operator=(rhs);
+    managed_labels.copy(this->administrator, rhs.administrator, rhs.managed_labels);
+    managed_dimension.copy(this->administrator, rhs.administrator, rhs.managed_dimension);
+    managed_binary2multi.copy(this->administrator, rhs.administrator, rhs.managed_binary2multi);
+    managed_thetas.copy(this->administrator, rhs.administrator, rhs.managed_thetas);
+    managed_ecoc.copy(this->administrator, rhs.administrator, rhs.managed_ecoc);
+    managed_xs.copy(this->administrator, rhs.administrator, rhs.managed_xs);
+    managed_ys.copy(this->administrator, rhs.administrator, rhs.managed_ys);
     return *this;
 }
 template <typename T>
@@ -121,6 +125,13 @@ BinaryClassificationModelBase<T> &BinaryClassificationModelBase<T>::operator=(
 {
     using namespace std;
     ManagedClass::operator=(move(rhs));
+    managed_labels.copy(this->administrator, rhs.administrator, rhs.managed_labels);
+    managed_dimension.copy(this->administrator, rhs.administrator, rhs.managed_dimension);
+    managed_binary2multi.copy(this->administrator, rhs.administrator, rhs.managed_binary2multi);
+    managed_thetas.copy(this->administrator, rhs.administrator, rhs.managed_thetas);
+    managed_ecoc.copy(this->administrator, rhs.administrator, rhs.managed_ecoc);
+    managed_xs.copy(this->administrator, rhs.administrator, rhs.managed_xs);
+    managed_ys.copy(this->administrator, rhs.administrator, rhs.managed_ys);
     return *this;
 }
 
