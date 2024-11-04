@@ -19,8 +19,8 @@ template <typename T = double> class LogisticRegression : public BinaryClassific
 
   public:
     // model parameters
-    double learning_rate = 0.0003;
-    size_t batch_size    = 70;
+    double learning_rate = 0.00025;
+    size_t batch_size    = 177;
     size_t iterations    = 1000;
 };
 
@@ -42,7 +42,7 @@ template <typename T> Mat<T> LogisticRegression<T>::train_binary(const Mat<T> &x
     Mat<T> ones(x.size(Axis::row), 1);
     ones     = 1;
     Mat<T> w = x.concat(ones, Axis::col);
-    Mat<T> thetas(1, x.size(Axis::col) + 1);
+    Mat<T> theta(1, x.size(Axis::col) + 1);
 
     // start training
     for (size_t I = 0; I < iterations; ++I)
@@ -62,27 +62,24 @@ template <typename T> Mat<T> LogisticRegression<T>::train_binary(const Mat<T> &x
         while (randomNums.size() < batch_size)
             randomNums.insert(dis(gen));
 
-        Mat<T> tmp_thetas(thetas);
-
-        for (size_t i = 0; i < w.size(Axis::col); ++i)
+        Mat<T> first_derivative(theta.size(Axis::row),theta.size(Axis::col));
+        T      second_derivative;
+        for (const auto &e : randomNums)
         {
-            T tmp_theta_i = 0;
-            // gradient descent
-            for (const auto &e : randomNums)
-            {
-                tmp_theta_i +=
-                    learning_rate * ((mumerical_y.iloc(e, Axis::row) -
-                                      LogisticRegression<T>::predict_probabilities(x.iloc(e, Axis::row), thetas)) *
-                                     w.iloc(e, i))
-                                        .iloc(0, 0);
-            }
-            tmp_thetas.iloc(0, i) += (tmp_theta_i);
+            Mat<T> w_i                  = w.iloc(e, Axis::row);
+            T      w_i_dot_theta        = w_i.dot(theta.transpose()).iloc(0, 0);
+            T      exp_to_w_i_dot_theta = exp(w_i_dot_theta);
+            T      p1                   = exp_to_w_i_dot_theta / (1 + exp_to_w_i_dot_theta);
+
+            first_derivative -= (w_i * (mumerical_y.iloc(e, 0) - p1));
+            second_derivative += (w_i.dot(w_i.transpose()) * p1 * (1 - p1)).iloc(0,0);
         }
-        thetas = tmp_thetas;
-        display_rainbow(thetas);
+
+        theta -= learning_rate*first_derivative ;
+        display_rainbow(theta);
     }
 
-    return thetas;
+    return theta;
 }
 template <typename T> Mat<std::string> LogisticRegression<T>::predict_binary(const Mat<T> &x, const Mat<T> &theta) const
 {
@@ -91,24 +88,23 @@ template <typename T> Mat<std::string> LogisticRegression<T>::predict_binary(con
     Mat<T>      probabilities = predict_probabilities(x, theta);
     Mat<string> ret(x.size(Axis::row), 1);
     for (size_t i = 0; i < x.size(Axis::row); ++i)
-        ret.iloc(i, 0) = probabilities.iloc(i, 0) > 0.5 ? "T"
-                                                        : "F";
+        ret.iloc(i, 0) = probabilities.iloc(i, 0) > 0.5 ? "T" : "F";
     return ret;
 }
-template <typename T> Mat<T> LogisticRegression<T>::predict_probabilities(const Mat<T> &x, const Mat<T> &thetas)
+template <typename T> Mat<T> LogisticRegression<T>::predict_probabilities(const Mat<T> &x, const Mat<T> &theta)
 {
     using namespace std;
 
-    if (x.size(Axis::col) + 1 != thetas.size(Axis::col))
-        throw invalid_argument("Error: Number of columns in x must be equal to number of columns in thetas minus one.");
+    if (x.size(Axis::col) + 1 != theta.size(Axis::col))
+        throw invalid_argument("Error: Number of columns in x must be equal to number of columns in theta minus one.");
 
     Mat<T> y(x.size(Axis::row), 1);
     Mat<T> ones(x.size(Axis::row), 1);
-    ones     = 1;
-    Mat<T> w = x.concat(ones, Axis::col);
-    w = w.dot(thetas.transpose());
+    ones               = 1;
+    Mat<T> w           = x.concat(ones, Axis::col);
+    T      w_dot_theta = w.dot(theta.transpose()).iloc(0, 0);
     for (size_t i = 0; i < x.size(Axis::row); ++i)
-        y.iloc(i, 0) = 1 / (1 + exp(-w.iloc(i, 0)));
+        y.iloc(i, 0) = 1/(1+exp(-w_dot_theta));
 
     return y;
 }

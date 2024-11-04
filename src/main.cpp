@@ -93,16 +93,24 @@ int main()
     loader.nameFlag         = col_name;
     Mat data                = loader.load_matrix(dataFileName);
     display_rainbow(data, col_name, 5);
-    auto x = data.extract(0,data.size(Axis::col)-1,Axis::col);
-    Mat<string> y = data.loc("target",Axis::col);
+    auto        x = data.extract(0, data.size(Axis::col) - 1, Axis::col);
+    Mat<string> y = data.loc("target", Axis::col);
     display(x);
     display(y);
+    auto x_y = train_test_split(x, y, 0.2);
+
+    auto x_train = x_y["x_train"];
+    auto y_train = x_y["y_train"];
+    auto x_test  = x_y["x_test"];
+    auto y_test  = x_y["y_test"];
+
     LogisticRegression model;
-    model.train(x,y);
+    model.binary2multi = BinaryToMultiMethod::OneVsOne;
+    model.train(x_train, y_train);
     ClassificationEvaluation evalution;
-    auto y_pred = model.predict(x);
-    display_rainbow(y.concat(y_pred,Axis::col));
-    evalution.fit(y_pred,y);
+    auto                     y_pred = model.predict(x_test);
+    display_rainbow(y_test.concat(y_pred, Axis::col));
+    evalution.fit(y_pred, y_test);
     evalution.report();
 
 #endif

@@ -259,17 +259,17 @@ template <typename T> void BinaryClassificationModelBase<T>::generate_ecoc(const
         break;
     }
     case OneVsOne: {
-        size_t   numClasses = managed_labels.read().size(Axis::col);
-        size_t   pairCount  = (numClasses * (numClasses - 1)) / 2;
-        Mat<int> ecocMatrix(numClasses, pairCount);
+        size_t   num_classes = managed_labels.read().size(Axis::col);
+        size_t   pairCount  = (num_classes * (num_classes - 1)) / 2;
+        Mat<int> ecocMatrix(num_classes, pairCount);
 
         size_t c = 0;
-        for (size_t i = 0; i < numClasses; ++i)
+        for (size_t i = 0; i < num_classes; ++i)
         {
-            for (size_t j = i + 1; j < numClasses; ++j)
+            for (size_t j = i + 1; j < num_classes; ++j)
             {
-                ecocMatrix.iloc(i, c) = 0;
-                ecocMatrix.iloc(j, c) = 1;
+                ecocMatrix.iloc(i, c) = 1;
+                ecocMatrix.iloc(j, c) = -1;
                 ++c;
             }
         }
@@ -315,13 +315,14 @@ template <typename T> std::string BinaryClassificationModelBase<T>::predict_ecoc
     Mat<int> pred_ecoc(1, ecoc.size(Axis::col));
     size_t   c = 0;
     for (const auto &e : managed_thetas.read())
-        pred_ecoc.iloc(0, c++) = (predict_binary(x, e).iloc(0, 0) == "T") ? 1 : -1;
+        pred_ecoc.iloc(0, c++) = (predict_binary(x, e).iloc(0, 0) == "T") ? -1 : 1;
 
     size_t minHammingDistance = BinaryClassificationModelBase<int>::hammingDistance(ecoc.iloc(0, Axis::row), pred_ecoc);
     size_t pred_r             = 0;
     for (size_t r = 1; r < managed_ecoc.read().size(Axis::row); ++r)
     {
         size_t distance = BinaryClassificationModelBase<int>::hammingDistance(ecoc.iloc(r, Axis::row), pred_ecoc);
+        std::cout<<"> "<<r<<" "<<distance<<std::endl;
         if (distance < minHammingDistance)
         {
             minHammingDistance = distance;

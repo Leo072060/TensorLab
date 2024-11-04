@@ -13,7 +13,7 @@
 
 namespace TL
 {
-template <typename T> std::map<std::string, Mat<T>> train_test_split(const Mat<T> &x, const Mat<T> &y, double test_size)
+template <typename T,typename U> std::map<std::string, Mat<T>> train_test_split(const Mat<T> &x, const Mat<U> &y, double test_size)
 {
     using namespace std;
 
@@ -40,9 +40,9 @@ template <typename T> std::map<std::string, Mat<T>> train_test_split(const Mat<T
     shuffle(indices.begin(), indices.end(), g);
 
     Mat<T> x_train(train_samples, x.size(Axis::col));
-    Mat<T> y_train(train_samples, 1);
+    Mat<U> y_train(train_samples, 1);
     Mat<T> x_test(test_samples, x.size(Axis::col));
-    Mat<T> y_test(test_samples, 1);
+    Mat<U> y_test(test_samples, 1);
 
     for (size_t r = 0; r < train_samples; ++r)
     {
