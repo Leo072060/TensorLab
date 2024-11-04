@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 #include <map>
+#include <numeric>
 #include <random>
 #include <stdexcept>
 #include <vector>

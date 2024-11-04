@@ -20,8 +20,8 @@ template <typename T = double> class LogisticRegression : public BinaryClassific
   public:
     // model parameters
     double learning_rate = 0.0003;
-    size_t batch_size    = 50;
-    size_t iterations    = 1700;
+    size_t batch_size    = 70;
+    size_t iterations    = 1000;
 };
 
 template <typename T> Mat<T> LogisticRegression<T>::train_binary(const Mat<T> &x, const Mat<std::string> &y)
@@ -91,8 +91,8 @@ template <typename T> Mat<std::string> LogisticRegression<T>::predict_binary(con
     Mat<T>      probabilities = predict_probabilities(x, theta);
     Mat<string> ret(x.size(Axis::row), 1);
     for (size_t i = 0; i < x.size(Axis::row); ++i)
-        ret.iloc(i, 0) = probabilities.iloc(i, 0) > 0.5 ? this->managed_labels.read().iloc(0, 0)
-                                                        : this->managed_labels.read().iloc(0, 1);
+        ret.iloc(i, 0) = probabilities.iloc(i, 0) > 0.5 ? "T"
+                                                        : "F";
     return ret;
 }
 template <typename T> Mat<T> LogisticRegression<T>::predict_probabilities(const Mat<T> &x, const Mat<T> &thetas)
@@ -106,7 +106,7 @@ template <typename T> Mat<T> LogisticRegression<T>::predict_probabilities(const 
     Mat<T> ones(x.size(Axis::row), 1);
     ones     = 1;
     Mat<T> w = x.concat(ones, Axis::col);
-    w.dot(thetas.transpose());
+    w = w.dot(thetas.transpose());
     for (size_t i = 0; i < x.size(Axis::row); ++i)
         y.iloc(i, 0) = 1 / (1 + exp(-w.iloc(i, 0)));
 

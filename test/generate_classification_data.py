@@ -1,10 +1,14 @@
 import pandas as pd
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_wine
 
-iris = load_iris()
+# 加载葡萄酒数据集
+wine = load_wine()
 
-df = pd.DataFrame(data=iris.data, columns=iris.feature_names)
-df['target'] = iris.target
+# 创建 DataFrame
+df = pd.DataFrame(data=wine.data, columns=wine.feature_names)
+df['target'] = wine.target
 
+# 将目标变量转换为类型（可选）
+df['target'] = df['target'].astype('category')
 df.to_csv('classification_data.csv', index=False)
 

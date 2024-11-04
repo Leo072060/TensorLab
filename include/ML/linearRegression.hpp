@@ -13,7 +13,7 @@ template <class T = double> class LinearRegression : public RegressionModelBase<
     // hook functions
   private:
     Mat<T> train_(const Mat<T> &x, const Mat<T> &y) override;
-    Mat<T> predict_(const Mat<T> &x, const Mat<T> &thetas) const override;
+    Mat<T> predict_(const Mat<T> &x, const Mat<T> &theta) const override;
 
     // for polymorphism
   public:
@@ -34,7 +34,7 @@ template <typename T> Mat<T> LinearRegression<T>::train_(const Mat<T> &x, const 
     Mat<T> ones(x.size(Axis::row), 1);
     ones     = 1;
     Mat<T> w = x.concat(ones, Axis::col);
-    Mat<T> thetas(1, x.size(Axis::col) + 1);
+    Mat<T> theta(1, x.size(Axis::col) + 1);
 
     // start training
     for (size_t I = 0; I < iterations; ++I)
@@ -54,7 +54,7 @@ template <typename T> Mat<T> LinearRegression<T>::train_(const Mat<T> &x, const 
         while (randomNums.size() < batch_size)
             randomNums.insert(dis(gen));
 
-        Mat<T> tmp_thetas(thetas);
+        Mat<T> tmp_theta(theta);
 
         for (size_t i = 0; i < w.size(Axis::col); ++i)
         {
@@ -63,29 +63,29 @@ template <typename T> Mat<T> LinearRegression<T>::train_(const Mat<T> &x, const 
             {
                 tmp_theta_i +=
                     learning_rate *
-                    ((y.iloc(e, Axis::row) - thetas.dot(w.iloc(e, Axis::row).transpose())) * w.iloc(e, i)).iloc(0, 0);
+                    ((y.iloc(e, Axis::row) - theta.dot(w.iloc(e, Axis::row).transpose())) * w.iloc(e, i)).iloc(0, 0);
             }
-            tmp_thetas.iloc(0, i) += (tmp_theta_i / batch_size);
+            tmp_theta.iloc(0, i) += (tmp_theta_i / batch_size);
         }
-        thetas = tmp_thetas;
+        theta = tmp_theta;
     }
-    return thetas;
+    return theta;
 }
-template <typename T> Mat<T> LinearRegression<T>::predict_(const Mat<T> &x, const Mat<T> &thetas) const
+template <typename T> Mat<T> LinearRegression<T>::predict_(const Mat<T> &x, const Mat<T> &theta) const
 {
     using namespace std;
 
-    if (x.size(Axis::col) + 1 != thetas.size(Axis::col))
+    if (x.size(Axis::col) + 1 != theta.size(Axis::col))
     {
         cerr << "Error: The input matrix has incompatible dimensions with the model parameters." << endl;
-        cerr << "Expected columns: " << (thetas.size(Axis::col) - 1) << ", but got: " << x.size(Axis::col) << "."
+        cerr << "Expected columns: " << (theta.size(Axis::col) - 1) << ", but got: " << x.size(Axis::col) << "."
              << endl;
         throw invalid_argument("The input matrix has incompatible dimensions with the model parameters.");
     }
     Mat<T> ones(x.size(Axis::row), 1);
     ones     = 1;
     Mat<T> w = x.concat(ones, Axis::col);
-    return w.dot(thetas.transpose());
+    return w.dot(theta.transpose());
 }
 
 // for polymorphism

@@ -205,7 +205,7 @@ template <typename T> Mat<std::string> BinaryClassificationModelBase<T>::predict
             cerr << "Error: Invalid binary-to-multi classification method." << endl;
             throw invalid_argument("Invalid binary-to-multi classification method.");
         }
-        ret.iloc(0, r) = pred;
+        ret.iloc(r, 0) = pred;
     }
 
     return ret;
@@ -229,7 +229,7 @@ template <typename T> void BinaryClassificationModelBase<T>::classify_labels(con
 
     vector<Mat<T>>      xs;
     vector<Mat<string>> ys;
-    for (size_t c = 0; c < managed_labels.read().size(Axis::row); ++c)
+    for (size_t c = 0; c < managed_labels.read().size(Axis::col); ++c)
     {
         vector<pair<size_t, size_t>> loc = y.find(managed_labels.read().iloc(0, c));
         vector<size_t>               index;
@@ -321,7 +321,7 @@ template <typename T> std::string BinaryClassificationModelBase<T>::predict_ecoc
     size_t pred_r             = 0;
     for (size_t r = 1; r < managed_ecoc.read().size(Axis::row); ++r)
     {
-        size_t distance = BinaryClassificationModelBase<int>::hammingDistance(ecoc.iloc(0, Axis::row), pred_ecoc);
+        size_t distance = BinaryClassificationModelBase<int>::hammingDistance(ecoc.iloc(r, Axis::row), pred_ecoc);
         if (distance < minHammingDistance)
         {
             minHammingDistance = distance;

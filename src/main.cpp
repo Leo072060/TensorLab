@@ -14,7 +14,7 @@
 using namespace std;
 using namespace TL;
 
-#define TEST_LinearRegression
+#define TEST_LogisticRegression
 int main()
 {
     cout << "__main__" << endl;
@@ -93,12 +93,17 @@ int main()
     loader.nameFlag         = col_name;
     Mat data                = loader.load_matrix(dataFileName);
     display_rainbow(data, col_name, 5);
-    auto x = data.extract(0,4,Axis::col);
+    auto x = data.extract(0,data.size(Axis::col)-1,Axis::col);
     Mat<string> y = data.loc("target",Axis::col);
     display(x);
     display(y);
     LogisticRegression model;
     model.train(x,y);
+    ClassificationEvaluation evalution;
+    auto y_pred = model.predict(x);
+    display_rainbow(y.concat(y_pred,Axis::col));
+    evalution.fit(y_pred,y);
+    evalution.report();
 
 #endif
 }

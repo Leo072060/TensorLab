@@ -1094,13 +1094,13 @@ template <typename T> Mat<T> Mat<T>::concat(const Mat<T> &other, const Axis axis
     switch (axis)
     {
     case Axis::row: {
-        if (colSize != other.colSize)
+        if (rowSize && other.rowSize && colSize != other.colSize)
         {
             cerr << "Error: Column sizes must match for row concatenation." << endl;
             throw invalid_argument("Column sizes do not match for row concatenation.");
         }
 
-        Mat<T> ret(rowSize + other.rowSize, colSize);
+        Mat<T> ret(rowSize + other.rowSize, colSize?colSize:other.colSize);
         for (size_t r = 0; r < rowSize; ++r)
         {
             ret.rowNames[r] = rowNames[r];
@@ -1110,22 +1110,22 @@ template <typename T> Mat<T> Mat<T>::concat(const Mat<T> &other, const Axis axis
         for (size_t r = 0; r < other.rowSize; ++r)
         {
             ret.rowNames[r + rowSize] = other.rowNames[r];
-            for (size_t c = 0; c < colSize; ++c)
+            for (size_t c = 0; c < other.colSize; ++c)
                 ret.data[r + rowSize][c] = other.data[r][c];
         }
-        for (size_t c = 0; c < colSize; ++c)
+        for (size_t c = 0; c < other.colSize; ++c)
             ret.colNames[c] = other.colNames[c];
 
         return ret;
     }
     case Axis::col: {
-        if (rowSize != other.rowSize)
+        if (colSize && other.colSize && rowSize != other.rowSize)
         {
             cerr << "Error: Row sizes must match for column concatenation." << endl;
             throw invalid_argument("Row sizes do not match for column concatenation.");
         }
 
-        Mat<T> ret(rowSize, colSize + other.colSize);
+        Mat<T> ret(rowSize?rowSize:other.rowSize, colSize + other.colSize);
         for (size_t c = 0; c < colSize; ++c)
         {
             ret.colNames[c] = colNames[c];

@@ -8,7 +8,7 @@ namespace TL
 {
 using namespace _internal;
 
-template <typename T> class ClassificationEvaluation : public ManagedClass
+template <typename T=double> class ClassificationEvaluation : public ManagedClass
 {
   public:
     ClassificationEvaluation();
