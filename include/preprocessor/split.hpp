@@ -13,7 +13,8 @@
 
 namespace TL
 {
-template <typename T,typename U> std::map<std::string, Mat<T>> train_test_split(const Mat<T> &x, const Mat<U> &y, double test_size)
+template <typename T, typename U>
+std::map<std::string, Mat<T>> train_test_split(const Mat<T> &x, const Mat<U> &y, double test_size)
 {
     using namespace std;
 
@@ -48,17 +49,37 @@ template <typename T,typename U> std::map<std::string, Mat<T>> train_test_split(
     {
         for (size_t c = 0; c < x.size(Axis::col); ++c)
         {
-            x_train.iloc(r, c) = x.iloc(indices[r], c);
+            x_train.iloc(r, c)              = x.iloc(indices[r], c);
+            x_train.iloc_name(r, Axis::row) = x.iloc_name(indices[r], Axis::row);
         }
-        y_train.iloc(r, 0) = y.iloc(indices[r], 0);
+        for (size_t c = 0; c < y.size(Axis::col); ++c)
+        {
+            y_train.iloc(r, c)              = y.iloc(indices[r], c);
+            y_train.iloc_name(r, Axis::row) = y.iloc_name(indices[r], Axis::row);
+        }
     }
     for (size_t r = 0; r < test_samples; ++r)
     {
         for (size_t c = 0; c < x.size(Axis::col); ++c)
         {
-            x_test.iloc(r, c) = x.iloc(indices[r], c);
+            x_test.iloc(r, c)              = x.iloc(indices[r], c);
+            x_test.iloc_name(r, Axis::row) = x.iloc_name(indices[r], Axis::row);
         }
-        y_test.iloc(r, 0) = y.iloc(indices[r], 0);
+        for (size_t c = 0; c < y.size(Axis::col); ++c)
+        {
+            y_test.iloc(r, c)              = y.iloc(indices[r], c);
+            y_test.iloc_name(r, Axis::row) = y.iloc_name(indices[r], Axis::row);
+        }
+    }
+    for (size_t c = 0; c < x.size(Axis::col); ++c)
+    {
+        x_train.iloc_name(c, Axis::col) = x.iloc_name(c, Axis::col);
+        x_test.iloc_name(c, Axis::col)  = x.iloc_name(c, Axis::col);
+    }
+    for (size_t c = 0; c < y.size(Axis::col); ++c)
+    {
+        y_train.iloc_name(c, Axis::col) = y.iloc_name(c, Axis::col);
+        y_test.iloc_name(c, Axis::col)  = y.iloc_name(c, Axis::col);
     }
 
     return {{"x_train", x_train}, {"y_train", y_train}, {"x_test", x_test}, {"y_test", y_test}};

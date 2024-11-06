@@ -25,12 +25,12 @@ template <class T = double> class RegressionModelBase : public ManagedClass
   public:
     void   train(const Mat<T> &x, const Mat<T> &y);
     Mat<T> predict(const Mat<T> &x) const;
-    Mat<T> get_thetas() const;
+    Mat<T> get_theta() const;
 
     // hook functions
   protected:
-    virtual Mat<T> train_(const Mat<T> &x, const Mat<T> &y)              = 0;
-    virtual Mat<T> predict_(const Mat<T> &x, const Mat<T> &thetas) const = 0;
+    virtual Mat<double> train_(const Mat<T> &x, const Mat<T> &y)              = 0;
+    virtual Mat<T> predict_(const Mat<T> &x, const Mat<double> &thetas) const = 0;
 
     // for polymorphism
   public:
@@ -38,69 +38,69 @@ template <class T = double> class RegressionModelBase : public ManagedClass
 
     // model parameters
   private:
-    mutable ManagedVal<Mat<T>> managed_thetas;
+    mutable ManagedVal<Mat<double>> managed_theta;
 };
 
 // lifecycle management
 template <class T>
 RegressionModelBase<T>::RegressionModelBase()
     : ManagedClass()
-    , managed_thetas(this->administrator)
+    , managed_theta(this->administrator)
 {
 }
 template <class T>
 RegressionModelBase<T>::RegressionModelBase(const RegressionModelBase<T> &other)
     : ManagedClass(other)
-    , managed_thetas(this->administrator, other.administrator, other.managed_thetas)
+    , managed_theta(this->administrator, other.administrator, other.managed_theta)
 {
 }
 template <class T>
 RegressionModelBase<T>::RegressionModelBase(RegressionModelBase<T> &&other) noexcept
     : ManagedClass(std::move(other))
-    , managed_thetas(this->administrator, other.administrator, other.managed_thetas)
+    , managed_theta(this->administrator, other.administrator, other.managed_theta)
 {
 }
 template <class T> RegressionModelBase<T> &RegressionModelBase<T>::operator=(const RegressionModelBase<T> &rhs)
 {
     ManagedClass::operator=(rhs);
-    managed_thetas.copy(this->administrator, rhs.administrator, rhs.managed_thetas);
+    managed_theta.copy(this->administrator, rhs.administrator, rhs.managed_theta);
     return *this;
 }
 template <class T> RegressionModelBase<T> &RegressionModelBase<T>::operator=(RegressionModelBase<T> &&rhs) noexcept
 {
     using namespace std;
     ManagedClass::operator=(move(rhs));
-    managed_thetas.copy(this->administrator, rhs.administrator, rhs.managed_thetas);
+    managed_theta.copy(this->administrator, rhs.administrator, rhs.managed_theta);
     return *this;
 }
 
 // interface functions
 template <class T> void RegressionModelBase<T>::train(const Mat<T> &x, const Mat<T> &y)
 {
-    this->record(managed_thetas, this->train_(x, y));
+    this->record(managed_theta, this->train_(x, y));
 }
 template <class T> Mat<T> RegressionModelBase<T>::predict(const Mat<T> &x) const
 {
     using namespace std;
 
-    if (!managed_thetas.isReadable())
+    if (!managed_theta.isReadable())
     {
         cerr << "Error: The model cannot predict before the model has been trained." << endl;
         throw runtime_error("The model has not been trained.");
     }
 
-    return predict_(x, managed_thetas.read());
+    return predict_(x, managed_theta.read());
 }
-template <class T> Mat<T> RegressionModelBase<T>::get_thetas() const
+template <class T> Mat<T> RegressionModelBase<T>::get_theta() const
 {
     using namespace std;
 
-    if (!managed_thetas.isReadable())
+    if (!managed_theta.isReadable())
     {
         cerr << "Error: The model parameters (thetas) cannot be read before the model has been trained." << endl;
         throw runtime_error("The model has not been trained.");
     }
-    return managed_thetas.read();
+    return managed_theta.read();
 }
 } // namespace _internal
 } // namespace TL

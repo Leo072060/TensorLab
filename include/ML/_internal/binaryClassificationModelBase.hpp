@@ -11,7 +11,7 @@ namespace TL
 {
 namespace _internal
 {
-enum BinaryToMultiMethod : int
+enum BinaryToMulti : int
 {
     OneVsRest,
     OneVsOne
@@ -30,36 +30,36 @@ template <typename T> class BinaryClassificationModelBase : public Classificatio
 
     // interface functions
   public:
-    void                train(const Mat<T> &x, const Mat<std::string> &y) override;
-    Mat<std::string>    predict(const Mat<T> &x) const override;
-    std::vector<Mat<T>> get_thetas() const;
+    void                     train(const Mat<T> &x, const Mat<std::string> &y) override;
+    Mat<std::string>         predict(const Mat<T> &x) const override;
+    std::vector<Mat<double>> get_thetas() const;
 
     // hook functions
   protected:
-    virtual Mat<T>           train_binary(const Mat<T> &x, const Mat<std::string> &y)   = 0;
-    virtual Mat<std::string> predict_binary(const Mat<T> &x, const Mat<T> &theta) const = 0;
+    virtual Mat<double>      train_binary(const Mat<T> &x, const Mat<std::string> &y)        = 0;
+    virtual Mat<std::string> predict_binary(const Mat<T> &x, const Mat<double> &theta) const = 0;
 
     // internal implementation functions
   private:
     void        classify_labels(const Mat<T> &x, const Mat<std::string> &y);
-    void        generate_ecoc(const BinaryToMultiMethod method);
+    void        generate_ecoc(const BinaryToMulti method);
     void        train_ecoc();
     std::string predict_ecoc(const Mat<T> &x) const;
 
   public:
-    static size_t hammingDistance(const Mat<T> &lhs, const Mat<T> &rhs);
+    static size_t hammingDistance(const Mat<int> &lhs, const Mat<int> &rhs);
 
     // model parameters
   public:
-    BinaryToMultiMethod binary2multi;
+    BinaryToMulti binary2multi;
 
   protected:
     ManagedVal<Mat<std::string>> managed_labels;
 
   private:
     mutable ManagedVal<size_t>                        managed_dimension;
-    mutable ManagedVal<BinaryToMultiMethod>           managed_binary2multi;
-    mutable ManagedVal<std::vector<Mat<T>>>           managed_thetas;
+    mutable ManagedVal<BinaryToMulti>           managed_binary2multi;
+    mutable ManagedVal<std::vector<Mat<double>>>      managed_thetas;
     mutable ManagedVal<Mat<int>>                      managed_ecoc;
     mutable ManagedVal<std::vector<Mat<T>>>           managed_xs;
     mutable ManagedVal<std::vector<Mat<std::string>>> managed_ys;
@@ -210,7 +210,7 @@ template <typename T> Mat<std::string> BinaryClassificationModelBase<T>::predict
 
     return ret;
 }
-template <class T> std::vector<Mat<T>> BinaryClassificationModelBase<T>::get_thetas() const
+template <class T> std::vector<Mat<double>> BinaryClassificationModelBase<T>::get_thetas() const
 {
     using namespace std;
 
@@ -241,7 +241,7 @@ template <typename T> void BinaryClassificationModelBase<T>::classify_labels(con
     this->record(managed_xs, xs);
     this->record(managed_ys, ys);
 }
-template <typename T> void BinaryClassificationModelBase<T>::generate_ecoc(const BinaryToMultiMethod method)
+template <typename T> void BinaryClassificationModelBase<T>::generate_ecoc(const BinaryToMulti method)
 {
     using namespace std;
 
@@ -260,7 +260,7 @@ template <typename T> void BinaryClassificationModelBase<T>::generate_ecoc(const
     }
     case OneVsOne: {
         size_t   num_classes = managed_labels.read().size(Axis::col);
-        size_t   pairCount  = (num_classes * (num_classes - 1)) / 2;
+        size_t   pairCount   = (num_classes * (num_classes - 1)) / 2;
         Mat<int> ecocMatrix(num_classes, pairCount);
 
         size_t c = 0;
@@ -278,8 +278,8 @@ template <typename T> void BinaryClassificationModelBase<T>::generate_ecoc(const
         break;
     }
     default:
-        cerr << "Error: Invalid BinaryToMultiMethod provided." << endl;
-        throw invalid_argument("Invalid BinaryToMultiMethod.");
+        cerr << "Error: Invalid BinaryToMulti provided." << endl;
+        throw invalid_argument("Invalid BinaryToMulti.");
     }
 }
 template <typename T> void BinaryClassificationModelBase<T>::train_ecoc()
@@ -322,7 +322,7 @@ template <typename T> std::string BinaryClassificationModelBase<T>::predict_ecoc
     for (size_t r = 1; r < managed_ecoc.read().size(Axis::row); ++r)
     {
         size_t distance = BinaryClassificationModelBase<int>::hammingDistance(ecoc.iloc(r, Axis::row), pred_ecoc);
-        std::cout<<"> "<<r<<" "<<distance<<std::endl;
+        std::cout << "> " << r << " " << distance << std::endl;
         if (distance < minHammingDistance)
         {
             minHammingDistance = distance;
@@ -332,7 +332,7 @@ template <typename T> std::string BinaryClassificationModelBase<T>::predict_ecoc
 
     return managed_labels.read().iloc(0, pred_r);
 }
-template <typename T> size_t BinaryClassificationModelBase<T>::hammingDistance(const Mat<T> &lhs, const Mat<T> &rhs)
+template <typename T> size_t BinaryClassificationModelBase<T>::hammingDistance(const Mat<int> &lhs, const Mat<int> &rhs)
 {
     using namespace std;
 

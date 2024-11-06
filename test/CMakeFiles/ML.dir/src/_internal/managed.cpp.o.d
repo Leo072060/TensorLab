@@ -1,5 +1,5 @@
-CMakeFiles/ML.dir/src/managed.cpp.o: /home/twh/TensorLab/src/managed.cpp \
- /usr/include/stdc-predef.h \
+CMakeFiles/ML.dir/src/_internal/managed.cpp.o: \
+ /home/twh/TensorLab/src/_internal/managed.cpp /usr/include/stdc-predef.h \
  /home/twh/TensorLab/include/_internal/managed.hpp \
  /usr/include/c++/11/iostream \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
@@ -170,5 +170,5 @@ CMakeFiles/ML.dir/src/managed.cpp.o: /home/twh/TensorLab/src/managed.cpp \
  /usr/include/c++/11/bits/stl_vector.h \
  /usr/include/c++/11/bits/stl_bvector.h \
  /usr/include/c++/11/bits/vector.tcc \
- /home/twh/TensorLab/include/_internal/uncopyable.h \
+ /home/twh/TensorLab/include/_internal/uncopyable.hpp \
  /home/twh/TensorLab/include/_internal/utility.hpp

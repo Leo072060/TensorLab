@@ -69,10 +69,38 @@ include CMakeFiles/ML.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/ML.dir/flags.make
 
+CMakeFiles/ML.dir/src/ML/decisionTree.cpp.o: CMakeFiles/ML.dir/flags.make
+CMakeFiles/ML.dir/src/ML/decisionTree.cpp.o: ../src/ML/decisionTree.cpp
+CMakeFiles/ML.dir/src/ML/decisionTree.cpp.o: CMakeFiles/ML.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/ML.dir/src/ML/decisionTree.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ML.dir/src/ML/decisionTree.cpp.o -MF CMakeFiles/ML.dir/src/ML/decisionTree.cpp.o.d -o CMakeFiles/ML.dir/src/ML/decisionTree.cpp.o -c /home/twh/TensorLab/src/ML/decisionTree.cpp
+
+CMakeFiles/ML.dir/src/ML/decisionTree.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ML.dir/src/ML/decisionTree.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/twh/TensorLab/src/ML/decisionTree.cpp > CMakeFiles/ML.dir/src/ML/decisionTree.cpp.i
+
+CMakeFiles/ML.dir/src/ML/decisionTree.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ML.dir/src/ML/decisionTree.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/twh/TensorLab/src/ML/decisionTree.cpp -o CMakeFiles/ML.dir/src/ML/decisionTree.cpp.s
+
+CMakeFiles/ML.dir/src/_internal/managed.cpp.o: CMakeFiles/ML.dir/flags.make
+CMakeFiles/ML.dir/src/_internal/managed.cpp.o: ../src/_internal/managed.cpp
+CMakeFiles/ML.dir/src/_internal/managed.cpp.o: CMakeFiles/ML.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/ML.dir/src/_internal/managed.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ML.dir/src/_internal/managed.cpp.o -MF CMakeFiles/ML.dir/src/_internal/managed.cpp.o.d -o CMakeFiles/ML.dir/src/_internal/managed.cpp.o -c /home/twh/TensorLab/src/_internal/managed.cpp
+
+CMakeFiles/ML.dir/src/_internal/managed.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ML.dir/src/_internal/managed.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/twh/TensorLab/src/_internal/managed.cpp > CMakeFiles/ML.dir/src/_internal/managed.cpp.i
+
+CMakeFiles/ML.dir/src/_internal/managed.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ML.dir/src/_internal/managed.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/twh/TensorLab/src/_internal/managed.cpp -o CMakeFiles/ML.dir/src/_internal/managed.cpp.s
+
 CMakeFiles/ML.dir/src/main.cpp.o: CMakeFiles/ML.dir/flags.make
 CMakeFiles/ML.dir/src/main.cpp.o: ../src/main.cpp
 CMakeFiles/ML.dir/src/main.cpp.o: CMakeFiles/ML.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/ML.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/ML.dir/src/main.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ML.dir/src/main.cpp.o -MF CMakeFiles/ML.dir/src/main.cpp.o.d -o CMakeFiles/ML.dir/src/main.cpp.o -c /home/twh/TensorLab/src/main.cpp
 
 CMakeFiles/ML.dir/src/main.cpp.i: cmake_force
@@ -83,33 +111,21 @@ CMakeFiles/ML.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ML.dir/src/main.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/twh/TensorLab/src/main.cpp -o CMakeFiles/ML.dir/src/main.cpp.s
 
-CMakeFiles/ML.dir/src/managed.cpp.o: CMakeFiles/ML.dir/flags.make
-CMakeFiles/ML.dir/src/managed.cpp.o: ../src/managed.cpp
-CMakeFiles/ML.dir/src/managed.cpp.o: CMakeFiles/ML.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/ML.dir/src/managed.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ML.dir/src/managed.cpp.o -MF CMakeFiles/ML.dir/src/managed.cpp.o.d -o CMakeFiles/ML.dir/src/managed.cpp.o -c /home/twh/TensorLab/src/managed.cpp
-
-CMakeFiles/ML.dir/src/managed.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ML.dir/src/managed.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/twh/TensorLab/src/managed.cpp > CMakeFiles/ML.dir/src/managed.cpp.i
-
-CMakeFiles/ML.dir/src/managed.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ML.dir/src/managed.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/twh/TensorLab/src/managed.cpp -o CMakeFiles/ML.dir/src/managed.cpp.s
-
 # Object files for target ML
 ML_OBJECTS = \
-"CMakeFiles/ML.dir/src/main.cpp.o" \
-"CMakeFiles/ML.dir/src/managed.cpp.o"
+"CMakeFiles/ML.dir/src/ML/decisionTree.cpp.o" \
+"CMakeFiles/ML.dir/src/_internal/managed.cpp.o" \
+"CMakeFiles/ML.dir/src/main.cpp.o"
 
 # External object files for target ML
 ML_EXTERNAL_OBJECTS =
 
+ML: CMakeFiles/ML.dir/src/ML/decisionTree.cpp.o
+ML: CMakeFiles/ML.dir/src/_internal/managed.cpp.o
 ML: CMakeFiles/ML.dir/src/main.cpp.o
-ML: CMakeFiles/ML.dir/src/managed.cpp.o
 ML: CMakeFiles/ML.dir/build.make
 ML: CMakeFiles/ML.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable ML"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable ML"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/ML.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

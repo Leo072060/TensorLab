@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include "_internal/uncopyable.h"
+#include "_internal/uncopyable.hpp"
 #include "_internal/utility.hpp"
 
 namespace TL

@@ -129,6 +129,54 @@ ML/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/build
 .PHONY : ML/fast
 
+src/ML/decisionTree.o: src/ML/decisionTree.cpp.o
+.PHONY : src/ML/decisionTree.o
+
+# target to build an object file
+src/ML/decisionTree.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/decisionTree.cpp.o
+.PHONY : src/ML/decisionTree.cpp.o
+
+src/ML/decisionTree.i: src/ML/decisionTree.cpp.i
+.PHONY : src/ML/decisionTree.i
+
+# target to preprocess a source file
+src/ML/decisionTree.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/decisionTree.cpp.i
+.PHONY : src/ML/decisionTree.cpp.i
+
+src/ML/decisionTree.s: src/ML/decisionTree.cpp.s
+.PHONY : src/ML/decisionTree.s
+
+# target to generate assembly for a file
+src/ML/decisionTree.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/decisionTree.cpp.s
+.PHONY : src/ML/decisionTree.cpp.s
+
+src/_internal/managed.o: src/_internal/managed.cpp.o
+.PHONY : src/_internal/managed.o
+
+# target to build an object file
+src/_internal/managed.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/_internal/managed.cpp.o
+.PHONY : src/_internal/managed.cpp.o
+
+src/_internal/managed.i: src/_internal/managed.cpp.i
+.PHONY : src/_internal/managed.i
+
+# target to preprocess a source file
+src/_internal/managed.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/_internal/managed.cpp.i
+.PHONY : src/_internal/managed.cpp.i
+
+src/_internal/managed.s: src/_internal/managed.cpp.s
+.PHONY : src/_internal/managed.s
+
+# target to generate assembly for a file
+src/_internal/managed.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/_internal/managed.cpp.s
+.PHONY : src/_internal/managed.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -153,30 +201,6 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
-src/managed.o: src/managed.cpp.o
-.PHONY : src/managed.o
-
-# target to build an object file
-src/managed.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/managed.cpp.o
-.PHONY : src/managed.cpp.o
-
-src/managed.i: src/managed.cpp.i
-.PHONY : src/managed.i
-
-# target to preprocess a source file
-src/managed.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/managed.cpp.i
-.PHONY : src/managed.cpp.i
-
-src/managed.s: src/managed.cpp.s
-.PHONY : src/managed.s
-
-# target to generate assembly for a file
-src/managed.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/managed.cpp.s
-.PHONY : src/managed.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -186,12 +210,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... ML"
+	@echo "... src/ML/decisionTree.o"
+	@echo "... src/ML/decisionTree.i"
+	@echo "... src/ML/decisionTree.s"
+	@echo "... src/_internal/managed.o"
+	@echo "... src/_internal/managed.i"
+	@echo "... src/_internal/managed.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
-	@echo "... src/managed.o"
-	@echo "... src/managed.i"
-	@echo "... src/managed.s"
 .PHONY : help
 
 

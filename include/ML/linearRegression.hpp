@@ -1,8 +1,7 @@
 #ifndef LINEAR_REGRESSION_HPP
 #define LINEAR_REGRESSION_HPP
 
-#include "ML/_internal/regressionModelBase.hpp"
-#include "mat/mat.hpp"
+#include "ML/_internal/regressionModelBase.hpp" 
 
 namespace TL
 {
@@ -12,8 +11,8 @@ template <class T = double> class LinearRegression : public RegressionModelBase<
 {
     // hook functions
   private:
-    Mat<T> train_(const Mat<T> &x, const Mat<T> &y) override;
-    Mat<T> predict_(const Mat<T> &x, const Mat<T> &theta) const override;
+    Mat<double> train_(const Mat<T> &x, const Mat<T> &y) override;
+    Mat<T> predict_(const Mat<T> &x, const Mat<double> &theta) const override;
 
     // for polymorphism
   public:
@@ -27,14 +26,14 @@ template <class T = double> class LinearRegression : public RegressionModelBase<
 };
 
 // hook functions
-template <typename T> Mat<T> LinearRegression<T>::train_(const Mat<T> &x, const Mat<T> &y)
+template <typename T> Mat<double> LinearRegression<T>::train_(const Mat<T> &x, const Mat<T> &y)
 {
     using namespace std;
 
     Mat<T> ones(x.size(Axis::row), 1);
     ones     = 1;
     Mat<T> w = x.concat(ones, Axis::col);
-    Mat<T> theta(1, x.size(Axis::col) + 1);
+    Mat<double> theta(1, x.size(Axis::col) + 1);
 
     // start training
     for (size_t I = 0; I < iterations; ++I)
@@ -54,7 +53,7 @@ template <typename T> Mat<T> LinearRegression<T>::train_(const Mat<T> &x, const 
         while (randomNums.size() < batch_size)
             randomNums.insert(dis(gen));
 
-        Mat<T> tmp_theta(theta);
+        Mat<double> tmp_theta(theta);
 
         for (size_t i = 0; i < w.size(Axis::col); ++i)
         {
@@ -71,7 +70,7 @@ template <typename T> Mat<T> LinearRegression<T>::train_(const Mat<T> &x, const 
     }
     return theta;
 }
-template <typename T> Mat<T> LinearRegression<T>::predict_(const Mat<T> &x, const Mat<T> &theta) const
+template <typename T> Mat<T> LinearRegression<T>::predict_(const Mat<T> &x, const Mat<double> &theta) const
 {
     using namespace std;
 

@@ -7,6 +7,7 @@
 #include <map>
 #include <set>
 #include <sstream>
+#include <unordered_map>
 
 #include "_internal/managed.hpp"
 
@@ -94,13 +95,13 @@ template <class T = double> class Mat : public ManagedClass
     Mat<T> dot(const Mat<T> &rhs) const;
 
     // evaluation operations
-    T                             mean() const;
-    Mat<T>                        mean(const Axis axis) const;
-    T                             sum() const;
-    Mat<T>                        sum(const Axis axis) const;
-    Mat<T>                        inverse() const;
-    T                             det() const;
-    std::map<std::string, Mat<T>> LU() const;
+    T                                       mean() const;
+    Mat<T>                                  mean(const Axis axis) const;
+    T                                       sum() const;
+    Mat<T>                                  sum(const Axis axis) const;
+    Mat<T>                                  inverse() const;
+    T                                       det() const;
+    std::unordered_map<std::string, Mat<T>> LU() const;
 
     // indexing operations
     const T           &iloc(const size_t r, const size_t c) const;
@@ -126,10 +127,14 @@ template <class T = double> class Mat : public ManagedClass
     void                                   sort(const size_t i, const Order order, const Axis axis);
     std::vector<std::pair<size_t, size_t>> find(const T val) const;
     size_t                                 count(const T val) const;
+    std::unordered_map<T, size_t>          count() const;
     Mat<T>                                 unique() const;
 
     // matrix generation
     static Mat<T> identity(const size_t size);
+
+    // tool functions
+    size_t name2index(const std::string &name, const Axis axis) const;
 
   private:
     T          **data     = nullptr;
@@ -137,6 +142,7 @@ template <class T = double> class Mat : public ManagedClass
     std::string *colNames = nullptr;
     std::size_t  rowSize  = 0;
     std::size_t  colSize  = 0;
+
     // calculated value
     mutable ManagedVal<T> managed_det;
     mutable ManagedVal<T> managed_mean;
@@ -783,7 +789,7 @@ template <typename T> T Mat<T>::det() const
     this->record(managed_det, ret);
     return ret;
 }
-template <typename T> std::map<std::string, Mat<T>> Mat<T>::LU() const
+template <typename T> std::unordered_map<std::string, Mat<T>> Mat<T>::LU() const
 {
     using namespace std;
 
@@ -826,7 +832,7 @@ template <typename T> std::map<std::string, Mat<T>> Mat<T>::LU() const
 
     L += Mat<T>::identity(rowSize);
 
-    map<string, Mat<T>> ret;
+    unordered_map<string, Mat<T>> ret;
     ret["L"] = L;
     ret["U"] = U;
     ret["P"] = P;
@@ -1100,7 +1106,7 @@ template <typename T> Mat<T> Mat<T>::concat(const Mat<T> &other, const Axis axis
             throw invalid_argument("Column sizes do not match for row concatenation.");
         }
 
-        Mat<T> ret(rowSize + other.rowSize, colSize?colSize:other.colSize);
+        Mat<T> ret(rowSize + other.rowSize, colSize ? colSize : other.colSize);
         for (size_t r = 0; r < rowSize; ++r)
         {
             ret.rowNames[r] = rowNames[r];
@@ -1125,7 +1131,7 @@ template <typename T> Mat<T> Mat<T>::concat(const Mat<T> &other, const Axis axis
             throw invalid_argument("Row sizes do not match for column concatenation.");
         }
 
-        Mat<T> ret(rowSize?rowSize:other.rowSize, colSize + other.colSize);
+        Mat<T> ret(rowSize ? rowSize : other.rowSize, colSize + other.colSize);
         for (size_t c = 0; c < colSize; ++c)
         {
             ret.colNames[c] = colNames[c];
@@ -1217,7 +1223,7 @@ template <typename T> void Mat<T>::drop(const size_t i, const Axis axis)
             throw out_of_range("Row index out of bounds.");
         }
 
-        T     **newData     = new T **[rowSize - 1];
+        T     **newData     = new T *[rowSize - 1];
         string *newRowNames = new string[rowSize - 1];
         for (size_t r = 0, newRow = 0; r < rowSize; ++r)
             if (r != i)
@@ -1248,7 +1254,7 @@ template <typename T> void Mat<T>::drop(const size_t i, const Axis axis)
         }
 
         T     **newData     = new T *[rowSize];
-        string *newColNames = new string *[colSize];
+        string *newColNames = new string[colSize];
         for (size_t r = 0; r < rowSize; ++r)
         {
             newData[r] = new T[colSize - 1];
@@ -1373,6 +1379,20 @@ template <typename T> size_t Mat<T>::count(const T val) const
             if (data[r][c] == val) count++;
     return count;
 }
+template <typename T> std::unordered_map<T, size_t> Mat<T>::count() const
+{
+    using namespace std;
+
+    unordered_map<T, size_t> ret;
+
+    for (size_t r = 0; r < rowSize; ++r)
+        for (size_t c = 0; c < colSize; ++c)
+        {
+            ++ret[data[r][c]];
+        }
+
+    return ret;
+}
 template <typename T> Mat<T> Mat<T>::unique() const
 {
     using namespace std;
@@ -1400,6 +1420,51 @@ template <typename T> Mat<T> Mat<T>::identity(const size_t size)
         ret.data[i][i] = 1;
 
     return ret;
+}
+
+// tool functions
+template <typename T> size_t Mat<T>::name2index(const std::string &name, const Axis axis) const
+{
+    using namespace std;
+
+    if (name.empty())
+    {
+        cerr << "Error: name cannot be empty." << endl;
+        throw invalid_argument("Name cannot be empty.");
+    }
+
+    switch (axis)
+    {
+    case Axis::row: {
+        for (size_t r = 0; r < rowSize; ++r)
+        {
+            if (rowNames[r] == name)
+            {
+                return r;
+            }
+        }
+        cerr << "Error: Row name not found: " << name << endl;
+        throw invalid_argument("Row name not found.");
+        break;
+    }
+    case Axis::col: {
+        for (size_t c = 0; c < colSize; ++c)
+        {
+            if (colNames[c] == name)
+            {
+                return c;
+            }
+        }
+        cerr << "Error: Column name not found: " << name << endl;
+        throw invalid_argument("Column name not found.");
+        break;
+    }
+    default: {
+        cerr << "Error: Invalid AxisType provided for name2index operation." << endl;
+        throw invalid_argument("Invalid AxisType for name2index operation.");
+        break;
+    }
+    }
 }
 
 // display

@@ -14,7 +14,7 @@
 using namespace std;
 using namespace TL;
 
-#define TEST_LogisticRegression
+#define TEST_DicisionTree
 int main()
 {
     cout << "__main__" << endl;
@@ -105,13 +105,41 @@ int main()
     auto y_test  = x_y["y_test"];
 
     LogisticRegression model;
-    model.binary2multi = BinaryToMultiMethod::OneVsOne;
+    model.binary2multi = BinaryToMulti::OneVsOne;
     model.train(x_train, y_train);
     ClassificationEvaluation evalution;
     auto                     y_pred = model.predict(x_test);
     display_rainbow(y_test.concat(y_pred, Axis::col));
     evalution.fit(y_pred, y_test);
     evalution.report();
+#endif
 
+#ifdef TEST_DicisionTree
+    csv_Loader<string> loader;
+    string     dataFileName = "car_evaluation.csv";
+    loader.nameFlag         = col_name;
+    auto data                = loader.load_matrix(dataFileName);
+    display_rainbow(data, col_name, 5);
+    auto        x = data.extract(0, data.size(Axis::col) - 1, Axis::col);
+    auto y = data.loc("class", Axis::col);
+    display_rainbow(x,NameFlag::col_name,5);
+    display_rainbow(y,NameFlag::col_name,5);
+    auto x_y = train_test_split(x, y, 0.2);
+
+    auto x_train = x_y["x_train"];
+    auto y_train = x_y["y_train"];
+    auto x_test  = x_y["x_test"];
+    auto y_test  = x_y["y_test"];
+
+
+
+    // LogisticRegression model;
+    // model.binary2multi = BinaryToMulti::OneVsOne;
+    // model.train(x_train, y_train);
+    // ClassificationEvaluation evalution;
+    // auto                     y_pred = model.predict(x_test);
+    // display_rainbow(y_test.concat(y_pred, Axis::col));
+    // evalution.fit(y_pred, y_test);
+    // evalution.report();
 #endif
 }

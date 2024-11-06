@@ -53,7 +53,8 @@
         "iosfwd": "cpp",
         "limits": "cpp",
         "new": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "unordered_set": "cpp"
     },
     "cmake.buildDirectory": "${workspaceFolder}/build",
     "cmake.sourceDirectory": "${workspaceFolder}",

@@ -10,9 +10,9 @@ using namespace _internal;
 template <typename T = double> class LogisticRegression : public BinaryClassificationModelBase<T>
 {
   private:
-    Mat<T>           train_binary(const Mat<T> &x, const Mat<std::string> &y) override;
-    Mat<std::string> predict_binary(const Mat<T> &x, const Mat<T> &theta) const override;
-    static Mat<T>    predict_probabilities(const Mat<T> &x, const Mat<T> &thetas);
+    Mat<double>        train_binary(const Mat<T> &x, const Mat<std::string> &y) override;
+    Mat<std::string>   predict_binary(const Mat<T> &x, const Mat<double> &theta) const override;
+    static Mat<double> predict_probabilities(const Mat<T> &x, const Mat<double> &thetas);
 
   public:
     std::shared_ptr<ClassificationModelBase<T>> clone() const override;
@@ -24,7 +24,7 @@ template <typename T = double> class LogisticRegression : public BinaryClassific
     size_t iterations    = 1000;
 };
 
-template <typename T> Mat<T> LogisticRegression<T>::train_binary(const Mat<T> &x, const Mat<std::string> &y)
+template <typename T> Mat<double> LogisticRegression<T>::train_binary(const Mat<T> &x, const Mat<std::string> &y)
 {
     using namespace std;
 
@@ -40,9 +40,9 @@ template <typename T> Mat<T> LogisticRegression<T>::train_binary(const Mat<T> &x
         mumerical_y.iloc(i, 0) = (labels.iloc(0, 0) == y.iloc(i, 0) ? 1 : 0);
 
     Mat<T> ones(x.size(Axis::row), 1);
-    ones     = 1;
-    Mat<T> w = x.concat(ones, Axis::col);
-    Mat<T> theta(1, x.size(Axis::col) + 1);
+    ones          = 1;
+    Mat<T>      w = x.concat(ones, Axis::col);
+    Mat<double> theta(1, x.size(Axis::col) + 1);
 
     // start training
     for (size_t I = 0; I < iterations; ++I)
@@ -62,7 +62,7 @@ template <typename T> Mat<T> LogisticRegression<T>::train_binary(const Mat<T> &x
         while (randomNums.size() < batch_size)
             randomNums.insert(dis(gen));
 
-        Mat<T> first_derivative(theta.size(Axis::row),theta.size(Axis::col));
+        Mat<T> first_derivative(theta.size(Axis::row), theta.size(Axis::col));
         T      second_derivative;
         for (const auto &e : randomNums)
         {
@@ -72,16 +72,15 @@ template <typename T> Mat<T> LogisticRegression<T>::train_binary(const Mat<T> &x
             T      p1                   = exp_to_w_i_dot_theta / (1 + exp_to_w_i_dot_theta);
 
             first_derivative -= (w_i * (mumerical_y.iloc(e, 0) - p1));
-            second_derivative += (w_i.dot(w_i.transpose()) * p1 * (1 - p1)).iloc(0,0);
+            second_derivative += (w_i.dot(w_i.transpose()) * p1 * (1 - p1)).iloc(0, 0);
         }
 
-        theta -= learning_rate*first_derivative ;
-        display_rainbow(theta);
+        theta -= learning_rate * first_derivative;
     }
 
     return theta;
 }
-template <typename T> Mat<std::string> LogisticRegression<T>::predict_binary(const Mat<T> &x, const Mat<T> &theta) const
+template <typename T> Mat<std::string> LogisticRegression<T>::predict_binary(const Mat<T> &x, const Mat<double> &theta) const
 {
     using namespace std;
 
@@ -91,7 +90,7 @@ template <typename T> Mat<std::string> LogisticRegression<T>::predict_binary(con
         ret.iloc(i, 0) = probabilities.iloc(i, 0) > 0.5 ? "T" : "F";
     return ret;
 }
-template <typename T> Mat<T> LogisticRegression<T>::predict_probabilities(const Mat<T> &x, const Mat<T> &theta)
+template <typename T> Mat<double> LogisticRegression<T>::predict_probabilities(const Mat<T> &x, const Mat<double> &theta)
 {
     using namespace std;
 
@@ -104,7 +103,7 @@ template <typename T> Mat<T> LogisticRegression<T>::predict_probabilities(const 
     Mat<T> w           = x.concat(ones, Axis::col);
     T      w_dot_theta = w.dot(theta.transpose()).iloc(0, 0);
     for (size_t i = 0; i < x.size(Axis::row); ++i)
-        y.iloc(i, 0) = 1/(1+exp(-w_dot_theta));
+        y.iloc(i, 0) = 1 / (1 + exp(-w_dot_theta));
 
     return y;
 }
