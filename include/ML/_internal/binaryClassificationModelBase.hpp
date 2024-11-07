@@ -286,7 +286,7 @@ template <typename T> void BinaryClassificationModelBase<T>::train_ecoc()
 {
     using namespace std;
 
-    vector<Mat<T>> thetas;
+    vector<Mat<double>> thetas;
     const Mat<int> ecoc = managed_ecoc.read();
     for (size_t c = 0; c < ecoc.size(Axis::col); ++c)
     {
@@ -322,7 +322,6 @@ template <typename T> std::string BinaryClassificationModelBase<T>::predict_ecoc
     for (size_t r = 1; r < managed_ecoc.read().size(Axis::row); ++r)
     {
         size_t distance = BinaryClassificationModelBase<int>::hammingDistance(ecoc.iloc(r, Axis::row), pred_ecoc);
-        std::cout << "> " << r << " " << distance << std::endl;
         if (distance < minHammingDistance)
         {
             minHammingDistance = distance;

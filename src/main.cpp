@@ -15,7 +15,7 @@
 using namespace std;
 using namespace TL;
 
-#define TEST_LogisticRegression
+#define TEST_DicisionTree
 int main()
 {
     cout << "__main__" << endl;
@@ -136,7 +136,7 @@ int main()
     model.train(x_train, y_train);
 
     ClassificationEvaluation evalution;
-    auto                     y_pred = model.predict(y_test);
+    auto                     y_pred = model.predict(x_test);
     display_rainbow(y_test.concat(y_pred, Axis::col));
     evalution.fit(y_pred, y_test);
     evalution.report();

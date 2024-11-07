@@ -20,8 +20,8 @@ class LogisticRegression : public BinaryClassificationModelBase<double>
   public:
     // model parameters
     double learning_rate = 0.00025;
-    size_t batch_size    = 177;
-    size_t iterations    = 1000;
+    size_t batch_size    = 10;
+    size_t iterations    = 300;
 };
 } // namespace TL
 #endif // LOGISTIC_REGRESSION_HPP

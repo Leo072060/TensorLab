@@ -39,10 +39,7 @@ class DecisionTree : public MultiClassificationModelBase<std::string>
     {
       public:
         std::vector<std::pair<std::string, std::shared_ptr<TreeNode>>> ptr_subTrees;
-        union FeatureOrCategory {
-            std::string feature;
-            std::string category;
-        } feature_or_category;
+        std::string feature_or_category;
         bool isLeaf = false;
     };
 

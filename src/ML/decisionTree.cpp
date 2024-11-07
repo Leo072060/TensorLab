@@ -20,7 +20,7 @@ Mat<std::string> DecisionTree::predict_multi(const Mat<std::string> &x, const Ma
 {
     using namespace std;
 
-    Mat<std::string> y;
+    Mat<std::string> y(x.size(Axis::row), 1);
     for (size_t r = 0; r < x.size(Axis::row); ++r)
     {
         size_t cur = 0;
@@ -35,17 +35,23 @@ Mat<std::string> DecisionTree::predict_multi(const Mat<std::string> &x, const Ma
                 }
                 else
                 {
-                    for (size_t i = cur + 1; i < (-theta.iloc(cur, 0)); ++i)
+                    size_t i = cur + 1;
+                    for (; i < cur - theta.iloc(cur, 0) + 1; ++i)
                     {
-                        if (theta.iloc_name(cur, Axis::row) == x.iloc(r, index_feature))
+                        if (theta.iloc_name(i, Axis::row) == x.iloc(r, index_feature))
                         {
                             cur = i;
+                            break;
                         }
                     }
-                    cerr << "Unknown attribute encountered: Feature "
-                         << x.name2index(theta.iloc_name(cur, Axis::row), Axis::col)
-                         << ", Attribute: " << x.iloc(r, index_feature) << endl;
-                    throw runtime_error("Unknown attribute.");
+                    if (i != cur)
+                    {
+                        cerr << "Unknown attribute encountered: Feature: " << theta.iloc_name(cur, Axis::row)
+                             << ", Attribute: " << x.iloc(r, index_feature) << ", in the line of theta: " << cur
+                             << endl;
+                        throw runtime_error("Unknown attribute.");
+                    }
+                    cur = theta.iloc(cur, 0);
                 }
             }
             else if (0 == theta.iloc(cur, 0)) // is a leaf
@@ -116,14 +122,14 @@ std::shared_ptr<DecisionTree::TreeNode> DecisionTree::generateTrees(const Mat<st
                                                                     const Mat<double>      &weight) const
 {
     using namespace std;
-    shared_ptr<TreeNode> root;
+    shared_ptr<TreeNode> root = make_shared<TreeNode>();
 
     // Here are two cases fot generating leaf node.
     // Case 1: All samples belong to one type.
     if (1 == y.unique().size())
     {
-        root->isLeaf                       = true;
-        root->feature_or_category.category = y.unique().iloc(0, 0);
+        root->isLeaf              = true;
+        root->feature_or_category = y.unique().iloc(0, 0);
         return root;
     }
     // Case 2: The number of available features is 0, or the values of the available features are the same.
@@ -147,56 +153,93 @@ std::shared_ptr<DecisionTree::TreeNode> DecisionTree::generateTrees(const Mat<st
                 category = e.first;
                 count    = e.second;
             }
-        root->isLeaf                       = true;
-        root->feature_or_category.category = y.unique().iloc(0, 0);
-        root->feature_or_category.category = category;
+        root->isLeaf              = true;
+        root->feature_or_category = y.unique().iloc(0, 0);
+        root->feature_or_category = category;
         return root;
     }
 
     // Generate the subtrees.
-    string splitFeature = chooseSplitFeature(x, y, weight);
+    string splitFeature       = chooseSplitFeature(x, y, weight);
+    root->feature_or_category = splitFeature;
 
     Mat<string> x_rm_splitFeature  = x;
     size_t      index_splitFeature = x.name2index(splitFeature, Axis::col);
     x_rm_splitFeature.drop(index_splitFeature, Axis::col);
 
-    double         totalWeight = 0;  // sum weight of x which the 'splitFeature' is not missing
-    vector<size_t> index_missingVal; // collect index of missing value
-    for (size_t r = 0; r < x.size(Axis::row); ++r)
-    {
-        if (!x.iloc(r, index_splitFeature).empty())
-            ++totalWeight;
-        else
-            index_missingVal.push_back(r);
-    }
-
-    size_t      count_missingVal = 0; // record the number of missing values that have already been assigned.
-    Mat<string> attributes       = x.iloc(index_splitFeature, Axis::col).unique();
     multimap<double, std::pair<std::string, std::shared_ptr<TreeNode>>, std::greater<double>> subTrees;
-    for (size_t i = 0; i < attributes.size(); ++i)
+    Mat<string> attributes = x.iloc(index_splitFeature, Axis::col).unique();
+
+    if (0 == x_rm_splitFeature.size())
     {
-        Mat<string> newX;
-        Mat<string> newY;
-        Mat<double> newWeight;
         double      weight_attribute = 0;
+        Mat<string> newY;
+        for (size_t i = 0; i < attributes.size(); ++i)
+        {
+            for (size_t r = 0; r < x.size(Axis::row); ++r)
+            {
+                if (x.iloc(r, index_splitFeature) == attributes.iloc(0, i))
+                {
+                    newY = newY.concat(y.iloc(r, Axis::row), Axis::row);
+                    weight_attribute += weight.iloc(r, 0);
+                }
+            }
+
+            // Find the category with the highest count.
+            unordered_map<string, size_t> statistic = newY.count();
+            string                        maxCategory;
+            size_t                        maxCount = 0;
+            for (const auto &e : statistic)
+                if (e.second > maxCount)
+                {
+                    maxCount    = e.second;
+                    maxCategory = e.first;
+                }
+
+            shared_ptr<TreeNode> subTree = make_shared<TreeNode>();
+            subTree->isLeaf              = true;
+            subTree->feature_or_category = maxCategory;
+            subTrees.insert({weight_attribute, {attributes.iloc(0, i), subTree}});
+        }
+    }
+    else
+    {
+        double         totalWeight = 0;  // sum weight of x which the 'splitFeature' is not missing
+        vector<size_t> index_missingVal; // collect index of missing value
         for (size_t r = 0; r < x.size(Axis::row); ++r)
         {
-            if (x.iloc(r, index_splitFeature) == attributes.iloc(0, i))
-            {
-                newX.concat(x_rm_splitFeature.iloc(r, Axis::row), Axis::row);
-                newY.concat(y.iloc(r, Axis::row), Axis::row);
-                newWeight.concat(weight.iloc(r, Axis::row), Axis::row);
-                weight_attribute += weight.iloc(r, 0);
-            }
+            if (!x.iloc(r, index_splitFeature).empty())
+                ++totalWeight;
+            else
+                index_missingVal.push_back(r);
         }
-        for (size_t j = 0; j < weight_attribute / totalWeight && count_missingVal <= index_missingVal.size(); ++j)
+
+        size_t count_missingVal = 0; // record the number of missing values that have already been assigned.
+        for (size_t i = 0; i < attributes.size(); ++i)
         {
-            newX.concat(x_rm_splitFeature.iloc(index_missingVal[count_missingVal], Axis::row), Axis::row);
-            newY.concat(y.iloc(index_missingVal[count_missingVal], Axis::row), Axis::row);
-            newWeight.concat(weight.iloc(index_missingVal[count_missingVal], Axis::row), Axis::row);
-            ++count_missingVal;
+            Mat<string> newX;
+            Mat<string> newY;
+            Mat<double> newWeight;
+            double      weight_attribute = 0;
+            for (size_t r = 0; r < x.size(Axis::row); ++r)
+            {
+                if (x.iloc(r, index_splitFeature) == attributes.iloc(0, i))
+                {
+                    newX      = newX.concat(x_rm_splitFeature.iloc(r, Axis::row), Axis::row);
+                    newY      = newY.concat(y.iloc(r, Axis::row), Axis::row);
+                    newWeight = newWeight.concat(weight.iloc(r, Axis::row), Axis::row);
+                    weight_attribute += weight.iloc(r, 0);
+                }
+            }
+            for (size_t j = 0; j < weight_attribute / totalWeight && count_missingVal < index_missingVal.size(); ++j)
+            {
+                newX = newX.concat(x_rm_splitFeature.iloc(index_missingVal[count_missingVal], Axis::row), Axis::row);
+                newY = newY.concat(y.iloc(index_missingVal[count_missingVal], Axis::row), Axis::row);
+                newWeight = newWeight.concat(weight.iloc(index_missingVal[count_missingVal], Axis::row), Axis::row);
+                ++count_missingVal;
+            }
+            subTrees.insert({weight_attribute, {attributes.iloc(0, i), generateTrees(newX, newY, newWeight)}});
         }
-        subTrees.insert({weight_attribute, {attributes.iloc(0, i), generateTrees(newX, newY, newWeight)}});
     }
     for (const auto e : subTrees)
     {
@@ -232,13 +275,13 @@ Mat<double> DecisionTree::tree2theta(std::shared_ptr<const TreeNode> tree) const
         if (cur_tree->isLeaf)
         {
             jumpTable.emplace_back(0);
-            rowNames.emplace_back(cur_tree->feature_or_category.category);
+            rowNames.emplace_back(cur_tree->feature_or_category);
             return;
         }
         else
         {
             jumpTable.emplace_back(-cur_tree->ptr_subTrees.size());
-            rowNames.emplace_back(cur_tree->feature_or_category.feature);
+            rowNames.emplace_back(cur_tree->feature_or_category);
             size_t jumpNum = jumpTable.size();
             for (const auto e : cur_tree->ptr_subTrees)
             {
@@ -255,11 +298,11 @@ Mat<double> DecisionTree::tree2theta(std::shared_ptr<const TreeNode> tree) const
             }
         }
     };
-
-    Mat<size_t> ret(jumpTable.size(), 1);
+    traversal();
+    Mat<double> ret(jumpTable.size(), 1);
     for (size_t r = 0; r < jumpTable.size(); ++r)
     {
-        ret.iloc(r, 0);
+        ret.iloc(r, 0)              = jumpTable[r];
         ret.iloc_name(r, Axis::row) = rowNames[r];
     }
 

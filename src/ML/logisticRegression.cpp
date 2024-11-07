@@ -43,7 +43,7 @@ Mat<double> LogisticRegression::train_binary(const Mat<double> &x, const Mat<std
             randomNums.insert(dis(gen));
 
         Mat<double> first_derivative(theta.size(Axis::row), theta.size(Axis::col));
-        double      second_derivative;
+        double      second_derivative = 0;
         for (const auto &e : randomNums)
         {
             Mat<double> w_i                  = w.iloc(e, Axis::row);

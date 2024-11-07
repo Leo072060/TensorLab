@@ -121,7 +121,6 @@ template <class T = double> class Mat : public ManagedClass
     Mat<T> concat(const Mat<T> &other, const Axis axis) const;
     Mat<T> transpose() const;
     void   swap(const size_t a, const size_t b, const Axis axis);
-    void   drop(const size_t begin, const size_t end, const Axis axis);
     void   drop(const size_t i, const Axis axis);
 
     // algorithm operation
@@ -275,6 +274,12 @@ Mat<T>::Mat(const size_t row, const size_t col)
     : Mat()
 {
     using namespace std;
+    if (row == 0 && col == 0) return;
+    if (row == 0 || col == 0)
+    {
+        cerr << "Error: Matrix dimensions cannot have one zero. Rows: " << row << ", Columns: " << col << endl;
+        throw runtime_error("Matrix dimensions cannot have one zero while the other is non-zero.");
+    }
 
     data     = new T *[row];
     rowNames = new string[row];
@@ -854,6 +859,12 @@ template <typename T> Mat<T> Mat<T>::iloc(const size_t i, const Axis axis) const
 {
     using namespace std;
 
+    if (0 == size())
+    {
+        cerr << "Error: Matrix size is zero." << endl;
+        throw runtime_error("Matrix size cannot be zero.");
+    }
+
     switch (axis)
     {
     case Axis::row: {
@@ -866,7 +877,7 @@ template <typename T> Mat<T> Mat<T>::iloc(const size_t i, const Axis axis) const
         for (size_t c = 0; c < colSize; ++c)
         {
             ret.data[0][c]  = data[i][c];
-            ret.colNames[c] = rowNames[c];
+            ret.colNames[c] = colNames[c];
         }
         ret.rowNames[0] = rowNames[i];
         return ret;
@@ -1142,7 +1153,7 @@ template <typename T> Mat<T> Mat<T>::concat(const Mat<T> &other, const Axis axis
     switch (axis)
     {
     case Axis::row: {
-        if (rowSize && other.rowSize && colSize != other.colSize)
+        if (rowSize && colSize != other.colSize)
         {
             cerr << "Error: Column sizes must match for row concatenation." << endl;
             throw invalid_argument("Column sizes do not match for row concatenation.");
@@ -1171,7 +1182,7 @@ template <typename T> Mat<T> Mat<T>::concat(const Mat<T> &other, const Axis axis
         return ret;
     }
     case Axis::col: {
-        if (colSize && other.colSize && rowSize != other.rowSize)
+        if (colSize && rowSize != other.rowSize)
         {
             cerr << "Error: Row sizes must match for column concatenation." << endl;
             throw invalid_argument("Row sizes do not match for column concatenation.");
@@ -1291,6 +1302,7 @@ template <typename T> void Mat<T>::drop(const size_t i, const Axis axis)
         data     = newData;
         rowNames = newRowNames;
         rowSize -= 1;
+        if (0 == rowSize) colSize = 0;
 
         this->refresh();
         break;
@@ -1326,7 +1338,8 @@ template <typename T> void Mat<T>::drop(const size_t i, const Axis axis)
         data     = newData;
         colNames = newColNames;
         colSize -= 1;
-
+        if (0 == colSize) rowSize = 0;
+        
         this->refresh();
         break;
     }
