@@ -129,6 +129,30 @@ ML/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/build
 .PHONY : ML/fast
 
+src/ML/classificationEvaluation.o: src/ML/classificationEvaluation.cpp.o
+.PHONY : src/ML/classificationEvaluation.o
+
+# target to build an object file
+src/ML/classificationEvaluation.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/classificationEvaluation.cpp.o
+.PHONY : src/ML/classificationEvaluation.cpp.o
+
+src/ML/classificationEvaluation.i: src/ML/classificationEvaluation.cpp.i
+.PHONY : src/ML/classificationEvaluation.i
+
+# target to preprocess a source file
+src/ML/classificationEvaluation.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/classificationEvaluation.cpp.i
+.PHONY : src/ML/classificationEvaluation.cpp.i
+
+src/ML/classificationEvaluation.s: src/ML/classificationEvaluation.cpp.s
+.PHONY : src/ML/classificationEvaluation.s
+
+# target to generate assembly for a file
+src/ML/classificationEvaluation.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/classificationEvaluation.cpp.s
+.PHONY : src/ML/classificationEvaluation.cpp.s
+
 src/ML/decisionTree.o: src/ML/decisionTree.cpp.o
 .PHONY : src/ML/decisionTree.o
 
@@ -282,6 +306,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... ML"
+	@echo "... src/ML/classificationEvaluation.o"
+	@echo "... src/ML/classificationEvaluation.i"
+	@echo "... src/ML/classificationEvaluation.s"
 	@echo "... src/ML/decisionTree.o"
 	@echo "... src/ML/decisionTree.i"
 	@echo "... src/ML/decisionTree.s"
