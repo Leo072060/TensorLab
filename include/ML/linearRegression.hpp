@@ -91,7 +91,7 @@ template <typename T> Mat<T> LinearRegression<T>::predict_(const Mat<T> &x, cons
 template <typename T> std::shared_ptr<RegressionModelBase<T>> LinearRegression<T>::clone() const
 {
     using namespace std;
-
+    
     return make_shared<LinearRegression<T>>(*this);
 }
 } // namespace TL

@@ -206,9 +206,7 @@ CMakeFiles/ML.dir/src/main.cpp.o: /home/twh/TensorLab/src/main.cpp \
  /usr/include/c++/11/bits/stl_numeric.h /usr/include/c++/11/bit \
  /usr/include/c++/11/pstl/glue_numeric_defs.h \
  /usr/include/c++/11/pstl/execution_defs.h \
- /home/twh/TensorLab/include/ML/evalution.hpp \
- /home/twh/TensorLab/include/ML/classificationEvaluation.hpp \
- /home/twh/TensorLab/include/_internal/managed.hpp \
+ /home/twh/TensorLab/include/ML/decisionTree.hpp \
  /usr/include/c++/11/memory /usr/include/c++/11/bits/stl_tempbuf.h \
  /usr/include/c++/11/bits/stl_raw_storage_iter.h \
  /usr/include/c++/11/bits/align.h \
@@ -217,6 +215,15 @@ CMakeFiles/ML.dir/src/main.cpp.o: /home/twh/TensorLab/src/main.cpp \
  /usr/include/c++/11/bits/atomic_lockfree_defines.h \
  /usr/include/c++/11/backward/auto_ptr.h \
  /usr/include/c++/11/pstl/glue_memory_defs.h \
+ /usr/include/c++/11/unordered_set /usr/include/c++/11/bits/hashtable.h \
+ /usr/include/c++/11/bits/hashtable_policy.h \
+ /usr/include/c++/11/bits/enable_special_members.h \
+ /usr/include/c++/11/bits/node_handle.h \
+ /usr/include/c++/11/bits/unordered_set.h \
+ /usr/include/c++/11/bits/erase_if.h \
+ /home/twh/TensorLab/include/ML/_internal/multiClassificationModelBase.hpp \
+ /home/twh/TensorLab/include/ML/_internal/classificationModelBase.hpp \
+ /home/twh/TensorLab/include/_internal/managed.hpp \
  /home/twh/TensorLab/include/_internal/uncopyable.hpp \
  /home/twh/TensorLab/include/_internal/utility.hpp \
  /home/twh/TensorLab/include/mat/mat.hpp /usr/include/c++/11/algorithm \
@@ -225,23 +232,20 @@ CMakeFiles/ML.dir/src/main.cpp.o: /home/twh/TensorLab/src/main.cpp \
  /usr/include/c++/11/bits/stl_heap.h \
  /usr/include/c++/11/pstl/glue_algorithm_defs.h \
  /usr/include/c++/11/functional /usr/include/c++/11/bits/std_function.h \
- /usr/include/c++/11/unordered_map /usr/include/c++/11/bits/hashtable.h \
- /usr/include/c++/11/bits/hashtable_policy.h \
- /usr/include/c++/11/bits/enable_special_members.h \
- /usr/include/c++/11/bits/node_handle.h \
- /usr/include/c++/11/bits/unordered_map.h \
- /usr/include/c++/11/bits/erase_if.h /usr/include/c++/11/map \
+ /usr/include/c++/11/unordered_map \
+ /usr/include/c++/11/bits/unordered_map.h /usr/include/c++/11/map \
  /usr/include/c++/11/bits/stl_tree.h /usr/include/c++/11/bits/stl_map.h \
  /usr/include/c++/11/bits/stl_multimap.h /usr/include/c++/11/set \
  /usr/include/c++/11/bits/stl_set.h \
  /usr/include/c++/11/bits/stl_multiset.h \
+ /home/twh/TensorLab/include/ML/evalution.hpp \
+ /home/twh/TensorLab/include/ML/classificationEvaluation.hpp \
  /home/twh/TensorLab/include/ML/regressionEvaluation.hpp \
  /home/twh/TensorLab/include/ML/linearModel.hpp \
  /home/twh/TensorLab/include/ML/linearRegression.hpp \
  /home/twh/TensorLab/include/ML/_internal/regressionModelBase.hpp \
  /home/twh/TensorLab/include/ML/logisticRegression.hpp \
  /home/twh/TensorLab/include/ML/_internal/binaryClassificationModelBase.hpp \
- /home/twh/TensorLab/include/ML/_internal/classificationModelBase.hpp \
  /home/twh/TensorLab/include/preprocessor/split.hpp \
  /home/twh/TensorLab/include/utility/loader.hpp \
  /usr/include/c++/11/fstream \

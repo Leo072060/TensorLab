@@ -154,7 +154,7 @@ std::shared_ptr<DecisionTree::TreeNode> DecisionTree::generateTrees(const Mat<st
     }
 
     // Generate the subtrees.
-    string splitFeature = chooseSplitFeature(x, y,weight);
+    string splitFeature = chooseSplitFeature(x, y, weight);
 
     Mat<string> x_rm_splitFeature  = x;
     size_t      index_splitFeature = x.name2index(splitFeature, Axis::col);
@@ -264,4 +264,11 @@ Mat<double> DecisionTree::tree2theta(std::shared_ptr<const TreeNode> tree) const
     }
 
     return ret;
+}
+
+std::shared_ptr<ClassificationModelBase<std::string>> DecisionTree::clone() const
+{
+    using namespace std;
+
+    return make_shared<DecisionTree>(*this);
 }

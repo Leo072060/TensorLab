@@ -30,6 +30,11 @@ class DecisionTree : public MultiClassificationModelBase<std::string>
                                             const Mat<double> &weight) const;
     Mat<double>               tree2theta(std::shared_ptr<const TreeNode> tree) const;
 
+    // for polymorphism
+  public:
+    std::shared_ptr<ClassificationModelBase<std::string>> clone() const override;
+
+  private:
     class TreeNode
     {
       public:
@@ -38,11 +43,11 @@ class DecisionTree : public MultiClassificationModelBase<std::string>
             std::string feature;
             std::string category;
         } feature_or_category;
-        bool isLeaf;
+        bool isLeaf = false;
     };
 
   public:
-    SplitCriterion split_criterion;
+    SplitCriterion split_criterion = SplitCriterion::gain;
 };
 } // namespace TL
 
