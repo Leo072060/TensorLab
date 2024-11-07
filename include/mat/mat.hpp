@@ -109,9 +109,10 @@ template <class T = double> class Mat : public ManagedClass
     Mat<T>             iloc(const size_t i, const Axis axis) const;
     const T           &loc(const std::string &rowName, const std::string &colName) const;
     T                 &loc(const std::string &rowName, const std::string &colName);
+    Mat<T>             loc(const std::string &name, const Axis axis) const;
     const std::string &iloc_name(const size_t i, const Axis axis) const;
     std::string       &iloc_name(const size_t i, const Axis axis);
-    Mat<T>             loc(const std::string &name, const Axis axis) const;
+
     Mat<T> extract(const size_t row_begin, const size_t row_end, const size_t col_begin, const size_t col_end) const;
     Mat<T> extract(const size_t begin, const size_t end, const Axis axis) const;
     Mat<T> extract(std::vector<size_t> index, Axis axis) const;
@@ -863,7 +864,11 @@ template <typename T> Mat<T> Mat<T>::iloc(const size_t i, const Axis axis) const
         }
         Mat<T> ret(1, colSize);
         for (size_t c = 0; c < colSize; ++c)
-            ret.data[0][c] = data[i][c];
+        {
+            ret.data[0][c]  = data[i][c];
+            ret.colNames[c] = rowNames[c];
+        }
+        ret.rowNames[0] = rowNames[i];
         return ret;
     }
     case Axis::col: {
@@ -874,7 +879,11 @@ template <typename T> Mat<T> Mat<T>::iloc(const size_t i, const Axis axis) const
         }
         Mat<T> ret(rowSize, 1);
         for (size_t r = 0; r < rowSize; ++r)
-            ret.data[r][0] = data[r][i];
+        {
+            ret.data[r][0]  = data[r][i];
+            ret.rowNames[r] = rowNames[r];
+        }
+        ret.colNames[0] = colNames[i];
         return ret;
     }
     default:
@@ -926,7 +935,11 @@ template <typename T> Mat<T> Mat<T>::loc(const std::string &name, const Axis axi
         }
         Mat<T> ret(1, colSize);
         for (size_t c = 0; c < colSize; ++c)
-            ret.data[0][c] = data[r][c];
+        {
+            ret.data[0][c]  = data[r][c];
+            ret.colNames[c] = colNames[c];
+        }
+        ret.rowNames[0] = rowNames[r];
         return ret;
     }
     case Axis::col: {
@@ -940,7 +953,11 @@ template <typename T> Mat<T> Mat<T>::loc(const std::string &name, const Axis axi
         }
         Mat<T> ret(rowSize, 1);
         for (size_t r = 0; r < rowSize; ++r)
-            ret.data[r][0] = data[r][c];
+        {
+            ret.data[r][0]  = data[r][c];
+            ret.rowNames[r] = rowNames[r];
+        }
+        ret.colNames[0] = colNames[c];
         return ret;
     }
     default:
@@ -999,8 +1016,13 @@ Mat<T> Mat<T>::extract(const size_t row_begin, const size_t row_end, const size_
 
     Mat<T> ret(row_end - row_begin, col_end - col_begin);
     for (size_t r = row_begin; r < row_end; ++r)
+    {
+        ret.rowNames[r - row_begin] = rowNames[r];
         for (size_t c = col_begin; c < col_end; ++c)
             ret.data[r - row_begin][c - col_begin] = data[r][c];
+    }
+    for (size_t c = col_begin; c < col_end; ++c)
+        ret.colNames[c - col_begin] = colNames[c];
 
     return ret;
 }
@@ -1025,9 +1047,13 @@ template <typename T> Mat<T> Mat<T>::extract(const size_t begin, const size_t en
 
         Mat<T> ret(end - begin, colSize);
         for (size_t r = begin; r < end; ++r)
+        {
+            ret.rowNames[r - begin] = rowNames[r];
             for (size_t c = 0; c < colSize; ++c)
                 ret.data[r - begin][c] = data[r][c];
-
+        }
+        for (size_t c = 0; c < colSize; ++c)
+            ret.colNames[c] = colNames[c];
         return ret;
     }
     case Axis::col: {
@@ -1038,10 +1064,16 @@ template <typename T> Mat<T> Mat<T>::extract(const size_t begin, const size_t en
         }
 
         Mat<T> ret(rowSize, end - begin);
-        for (size_t r = 0; r < rowSize; ++r)
-            for (size_t c = begin; c < end; ++c)
-
+        for (size_t c = begin; c < end; ++c)
+        {
+            ret.colNames[c - begin] = colNames[c];
+            for (size_t r = 0; r < rowSize; ++r)
+            {
                 ret.data[r][c - begin] = data[r][c];
+            }
+        }
+        for (size_t r = 0; r < rowSize; ++r)
+            ret.rowNames[r] = rowNames[r];
 
         return ret;
     }
@@ -1066,8 +1098,13 @@ template <typename T> Mat<T> Mat<T>::extract(std::vector<size_t> index, Axis axi
 
         Mat<T> ret(index.size(), colSize);
         for (size_t r = 0; r < index.size(); ++r)
+        {
+            ret.rowNames[r] = rowNames[index[r]];
             for (size_t c = 0; c < colSize; ++c)
                 ret.data[r][c] = data[index[r]][c];
+        }
+        for (size_t c = 0; c < colSize; ++c)
+            ret.colNames[c] = colNames[c];
 
         return ret;
     }
@@ -1080,9 +1117,14 @@ template <typename T> Mat<T> Mat<T>::extract(std::vector<size_t> index, Axis axi
             }
 
         Mat<T> ret(rowSize, index.size());
-        for (size_t r = 0; r < rowSize; ++r)
-            for (size_t c = 0; c < index.size(); ++c)
+        for (size_t c = 0; c < index.size(); ++c)
+        {
+            ret.colNames[c] = colNames[index[c]];
+            for (size_t r = 0; r < rowSize; ++r)
                 ret.data[r][c] = data[r][index[c]];
+        }
+        for (size_t r = 0; r < rowSize; ++r)
+            ret.rowNames[r] = rowNames[r];
 
         return ret;
     }
@@ -1119,8 +1161,12 @@ template <typename T> Mat<T> Mat<T>::concat(const Mat<T> &other, const Axis axis
             for (size_t c = 0; c < other.colSize; ++c)
                 ret.data[r + rowSize][c] = other.data[r][c];
         }
-        for (size_t c = 0; c < other.colSize; ++c)
-            ret.colNames[c] = other.colNames[c];
+        if (0 == size())
+            for (size_t c = 0; c < other.colSize; ++c)
+                ret.colNames[c] = other.colNames[c];
+        else
+            for (size_t c = 0; c < colSize; ++c)
+                ret.colNames[c] = colNames[c];
 
         return ret;
     }
@@ -1144,8 +1190,12 @@ template <typename T> Mat<T> Mat<T>::concat(const Mat<T> &other, const Axis axis
             for (size_t r = 0; r < other.rowSize; ++r)
                 ret.data[r][c + colSize] = other.data[r][c];
         }
-        for (size_t r = 0; r < rowSize; ++r)
-            ret.rowNames[r] = rowNames[r];
+        if (0 == size())
+            for (size_t r = 0; r < other.rowSize; ++r)
+                ret.rowNames[r] = other.rowNames[r];
+        else
+            for (size_t r = 0; r < rowSize; ++r)
+                ret.rowNames[r] = rowNames[r];
 
         return ret;
     }

@@ -153,6 +153,78 @@ src/ML/decisionTree.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/decisionTree.cpp.s
 .PHONY : src/ML/decisionTree.cpp.s
 
+src/ML/linearRegression.o: src/ML/linearRegression.cpp.o
+.PHONY : src/ML/linearRegression.o
+
+# target to build an object file
+src/ML/linearRegression.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/linearRegression.cpp.o
+.PHONY : src/ML/linearRegression.cpp.o
+
+src/ML/linearRegression.i: src/ML/linearRegression.cpp.i
+.PHONY : src/ML/linearRegression.i
+
+# target to preprocess a source file
+src/ML/linearRegression.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/linearRegression.cpp.i
+.PHONY : src/ML/linearRegression.cpp.i
+
+src/ML/linearRegression.s: src/ML/linearRegression.cpp.s
+.PHONY : src/ML/linearRegression.s
+
+# target to generate assembly for a file
+src/ML/linearRegression.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/linearRegression.cpp.s
+.PHONY : src/ML/linearRegression.cpp.s
+
+src/ML/logisticRegression.o: src/ML/logisticRegression.cpp.o
+.PHONY : src/ML/logisticRegression.o
+
+# target to build an object file
+src/ML/logisticRegression.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/logisticRegression.cpp.o
+.PHONY : src/ML/logisticRegression.cpp.o
+
+src/ML/logisticRegression.i: src/ML/logisticRegression.cpp.i
+.PHONY : src/ML/logisticRegression.i
+
+# target to preprocess a source file
+src/ML/logisticRegression.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/logisticRegression.cpp.i
+.PHONY : src/ML/logisticRegression.cpp.i
+
+src/ML/logisticRegression.s: src/ML/logisticRegression.cpp.s
+.PHONY : src/ML/logisticRegression.s
+
+# target to generate assembly for a file
+src/ML/logisticRegression.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/logisticRegression.cpp.s
+.PHONY : src/ML/logisticRegression.cpp.s
+
+src/ML/regressionEvalution.o: src/ML/regressionEvalution.cpp.o
+.PHONY : src/ML/regressionEvalution.o
+
+# target to build an object file
+src/ML/regressionEvalution.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/regressionEvalution.cpp.o
+.PHONY : src/ML/regressionEvalution.cpp.o
+
+src/ML/regressionEvalution.i: src/ML/regressionEvalution.cpp.i
+.PHONY : src/ML/regressionEvalution.i
+
+# target to preprocess a source file
+src/ML/regressionEvalution.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/regressionEvalution.cpp.i
+.PHONY : src/ML/regressionEvalution.cpp.i
+
+src/ML/regressionEvalution.s: src/ML/regressionEvalution.cpp.s
+.PHONY : src/ML/regressionEvalution.s
+
+# target to generate assembly for a file
+src/ML/regressionEvalution.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/regressionEvalution.cpp.s
+.PHONY : src/ML/regressionEvalution.cpp.s
+
 src/_internal/managed.o: src/_internal/managed.cpp.o
 .PHONY : src/_internal/managed.o
 
@@ -213,6 +285,15 @@ help:
 	@echo "... src/ML/decisionTree.o"
 	@echo "... src/ML/decisionTree.i"
 	@echo "... src/ML/decisionTree.s"
+	@echo "... src/ML/linearRegression.o"
+	@echo "... src/ML/linearRegression.i"
+	@echo "... src/ML/linearRegression.s"
+	@echo "... src/ML/logisticRegression.o"
+	@echo "... src/ML/logisticRegression.i"
+	@echo "... src/ML/logisticRegression.s"
+	@echo "... src/ML/regressionEvalution.o"
+	@echo "... src/ML/regressionEvalution.i"
+	@echo "... src/ML/regressionEvalution.s"
 	@echo "... src/_internal/managed.o"
 	@echo "... src/_internal/managed.i"
 	@echo "... src/_internal/managed.s"

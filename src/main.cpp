@@ -15,7 +15,7 @@
 using namespace std;
 using namespace TL;
 
-#define TEST_DicisionTree
+#define TEST_LogisticRegression
 int main()
 {
     cout << "__main__" << endl;
@@ -77,12 +77,12 @@ int main()
     auto y_test  = x_y["y_test"];
 
     model.train(x_train, y_train);
-    display(model.get_thetas());
+    display(model.get_theta());
     LinearRegression model_copy;
     model_copy  = model;
     auto y_pred = model_copy.predict(x_test);
 
-    RegressionEvaluation<double> evalution;
+    RegressionEvaluation  evalution;
     evalution.fit(y_pred, y_test);
     display_rainbow(y_pred.concat(y_test, Axis::col));
     evalution.report();
