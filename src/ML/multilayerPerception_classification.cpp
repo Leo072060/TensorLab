@@ -1,14 +1,16 @@
 #include <random>
 
-#include "ML/multilayerPerceptron_regression.hpp"
+#include "ML/multilayerPerceptron_classification.hpp"
+#include "preprocessor/encode.hpp"
 
 using namespace TL;
 
-Mat<double> MultilayerPerception_regression::train_(const Mat<double> &x, const Mat<double> &y)
+Mat<double> MultilayerPerception_classification::train_multi(const Mat<double> &x, const Mat<std::string> &y)
 {
     using namespace std;
 
-    vector<vector<shared_ptr<neuron>>> neurons = buildNetwork(x, y);
+    Mat<double>                        y_encode = onehot_encode(y);
+    vector<vector<shared_ptr<neuron>>> neurons  = buildNetwork(x, y_encode);
 
     // start training
     if (x.size(Axis::row) < batch_size)
@@ -46,7 +48,7 @@ Mat<double> MultilayerPerception_regression::train_(const Mat<double> &x, const 
             for (size_t i = 0; i < neurons[theLast].size(); ++i)
             {
                 double y_i_pred        = neurons[theLast][i]->outputSignal;
-                neurons[theLast][i]->g = (y_i_pred - y.iloc(sample, i)) * y_i_pred * (1 - y_i_pred);
+                neurons[theLast][i]->g = (y_i_pred - y_encode.iloc(sample, i)) * y_i_pred * (1 - y_i_pred);
             }
             for (size_t i = 0; i < neurons.size() - 1; ++i)
             {
@@ -66,11 +68,13 @@ Mat<double> MultilayerPerception_regression::train_(const Mat<double> &x, const 
 
     return neuralNetwork2theta(neurons);
 }
-Mat<double> MultilayerPerception_regression::predict_(const Mat<double> &x, const Mat<double> &theta) const
+Mat<std::string> MultilayerPerception_classification::predict_multi(const Mat<double> &x,
+                                                                    const Mat<double> &theta) const
 {
     using namespace std;
 
-    Mat<double> y(x.size(Axis::row), theta.iloc(0, theta.size(Axis::col) - 1));
+    Mat<double> y_encode(x.size(Axis::row), theta.iloc(0, theta.size(Axis::col) - 1));
+    Mat<string> y(x.size(Axis::row), 1);
 
     if (theta.iloc(0, 0) != x.size(Axis::col))
     {
@@ -79,6 +83,9 @@ Mat<double> MultilayerPerception_regression::predict_(const Mat<double> &x, cons
     }
 
     vector<vector<shared_ptr<neuron>>> neurons_pred = theta2neuralNetwork(theta);
+    vector<string>                     types;
+    for (size_t i = 0; i < theta.iloc(0, theta.size(Axis::col) - 1); ++i)
+        types.emplace_back(theta.iloc_name(i, Axis::row));
 
     for (size_t r = 0; r < x.size(Axis::row); ++r)
     {
@@ -97,14 +104,29 @@ Mat<double> MultilayerPerception_regression::predict_(const Mat<double> &x, cons
         for (size_t i = 0; i < neurons_pred[theLast].size(); ++i)
         {
             neurons_pred[i][theLast]->activate();
-            y.iloc(r, i) = neurons_pred[i][theLast]->outputSignal;
+            y_encode.iloc(r, i) = neurons_pred[i][theLast]->outputSignal;
         }
     }
 
+    for (size_t r = 0; r < y_encode.size(Axis::row); ++r)
+    {
+        double highestPossible = 0;
+        size_t index           = 0;
+        for (size_t c = 0; c < y_encode.size(Axis::col); ++c)
+        {
+            if (y_encode.iloc(r, c) > highestPossible)
+            {
+                highestPossible = y_encode.iloc(r, c);
+                index           = c;
+            }
+        }
+        y.iloc(r, 0) = types[index];
+    }
+    
     return y;
 }
-std::vector<std::vector<std::shared_ptr<MultilayerPerception_regression::neuron>>> MultilayerPerception_regression::
-    buildNetwork(const Mat<double> &x, const Mat<double> &y)
+std::vector<std::vector<std::shared_ptr<MultilayerPerception_classification::neuron>>>
+MultilayerPerception_classification::buildNetwork(const Mat<double> &x, const Mat<double> &y)
 {
     using namespace std;
 
@@ -158,7 +180,7 @@ std::vector<std::vector<std::shared_ptr<MultilayerPerception_regression::neuron>
 
     return neurons;
 }
-Mat<double> MultilayerPerception_regression::neuralNetwork2theta(
+Mat<double> MultilayerPerception_classification::neuralNetwork2theta(
     const std::vector<std::vector<std::shared_ptr<neuron>>> neurons)
 {
     size_t maxSize = 0;
@@ -184,8 +206,8 @@ Mat<double> MultilayerPerception_regression::neuralNetwork2theta(
 
     return theta;
 }
-std::vector<std::vector<std::shared_ptr<MultilayerPerception_regression::neuron>>> MultilayerPerception_regression::
-    theta2neuralNetwork(const Mat<double> &theta)
+std::vector<std::vector<std::shared_ptr<MultilayerPerception_classification::neuron>>>
+MultilayerPerception_classification::theta2neuralNetwork(const Mat<double> &theta)
 {
     using namespace std;
 
@@ -206,24 +228,24 @@ std::vector<std::vector<std::shared_ptr<MultilayerPerception_regression::neuron>
 }
 
 // for polymorphism
-std::shared_ptr<RegressionModelBase<double>> MultilayerPerception_regression ::clone() const
+std::shared_ptr<ClassificationModelBase<double>> MultilayerPerception_classification ::clone() const
 {
     using namespace std;
 
-    return make_shared<MultilayerPerception_regression>(*this);
+    return make_shared<MultilayerPerception_classification>(*this);
 }
 
 // neuron
-void MultilayerPerception_regression::neuron::activate()
+void MultilayerPerception_classification::neuron::activate()
 {
     outputSignal = 1 / (1 + exp(threshold - inputSignal));
 }
-void MultilayerPerception_regression::neuron::sentSignal()
+void MultilayerPerception_classification::neuron::sentSignal()
 {
     for (auto &e : synapse)
         e.second->inputSignal += e.first * outputSignal;
 }
-void MultilayerPerception_regression::neuron::calAdjustVal(const double learning_rate)
+void MultilayerPerception_classification::neuron::calAdjustVal(const double learning_rate)
 {
     weights_adjusted.clear();
     g = 0;
@@ -235,14 +257,14 @@ void MultilayerPerception_regression::neuron::calAdjustVal(const double learning
     g *= (threshold * (1 - threshold));
     threshold_adjusted = -learning_rate * g;
 }
-void MultilayerPerception_regression::neuron::adjust()
+void MultilayerPerception_classification::neuron::adjust()
 {
     for (size_t i = 0; i < synapse.size(); ++i)
         synapse[i].first = weights_adjusted[i];
 
     threshold = threshold_adjusted;
 }
-void MultilayerPerception_regression::neuron::clearSignals()
+void MultilayerPerception_classification::neuron::clearSignals()
 {
     inputSignal  = 0;
     outputSignal = 0;

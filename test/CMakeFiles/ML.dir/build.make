@@ -139,10 +139,24 @@ CMakeFiles/ML.dir/src/ML/logisticRegression.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ML.dir/src/ML/logisticRegression.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/twh/TensorLab/src/ML/logisticRegression.cpp -o CMakeFiles/ML.dir/src/ML/logisticRegression.cpp.s
 
+CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.o: CMakeFiles/ML.dir/flags.make
+CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.o: ../src/ML/multilayerPerception_classification.cpp
+CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.o: CMakeFiles/ML.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.o -MF CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.o.d -o CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.o -c /home/twh/TensorLab/src/ML/multilayerPerception_classification.cpp
+
+CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/twh/TensorLab/src/ML/multilayerPerception_classification.cpp > CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.i
+
+CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/twh/TensorLab/src/ML/multilayerPerception_classification.cpp -o CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.s
+
 CMakeFiles/ML.dir/src/ML/multilayerPerception_regression.cpp.o: CMakeFiles/ML.dir/flags.make
 CMakeFiles/ML.dir/src/ML/multilayerPerception_regression.cpp.o: ../src/ML/multilayerPerception_regression.cpp
 CMakeFiles/ML.dir/src/ML/multilayerPerception_regression.cpp.o: CMakeFiles/ML.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/ML.dir/src/ML/multilayerPerception_regression.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/ML.dir/src/ML/multilayerPerception_regression.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ML.dir/src/ML/multilayerPerception_regression.cpp.o -MF CMakeFiles/ML.dir/src/ML/multilayerPerception_regression.cpp.o.d -o CMakeFiles/ML.dir/src/ML/multilayerPerception_regression.cpp.o -c /home/twh/TensorLab/src/ML/multilayerPerception_regression.cpp
 
 CMakeFiles/ML.dir/src/ML/multilayerPerception_regression.cpp.i: cmake_force
@@ -156,7 +170,7 @@ CMakeFiles/ML.dir/src/ML/multilayerPerception_regression.cpp.s: cmake_force
 CMakeFiles/ML.dir/src/_internal/managed.cpp.o: CMakeFiles/ML.dir/flags.make
 CMakeFiles/ML.dir/src/_internal/managed.cpp.o: ../src/_internal/managed.cpp
 CMakeFiles/ML.dir/src/_internal/managed.cpp.o: CMakeFiles/ML.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/ML.dir/src/_internal/managed.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/ML.dir/src/_internal/managed.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ML.dir/src/_internal/managed.cpp.o -MF CMakeFiles/ML.dir/src/_internal/managed.cpp.o.d -o CMakeFiles/ML.dir/src/_internal/managed.cpp.o -c /home/twh/TensorLab/src/_internal/managed.cpp
 
 CMakeFiles/ML.dir/src/_internal/managed.cpp.i: cmake_force
@@ -170,7 +184,7 @@ CMakeFiles/ML.dir/src/_internal/managed.cpp.s: cmake_force
 CMakeFiles/ML.dir/src/main.cpp.o: CMakeFiles/ML.dir/flags.make
 CMakeFiles/ML.dir/src/main.cpp.o: ../src/main.cpp
 CMakeFiles/ML.dir/src/main.cpp.o: CMakeFiles/ML.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/ML.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/ML.dir/src/main.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ML.dir/src/main.cpp.o -MF CMakeFiles/ML.dir/src/main.cpp.o.d -o CMakeFiles/ML.dir/src/main.cpp.o -c /home/twh/TensorLab/src/main.cpp
 
 CMakeFiles/ML.dir/src/main.cpp.i: cmake_force
@@ -181,6 +195,20 @@ CMakeFiles/ML.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ML.dir/src/main.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/twh/TensorLab/src/main.cpp -o CMakeFiles/ML.dir/src/main.cpp.s
 
+CMakeFiles/ML.dir/src/preprocessor/encode.cpp.o: CMakeFiles/ML.dir/flags.make
+CMakeFiles/ML.dir/src/preprocessor/encode.cpp.o: ../src/preprocessor/encode.cpp
+CMakeFiles/ML.dir/src/preprocessor/encode.cpp.o: CMakeFiles/ML.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/ML.dir/src/preprocessor/encode.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ML.dir/src/preprocessor/encode.cpp.o -MF CMakeFiles/ML.dir/src/preprocessor/encode.cpp.o.d -o CMakeFiles/ML.dir/src/preprocessor/encode.cpp.o -c /home/twh/TensorLab/src/preprocessor/encode.cpp
+
+CMakeFiles/ML.dir/src/preprocessor/encode.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ML.dir/src/preprocessor/encode.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/twh/TensorLab/src/preprocessor/encode.cpp > CMakeFiles/ML.dir/src/preprocessor/encode.cpp.i
+
+CMakeFiles/ML.dir/src/preprocessor/encode.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ML.dir/src/preprocessor/encode.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/twh/TensorLab/src/preprocessor/encode.cpp -o CMakeFiles/ML.dir/src/preprocessor/encode.cpp.s
+
 # Object files for target ML
 ML_OBJECTS = \
 "CMakeFiles/ML.dir/src/ML/decisionTree.cpp.o" \
@@ -188,9 +216,11 @@ ML_OBJECTS = \
 "CMakeFiles/ML.dir/src/ML/evaluation_regression.cpp.o" \
 "CMakeFiles/ML.dir/src/ML/linearRegression.cpp.o" \
 "CMakeFiles/ML.dir/src/ML/logisticRegression.cpp.o" \
+"CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.o" \
 "CMakeFiles/ML.dir/src/ML/multilayerPerception_regression.cpp.o" \
 "CMakeFiles/ML.dir/src/_internal/managed.cpp.o" \
-"CMakeFiles/ML.dir/src/main.cpp.o"
+"CMakeFiles/ML.dir/src/main.cpp.o" \
+"CMakeFiles/ML.dir/src/preprocessor/encode.cpp.o"
 
 # External object files for target ML
 ML_EXTERNAL_OBJECTS =
@@ -200,12 +230,14 @@ ML: CMakeFiles/ML.dir/src/ML/evaluation_classification.cpp.o
 ML: CMakeFiles/ML.dir/src/ML/evaluation_regression.cpp.o
 ML: CMakeFiles/ML.dir/src/ML/linearRegression.cpp.o
 ML: CMakeFiles/ML.dir/src/ML/logisticRegression.cpp.o
+ML: CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.o
 ML: CMakeFiles/ML.dir/src/ML/multilayerPerception_regression.cpp.o
 ML: CMakeFiles/ML.dir/src/_internal/managed.cpp.o
 ML: CMakeFiles/ML.dir/src/main.cpp.o
+ML: CMakeFiles/ML.dir/src/preprocessor/encode.cpp.o
 ML: CMakeFiles/ML.dir/build.make
 ML: CMakeFiles/ML.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable ML"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/twh/TensorLab/test/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX executable ML"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/ML.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

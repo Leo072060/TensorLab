@@ -249,6 +249,30 @@ src/ML/logisticRegression.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/logisticRegression.cpp.s
 .PHONY : src/ML/logisticRegression.cpp.s
 
+src/ML/multilayerPerception_classification.o: src/ML/multilayerPerception_classification.cpp.o
+.PHONY : src/ML/multilayerPerception_classification.o
+
+# target to build an object file
+src/ML/multilayerPerception_classification.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.o
+.PHONY : src/ML/multilayerPerception_classification.cpp.o
+
+src/ML/multilayerPerception_classification.i: src/ML/multilayerPerception_classification.cpp.i
+.PHONY : src/ML/multilayerPerception_classification.i
+
+# target to preprocess a source file
+src/ML/multilayerPerception_classification.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.i
+.PHONY : src/ML/multilayerPerception_classification.cpp.i
+
+src/ML/multilayerPerception_classification.s: src/ML/multilayerPerception_classification.cpp.s
+.PHONY : src/ML/multilayerPerception_classification.s
+
+# target to generate assembly for a file
+src/ML/multilayerPerception_classification.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/ML/multilayerPerception_classification.cpp.s
+.PHONY : src/ML/multilayerPerception_classification.cpp.s
+
 src/ML/multilayerPerception_regression.o: src/ML/multilayerPerception_regression.cpp.o
 .PHONY : src/ML/multilayerPerception_regression.o
 
@@ -321,6 +345,30 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/preprocessor/encode.o: src/preprocessor/encode.cpp.o
+.PHONY : src/preprocessor/encode.o
+
+# target to build an object file
+src/preprocessor/encode.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/preprocessor/encode.cpp.o
+.PHONY : src/preprocessor/encode.cpp.o
+
+src/preprocessor/encode.i: src/preprocessor/encode.cpp.i
+.PHONY : src/preprocessor/encode.i
+
+# target to preprocess a source file
+src/preprocessor/encode.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/preprocessor/encode.cpp.i
+.PHONY : src/preprocessor/encode.cpp.i
+
+src/preprocessor/encode.s: src/preprocessor/encode.cpp.s
+.PHONY : src/preprocessor/encode.s
+
+# target to generate assembly for a file
+src/preprocessor/encode.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ML.dir/build.make CMakeFiles/ML.dir/src/preprocessor/encode.cpp.s
+.PHONY : src/preprocessor/encode.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -345,6 +393,9 @@ help:
 	@echo "... src/ML/logisticRegression.o"
 	@echo "... src/ML/logisticRegression.i"
 	@echo "... src/ML/logisticRegression.s"
+	@echo "... src/ML/multilayerPerception_classification.o"
+	@echo "... src/ML/multilayerPerception_classification.i"
+	@echo "... src/ML/multilayerPerception_classification.s"
 	@echo "... src/ML/multilayerPerception_regression.o"
 	@echo "... src/ML/multilayerPerception_regression.i"
 	@echo "... src/ML/multilayerPerception_regression.s"
@@ -354,6 +405,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/preprocessor/encode.o"
+	@echo "... src/preprocessor/encode.i"
+	@echo "... src/preprocessor/encode.s"
 .PHONY : help
 
 

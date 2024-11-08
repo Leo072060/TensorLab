@@ -1,5 +1,5 @@
-#ifndef MULTILAYER_PERCEPTRON
-#define MULTILAYER_PERCEPTRON
+#ifndef MULTILAYER_PERCEPTRON_REGRESSION
+#define MULTILAYER_PERCEPTRON_REGRESSION
 
 #include "ML/_internal/regressionModelBase.hpp"
 
@@ -46,8 +46,8 @@ class MultilayerPerception_regression : public RegressionModelBase<double>
     };
 
     std::vector<std::vector<std::shared_ptr<neuron>>> buildNetwork(const Mat<double> &x, const Mat<double> &y);
-    static Mat<double> neuralNetwork2theta(const std::vector<std::vector<std::shared_ptr<neuron>>> &neurons);
+    static Mat<double> neuralNetwork2theta(const std::vector<std::vector<std::shared_ptr<neuron>>> neurons);
     static std::vector<std::vector<std::shared_ptr<neuron>>> theta2neuralNetwork(const Mat<double> &theta);
 };
 } // namespace TL
-#endif // MULTILAYER_PERCEPTRON
+#endif // MULTILAYER_PERCEPTRON_REGRESSION
