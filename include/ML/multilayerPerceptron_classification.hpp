@@ -46,7 +46,8 @@ class MultilayerPerception_classification : public MultiClassificationModelBase<
     };
 
     std::vector<std::vector<std::shared_ptr<neuron>>> buildNetwork(const Mat<double> &x, const Mat<double> &y);
-    static Mat<double> neuralNetwork2theta(const std::vector<std::vector<std::shared_ptr<neuron>>> neurons);
+    static Mat<double> neuralNetwork2theta(const std::vector<std::vector<std::shared_ptr<neuron>>> neurons,
+                                           const Mat<std::string>                                 &y_unique);
     static std::vector<std::vector<std::shared_ptr<neuron>>> theta2neuralNetwork(const Mat<double> &theta);
 };
 } // namespace TL
