@@ -263,7 +263,7 @@ Mat<double> DecisionTree::tree2theta(std::shared_ptr<const TreeNode> tree) const
     8   |category2      |   0   |                                           |_attribute2_category3
     9   |category3      |   0   |                                           |
     10  |category4      |   0   |                                           |_attribute3_category4
-    ____|_______________|_______|
+    ____|_______________|_______|  
     */
     using namespace std;
 

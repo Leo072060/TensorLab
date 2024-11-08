@@ -6,8 +6,9 @@
 #include <vector>
 
 #include "ML/decisionTree.hpp"
-#include "ML/evalution.hpp"
+#include "ML/evaluation.hpp"
 #include "ML/linearModel.hpp"
+#include "ML/multilayerPerceptron.hpp"
 #include "mat/mat.hpp"
 #include "preprocessor/split.hpp"
 #include "utility/loader.hpp"
@@ -15,7 +16,8 @@
 using namespace std;
 using namespace TL;
 
-#define TEST_DicisionTree
+#define TEST_MultilayerPerception_regression
+
 int main()
 {
     cout << "__main__" << endl;
@@ -82,7 +84,7 @@ int main()
     model_copy  = model;
     auto y_pred = model_copy.predict(x_test);
 
-    RegressionEvaluation  evalution;
+    Evaluation_regression evalution;
     evalution.fit(y_pred, y_test);
     display_rainbow(y_pred.concat(y_test, Axis::col));
     evalution.report();
@@ -108,8 +110,8 @@ int main()
     LogisticRegression model;
     model.binary2multi = BinaryToMulti::OneVsOne;
     model.train(x_train, y_train);
-    ClassificationEvaluation evalution;
-    auto                     y_pred = model.predict(x_test);
+    Evaluation_classification evalution;
+    auto                      y_pred = model.predict(x_test);
     display_rainbow(y_test.concat(y_pred, Axis::col));
     evalution.fit(y_pred, y_test);
     evalution.report();
@@ -135,11 +137,40 @@ int main()
     DecisionTree model;
     model.train(x_train, y_train);
 
-    ClassificationEvaluation evalution;
-    auto                     y_pred = model.predict(x_test);
+    Evaluation_classification evalution;
+    auto                      y_pred = model.predict(x_test);
     display_rainbow(y_test.concat(y_pred, Axis::col));
     evalution.fit(y_pred, y_test);
     evalution.report();
- 
+#endif
+
+#ifdef TEST_MultilayerPerception_regression
+    csv_Loader loader;
+
+    string dataFileName = "regression_data.csv";
+    loader.nameFlag     = col_name;
+    Mat data            = loader.load_matrix(dataFileName);
+    display_rainbow(data, col_name, 5);
+
+    MultilayerPerception_regression model;
+
+    auto x = data.extract(0, 5, Axis::col);
+    auto y = data.loc("target", Axis::col);
+
+    auto x_y = train_test_split(x, y, 0.2);
+
+    auto x_train = x_y["x_train"];
+    auto y_train = x_y["y_train"];
+    auto x_test  = x_y["x_test"];
+    auto y_test  = x_y["y_test"];
+
+    model.train(x_train, y_train);
+    display(model.get_theta());
+    auto y_pred = model.predict(x_test);
+
+    Evaluation_regression evalution;
+    evalution.fit(y_pred, y_test);
+    display_rainbow(y_pred.concat(y_test, Axis::col));
+    evalution.report();
 #endif
 }

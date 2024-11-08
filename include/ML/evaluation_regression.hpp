@@ -8,14 +8,14 @@ namespace TL
 {
 using namespace _internal;
 
-class RegressionEvaluation : public ManagedClass
+class Evaluation_regression : public ManagedClass
 {
   public:
-    RegressionEvaluation();
-    RegressionEvaluation(const RegressionEvaluation &other);
-    RegressionEvaluation(RegressionEvaluation &&other) noexcept;
-    RegressionEvaluation  &operator=(const RegressionEvaluation &rhs);
-    RegressionEvaluation  &operator=(RegressionEvaluation &&rhs) noexcept;
+    Evaluation_regression();
+    Evaluation_regression(const Evaluation_regression &other);
+    Evaluation_regression(Evaluation_regression &&other) noexcept;
+    Evaluation_regression  &operator=(const Evaluation_regression &rhs);
+    Evaluation_regression  &operator=(Evaluation_regression &&rhs) noexcept;
 
   public:
     void fit(const Mat<double> &y_pred, const Mat<double> &y_target);

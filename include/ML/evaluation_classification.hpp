@@ -1,5 +1,5 @@
-#ifndef CLASSIFICATION_EVALUATION_HPP
-#define CLASSIFICATION_EVALUATION_HPP
+#ifndef EVALUATION_CLASSIFICATION_HPP
+#define EVALUATION_CLASSIFICATION_HPP
 
 #include "_internal/managed.hpp"
 #include "mat/mat.hpp"
@@ -8,14 +8,14 @@ namespace TL
 {
 using namespace _internal;
 
-class ClassificationEvaluation : public ManagedClass
+class Evaluation_classification : public ManagedClass
 {
   public:
-    ClassificationEvaluation();
-    ClassificationEvaluation(const ClassificationEvaluation &other);
-    ClassificationEvaluation(const ClassificationEvaluation &&other);
-    ClassificationEvaluation &operator=(const ClassificationEvaluation &rhs);
-    ClassificationEvaluation &operator=(ClassificationEvaluation &&rhs) noexcept;
+    Evaluation_classification();
+    Evaluation_classification(const Evaluation_classification &other);
+    Evaluation_classification(const Evaluation_classification &&other);
+    Evaluation_classification &operator=(const Evaluation_classification &rhs);
+    Evaluation_classification &operator=(Evaluation_classification &&rhs) noexcept;
 
   public:
     void        fit(const Mat<std::string> &y_pred, const Mat<std::string> &y_target);
@@ -37,4 +37,4 @@ class ClassificationEvaluation : public ManagedClass
 };
 } // namespace TL
 
-#endif // CLASSIFICATION_EVALUATION_HPP
+#endif // EVALUATION_CLASSIFICATION_HPP

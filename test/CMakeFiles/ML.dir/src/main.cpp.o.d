@@ -238,14 +238,17 @@ CMakeFiles/ML.dir/src/main.cpp.o: /home/twh/TensorLab/src/main.cpp \
  /usr/include/c++/11/bits/stl_multimap.h /usr/include/c++/11/set \
  /usr/include/c++/11/bits/stl_set.h \
  /usr/include/c++/11/bits/stl_multiset.h \
- /home/twh/TensorLab/include/ML/evalution.hpp \
- /home/twh/TensorLab/include/ML/classificationEvaluation.hpp \
- /home/twh/TensorLab/include/ML/regressionEvaluation.hpp \
+ /home/twh/TensorLab/include/ML/evaluation.hpp \
+ /home/twh/TensorLab/include/ML/evaluation_classification.hpp \
+ /home/twh/TensorLab/include/ML/evaluation_regression.hpp \
  /home/twh/TensorLab/include/ML/linearModel.hpp \
  /home/twh/TensorLab/include/ML/linearRegression.hpp \
  /home/twh/TensorLab/include/ML/_internal/regressionModelBase.hpp \
  /home/twh/TensorLab/include/ML/logisticRegression.hpp \
  /home/twh/TensorLab/include/ML/_internal/binaryClassificationModelBase.hpp \
+ /home/twh/TensorLab/include/ML/multilayerPerceptron.hpp \
+ /home/twh/TensorLab/include/ML/multilayerPerceptron_classification.hpp \
+ /home/twh/TensorLab/include/ML/multilayerPerceptron_regression.hpp \
  /home/twh/TensorLab/include/preprocessor/split.hpp \
  /home/twh/TensorLab/include/utility/loader.hpp \
  /usr/include/c++/11/fstream \

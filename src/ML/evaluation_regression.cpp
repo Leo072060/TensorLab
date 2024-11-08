@@ -1,8 +1,8 @@
-#include "ML/regressionEvaluation.hpp"
+#include "ML/evaluation_regression.hpp"
 
 using namespace TL;
 
-RegressionEvaluation ::RegressionEvaluation()
+Evaluation_regression ::Evaluation_regression()
     : ManagedClass()
     , managed_y_target(this->administrator)
     , managed_y_pred(this->administrator)
@@ -15,7 +15,7 @@ RegressionEvaluation ::RegressionEvaluation()
     , managed_R2(this->administrator)
 {
 }
-RegressionEvaluation::RegressionEvaluation(const RegressionEvaluation &other)
+Evaluation_regression::Evaluation_regression(const Evaluation_regression &other)
     : ManagedClass(other)
     , managed_y_target(this->administrator, other.administrator, other.managed_y_target)
     , managed_y_pred(this->administrator, other.administrator, other.managed_y_pred)
@@ -29,7 +29,7 @@ RegressionEvaluation::RegressionEvaluation(const RegressionEvaluation &other)
     , managed_R2(this->administrator, other.administrator, other.managed_R2)
 {
 }
-RegressionEvaluation ::RegressionEvaluation(RegressionEvaluation &&other) noexcept
+Evaluation_regression ::Evaluation_regression(Evaluation_regression &&other) noexcept
     : ManagedClass(std::move(other))
     , managed_y_target(this->administrator, other.administrator, other.managed_y_target)
     , managed_y_pred(this->administrator, other.administrator, other.managed_y_pred)
@@ -43,7 +43,7 @@ RegressionEvaluation ::RegressionEvaluation(RegressionEvaluation &&other) noexce
     , managed_R2(this->administrator, other.administrator, other.managed_R2)
 {
 }
-RegressionEvaluation &RegressionEvaluation ::operator=(const RegressionEvaluation &rhs)
+Evaluation_regression &Evaluation_regression ::operator=(const Evaluation_regression &rhs)
 {
     ManagedClass::operator=(rhs);
     managed_y_target.copy(this->administrator, rhs.administrator, rhs.managed_y_target);
@@ -58,7 +58,7 @@ RegressionEvaluation &RegressionEvaluation ::operator=(const RegressionEvaluatio
     managed_R2.copy(this->administrator, rhs.administrator, rhs.managed_R2);
     return *this;
 }
-RegressionEvaluation &RegressionEvaluation ::operator=(RegressionEvaluation &&rhs) noexcept
+Evaluation_regression &Evaluation_regression ::operator=(Evaluation_regression &&rhs) noexcept
 {
     using namespace std;
     ManagedClass::operator=(move(rhs));
@@ -74,7 +74,7 @@ RegressionEvaluation &RegressionEvaluation ::operator=(RegressionEvaluation &&rh
     managed_R2.copy(this->administrator, rhs.administrator, rhs.managed_R2);
     return *this;
 }
-void RegressionEvaluation ::fit(const Mat<double> &y_pred, const Mat<double> &y_target)
+void Evaluation_regression ::fit(const Mat<double> &y_pred, const Mat<double> &y_target)
 {
     using namespace std;
 
@@ -104,7 +104,7 @@ void RegressionEvaluation ::fit(const Mat<double> &y_pred, const Mat<double> &y_
         tmp.iloc(i, 0) = y_target.iloc(i, 0) - managed_y_target.read().mean(Axis::all).iloc(0, 0);
     this->record(managed_y_target_minus_mean_y_target, tmp);
 }
-void RegressionEvaluation ::report() const
+void Evaluation_regression ::report() const
 {
     using namespace std;
 
@@ -126,7 +126,7 @@ void RegressionEvaluation ::report() const
     cout << "r2 score                      "
          << "\t" << r2_score() << endl;
 }
-double RegressionEvaluation ::mean_absolute_error() const
+double Evaluation_regression ::mean_absolute_error() const
 {
     using namespace std;
 
@@ -143,7 +143,7 @@ double RegressionEvaluation ::mean_absolute_error() const
     this->record(managed_MAE, ret);
     return ret;
 }
-double RegressionEvaluation ::mean_squared_error() const
+double Evaluation_regression ::mean_squared_error() const
 {
     using namespace std;
 
@@ -160,7 +160,7 @@ double RegressionEvaluation ::mean_squared_error() const
     this->record(managed_MSE, ret);
     return ret;
 }
-double RegressionEvaluation ::root_mean_squared_error() const
+double Evaluation_regression ::root_mean_squared_error() const
 {
     using namespace std;
 
@@ -177,7 +177,7 @@ double RegressionEvaluation ::root_mean_squared_error() const
     this->record(managed_RMSE, ret);
     return ret;
 }
-double RegressionEvaluation ::mean_absolute_percentage_error() const
+double Evaluation_regression ::mean_absolute_percentage_error() const
 {
     using namespace std;
 
@@ -194,7 +194,7 @@ double RegressionEvaluation ::mean_absolute_percentage_error() const
     this->record(managed_MAPE, ret);
     return ret;
 }
-double RegressionEvaluation ::r2_score() const
+double Evaluation_regression ::r2_score() const
 {
     using namespace std;
 

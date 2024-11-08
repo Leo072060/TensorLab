@@ -1,8 +1,8 @@
-#include"ML/classificationEvaluation.hpp"
+#include"ML/evaluation_classification.hpp"
 
 using namespace TL;
 
-ClassificationEvaluation::ClassificationEvaluation()
+Evaluation_classification::Evaluation_classification()
     : ManagedClass()
     , managed_y_target(this->administrator)
     , managed_y_pred(this->administrator)
@@ -13,7 +13,7 @@ ClassificationEvaluation::ClassificationEvaluation()
     , managed_recall(this->administrator)
 {
 }
-ClassificationEvaluation::ClassificationEvaluation(const ClassificationEvaluation &other)
+Evaluation_classification::Evaluation_classification(const Evaluation_classification &other)
     : ManagedClass(other)
     , managed_y_target(this->administrator, other.administrator, other.managed_y_target)
     , managed_y_pred(this->administrator, other.administrator, other.managed_y_pred)
@@ -24,7 +24,7 @@ ClassificationEvaluation::ClassificationEvaluation(const ClassificationEvaluatio
     , managed_recall(this->administrator, other.administrator, other.managed_recall)
 {
 }
-ClassificationEvaluation::ClassificationEvaluation(const ClassificationEvaluation &&other)
+Evaluation_classification::Evaluation_classification(const Evaluation_classification &&other)
     : ManagedClass(other)
     , managed_y_target(this->administrator, other.administrator, other.managed_y_target)
     , managed_y_pred(this->administrator, other.administrator, other.managed_y_pred)
@@ -35,7 +35,7 @@ ClassificationEvaluation::ClassificationEvaluation(const ClassificationEvaluatio
     , managed_recall(this->administrator, other.administrator, other.managed_recall)
 {
 }
-ClassificationEvaluation &ClassificationEvaluation::operator=(const ClassificationEvaluation &rhs)
+Evaluation_classification &Evaluation_classification::operator=(const Evaluation_classification &rhs)
 {
     ManagedClass::operator=(rhs);
     managed_y_target.copy(this->administrator, rhs.administrator, rhs.managed_y_target);
@@ -47,7 +47,7 @@ ClassificationEvaluation &ClassificationEvaluation::operator=(const Classificati
     managed_recall.copy(this->administrator, rhs.administrator, rhs.managed_recall);
     return *this;
 }
-ClassificationEvaluation &ClassificationEvaluation::operator=(ClassificationEvaluation &&rhs) noexcept
+Evaluation_classification &Evaluation_classification::operator=(Evaluation_classification &&rhs) noexcept
 {
     ManagedClass::operator=(rhs);
     managed_y_target.copy(this->administrator, rhs.administrator, rhs.managed_y_target);
@@ -59,7 +59,7 @@ ClassificationEvaluation &ClassificationEvaluation::operator=(ClassificationEval
     managed_recall.copy(this->administrator, rhs.administrator, rhs.managed_recall);
     return *this;
 }
-void ClassificationEvaluation::fit(const Mat<std::string> &y_pred, const Mat<std::string> &y_target)
+void Evaluation_classification::fit(const Mat<std::string> &y_pred, const Mat<std::string> &y_target)
 {
     using namespace std;
 
@@ -82,7 +82,7 @@ void ClassificationEvaluation::fit(const Mat<std::string> &y_pred, const Mat<std
 
     confusionMatrix();
 }
-void ClassificationEvaluation::report() const
+void Evaluation_classification::report() const
 {
     using namespace std;
 
@@ -104,7 +104,7 @@ void ClassificationEvaluation::report() const
     cout << "recall : " << endl;
     display(recall(), both_names);
 }
-Mat<size_t> ClassificationEvaluation::confusionMatrix() const
+Mat<size_t> Evaluation_classification::confusionMatrix() const
 {
     using namespace std;
 
@@ -140,7 +140,7 @@ Mat<size_t> ClassificationEvaluation::confusionMatrix() const
     this->record(managed_confusionMatrix, ret);
     return ret;
 }
-double ClassificationEvaluation::accuracy() const
+double Evaluation_classification::accuracy() const
 {
     using namespace std;
 
@@ -162,7 +162,7 @@ double ClassificationEvaluation::accuracy() const
     this->record(managed_accuracy, ret);
     return ret;
 }
-double ClassificationEvaluation::error_rate() const
+double Evaluation_classification::error_rate() const
 {
     using namespace std;
 
@@ -179,7 +179,7 @@ double ClassificationEvaluation::error_rate() const
     this->record(managed_errorRate, ret);
     return ret;
 }
-Mat<double> ClassificationEvaluation::percision() const
+Mat<double> Evaluation_classification::percision() const
 {
     using namespace std;
 
@@ -203,7 +203,7 @@ Mat<double> ClassificationEvaluation::percision() const
     this->record(managed_percision, ret);
     return ret;
 }
-Mat<double> ClassificationEvaluation::recall() const
+Mat<double> Evaluation_classification::recall() const
 {
     using namespace std;
 
