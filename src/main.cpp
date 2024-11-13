@@ -16,7 +16,7 @@
 using namespace std;
 using namespace TL;
 
-#define TEST_MultilayerPerception_classification
+#define TEST_MultilayerPerception_regression
 
 int main()
 {

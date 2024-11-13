@@ -8,15 +8,16 @@ Mat<double> MultilayerPerception_regression::train_(const Mat<double> &x, const 
 {
     using namespace std;
 
-    vector<vector<shared_ptr<neuron>>> neurons = buildNetwork(x, y);
-
-    // start training
     if (x.size(Axis::row) < batch_size)
     {
         cerr << "Error: Batch size (" << batch_size << ") is larger than the available rows (" << x.size(Axis::row)
              << ")." << endl;
         throw out_of_range("Batch size is larger than the available rows.");
     }
+
+    vector<vector<shared_ptr<neuron>>> neurons = buildNeuralNetwork(x, y);
+
+    // start training
     for (size_t I = 0; I < iterations; ++I)
     {
         // randomly select samples to train
@@ -31,8 +32,7 @@ Mat<double> MultilayerPerception_regression::train_(const Mat<double> &x, const 
         {
             for (size_t i = 0; i < neurons[0].size(); ++i)
             {
-                neurons[0][i]->outputSignal = x.iloc(sample, i);
-                neurons[0][i]->sentSignal();
+                neurons[0][i]->sentSignal(x.iloc(sample, i));
             }
             for (size_t i = 1; i < neurons.size(); ++i)
                 for (size_t j = 0; j < neurons[i].size(); ++j)
@@ -45,26 +45,24 @@ Mat<double> MultilayerPerception_regression::train_(const Mat<double> &x, const 
             size_t theLast = neurons.size() - 1;
             for (size_t i = 0; i < neurons[theLast].size(); ++i)
             {
-                double y_i_pred        = neurons[theLast][i]->outputSignal;
-                neurons[theLast][i]->g = (y_i_pred - y.iloc(sample, i)) * y_i_pred * (1 - y_i_pred);
+                double y_i_pred = neurons[theLast][i]->getOutputSignal();
+                double delta_i  = (y_i_pred - y.iloc(sample, i)) * y_i_pred * (1 - y_i_pred);
+                neurons[theLast][i]->initOutputLayerDeltaAndAdjustThreshold(delta_i, learning_rate);
             }
-            for (size_t i = 0; i < neurons.size() - 1; ++i)
-            {
-                for (auto &e : neurons[i])
-                    e->calAdjustVal(learning_rate);
-            }
-            for (size_t i = 0; i < neurons.size() - 1; ++i)
+            for (size_t i = neurons.size() - 2; i >= 0; --i)
             {
                 for (auto &e : neurons[i])
                 {
-                    e->adjust();
+                    e->adjust(learning_rate);
                     e->clearSignals();
                 }
             }
         }
     }
 
-    return neuralNetwork2theta(neurons);
+    neuralNetwork = neurons;
+
+    return Mat<double>();
 }
 Mat<double> MultilayerPerception_regression::predict_(const Mat<double> &x, const Mat<double> &theta) const
 {
@@ -72,20 +70,19 @@ Mat<double> MultilayerPerception_regression::predict_(const Mat<double> &x, cons
 
     Mat<double> y(x.size(Axis::row), theta.iloc(0, theta.size(Axis::col) - 1));
 
-    if (theta.iloc(0, 0) != x.size(Axis::col))
-    {
-        cerr << "The dimension of x does not match the model's requirement." << endl;
-        throw runtime_error("Dimension mismatch between x and the model.");
-    }
+    // if (theta.iloc(0, 0) != x.size(Axis::col))
+    // {
+    //     cerr << "The dimension of x does not match the model's requirement." << endl;
+    //     throw runtime_error("Dimension mismatch between x and the model.");
+    // }
 
-    vector<vector<shared_ptr<neuron>>> neurons_pred = theta2neuralNetwork(theta);
+    vector<vector<shared_ptr<neuron>>> neurons_pred = neuralNetwork;
 
     for (size_t r = 0; r < x.size(Axis::row); ++r)
     {
         for (size_t i = 0; i < neurons_pred[0].size(); ++i)
         {
-            neurons_pred[0][i]->outputSignal = x.iloc(r, i);
-            neurons_pred[0][i]->sentSignal();
+            neurons_pred[0][i]->sentSignal(x.iloc(r, i));
         }
         for (size_t i = 1; i < neurons_pred.size() - 1; ++i)
             for (size_t j = 0; j < neurons_pred[i].size(); ++j)
@@ -97,14 +94,14 @@ Mat<double> MultilayerPerception_regression::predict_(const Mat<double> &x, cons
         for (size_t i = 0; i < neurons_pred[theLast].size(); ++i)
         {
             neurons_pred[i][theLast]->activate();
-            y.iloc(r, i) = neurons_pred[i][theLast]->outputSignal;
+            y.iloc(r, i) = neurons_pred[i][theLast]->getOutputSignal();
         }
     }
 
     return y;
 }
 std::vector<std::vector<std::shared_ptr<MultilayerPerception_regression::neuron>>> MultilayerPerception_regression::
-    buildNetwork(const Mat<double> &x, const Mat<double> &y)
+    buildNeuralNetwork(const Mat<double> &x, const Mat<double> &y)
 {
     using namespace std;
 
@@ -115,9 +112,10 @@ std::vector<std::vector<std::shared_ptr<MultilayerPerception_regression::neuron>
         // default architecture
         architecture.emplace_back(x.size(Axis::col));
         architecture.emplace_back(x.size(Axis::col));
+        architecture.emplace_back(x.size(Axis::col));
     }
     architecture.insert(architecture.begin(), x.size(Axis::col));
-    architecture.push_back(y.size(Axis::col));
+    architecture.emplace_back(y.size(Axis::col));
     for (const auto &layer_size : architecture)
     {
         if (layer_size == 0)
@@ -130,77 +128,38 @@ std::vector<std::vector<std::shared_ptr<MultilayerPerception_regression::neuron>
     vector<vector<shared_ptr<neuron>>> neurons;
 
     // create neurons
+    vector<shared_ptr<neuron>> layer_input;
+    for (size_t i = 0; i < architecture[0]; ++i)
+    {
+        layer_input.emplace_back(make_shared<neuron>(activation_hidden, 0.0));
+        neurons.push_back(layer_input);
+    }
     for (const auto e : architecture)
     {
-        vector<shared_ptr<neuron>> layer;
+        vector<shared_ptr<neuron>> layer_hidden;
         for (size_t i = 0; i < e; ++i)
-            layer.emplace_back(make_shared<neuron>());
-        neurons.push_back(layer);
+            layer_hidden.emplace_back(make_shared<neuron>(activation_hidden, 0.0));
+        neurons.push_back(layer_hidden);
+    }
+    vector<shared_ptr<neuron>> layer_output;
+    for (size_t i = 0; i < architecture[architecture.size() - 1]; ++i)
+    {
+        layer_input.emplace_back(make_shared<neuron>(activation_output, 0.0));
+        neurons.push_back(layer_output);
     }
 
-    // init neurons and connect neurons
+    // connect neurons
     random_device rd;
     mt19937       gen(rd());
     for (size_t i = 0; i < neurons.size() - 1; ++i)
     {
         // Use Xavier to init weight for each synapse.
-        double                     range = pow(1 / neurons[i].size(), 0.5);
-        uniform_int_distribution<> dis(-range, range);
+        double                      range = sqrt(2.0 / (neurons[i].size() + neurons[i + 1].size()));
+        uniform_real_distribution<> dis(-range, range);
         for (auto &e : neurons[i])
-        {
-            e->threshold = 0.0;
             for (const auto &e_nextLayer : neurons[i + 1])
-                e->synapse.push_back({dis(gen), e_nextLayer});
-        }
+                e->connect(dis(gen), e_nextLayer);
     }
-    for (auto &e : neurons[neurons.size() - 1])
-        e->threshold = 0.0;
-
-    return neurons;
-}
-Mat<double> MultilayerPerception_regression::neuralNetwork2theta(
-    const std::vector<std::vector<std::shared_ptr<neuron>>> neurons)
-{
-    size_t maxSize = 0;
-    for (size_t i = 0; i < neurons.size() - 1; ++i)
-    {
-        double size = (neurons[i].size() * (neurons[i + 1].size() + 1)) + 1;
-        if (size > maxSize) maxSize = size;
-    }
-    Mat<double> theta(maxSize, neurons.size());
-
-    for (size_t i = 0; i < neurons.size(); ++i)
-    {
-        theta.iloc(0, i) = neurons[i].size();
-        for (size_t j = 0; j < neurons[i].size(); ++j)
-        {
-            theta.iloc(j + 1, i) = neurons[i][j]->threshold;
-            for (size_t k = 0; k < neurons[i][j]->synapse.size(); ++k)
-            {
-                theta.iloc(5 * j + 6 + k, i) = neurons[i][j]->synapse[k].first;
-            }
-        }
-    }
-
-    return theta;
-}
-std::vector<std::vector<std::shared_ptr<MultilayerPerception_regression::neuron>>> MultilayerPerception_regression::
-    theta2neuralNetwork(const Mat<double> &theta)
-{
-    using namespace std;
-
-    vector<vector<shared_ptr<neuron>>> neurons;
-
-    for (size_t c = 0; c < theta.size(Axis::col); ++c)
-    {
-        vector<shared_ptr<neuron>> layer;
-        for (size_t i = 0; i < theta.iloc(0, c); ++i)
-            layer.emplace_back(make_shared<neuron>());
-    }
-    for (size_t i = 0; i < neurons.size() - 1; ++i)
-        for (size_t j = 0; j < neurons[i].size(); ++j)
-            for (size_t k = 0; k < neurons[i + 1].size(); ++k)
-                neurons[i][j]->synapse.push_back({theta.iloc(5 * j + 6 + k, i), neurons[i + 1][k]});
 
     return neurons;
 }
@@ -214,33 +173,89 @@ std::shared_ptr<RegressionModelBase<double>> MultilayerPerception_regression ::c
 }
 
 // neuron
+MultilayerPerception_regression::neuron::neuron(const Activation type, const double initialThreshold)
+    : activationType(type)
+    , threshold(initialThreshold)
+{
+}
+void MultilayerPerception_regression::neuron::connect(const double weight, std::shared_ptr<neuron> other)
+{
+    synapse.push_back({weight, other});
+}
+void MultilayerPerception_regression::neuron::receiveSignal(const double x)
+{
+    inputSignal += x;
+}
+double MultilayerPerception_regression::neuron::getOutputSignal() const
+{
+    return outputSignal;
+}
+void MultilayerPerception_regression::neuron::initOutputLayerDeltaAndAdjustThreshold(const double d,
+                                                                                     const double learning_rate)
+{
+    delta = d;
+    threshold -= learning_rate * delta;
+}
 void MultilayerPerception_regression::neuron::activate()
 {
-    outputSignal = 1 / (1 + exp(threshold - inputSignal));
+    double x     = threshold - inputSignal;
+    outputSignal = activation(x);
 }
-void MultilayerPerception_regression::neuron::sentSignal()
+double MultilayerPerception_regression::neuron::activation(const double x) const
+{
+    using namespace std;
+
+    switch (activationType)
+    {
+    case Activation::equation:
+        return x;
+    case Activation::tanh:
+        return (exp(x) - exp(-x)) / (exp(x) + exp(-x));
+    case Activation::sigmoid:
+        return 1 / (1 + exp(-x));
+    default:
+        cerr << "Error: Unsupported activation function!" << endl;
+        throw std::invalid_argument("Unsupported activation function.");
+    }
+}
+double MultilayerPerception_regression::neuron::activation_derivative(const double x) const
+{
+    using namespace std;
+
+    switch (activationType)
+    {
+    case Activation::equation:
+        return 1;
+    case Activation::tanh:
+        return 1 - activation(x);
+    case Activation::sigmoid:
+        return activation(x) * (1 - activation(x));
+    default:
+        cerr << "Error: Unsupported activation function!" << endl;
+        throw std::invalid_argument("Unsupported activation function.");
+    }
+}
+void MultilayerPerception_regression::neuron::sentSignal() const
 {
     for (auto &e : synapse)
         e.second->inputSignal += e.first * outputSignal;
 }
-void MultilayerPerception_regression::neuron::calAdjustVal(const double learning_rate)
+void MultilayerPerception_regression::neuron::sentSignal(const double signal)
 {
-    weights_adjusted.clear();
-    g = 0;
-    for (const auto &e : synapse)
-    {
-        weights_adjusted.push_back(learning_rate * e.second->g * outputSignal);
-        g += (e.first * e.second->g);
-    }
-    g *= (threshold * (1 - threshold));
-    threshold_adjusted = -learning_rate * g;
+    outputSignal = signal;
+    sentSignal();
 }
-void MultilayerPerception_regression::neuron::adjust()
+void MultilayerPerception_regression::neuron::adjust(const double learning_rate)
 {
+    delta = 0;
     for (size_t i = 0; i < synapse.size(); ++i)
-        synapse[i].first = weights_adjusted[i];
-
-    threshold = threshold_adjusted;
+    {
+        double delta_i = 0;
+        delta_i        = synapse[i].first * synapse[i].second->delta * activation_derivative(inputSignal);
+        delta += delta_i * synapse[i].first;
+        synapse[i].first += learning_rate * synapse[i].second->delta * outputSignal;
+    }
+    threshold -= learning_rate * delta;
 }
 void MultilayerPerception_regression::neuron::clearSignals()
 {

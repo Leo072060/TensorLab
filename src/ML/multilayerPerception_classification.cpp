@@ -66,7 +66,7 @@ Mat<double> MultilayerPerception_classification::train_multi(const Mat<double> &
         }
     }
 
-    return neuralNetwork2theta(neurons);
+    return neuralNetwork2theta(neurons, y.unique());
 }
 Mat<std::string> MultilayerPerception_classification::predict_multi(const Mat<double> &x,
                                                                     const Mat<double> &theta) const
@@ -103,8 +103,8 @@ Mat<std::string> MultilayerPerception_classification::predict_multi(const Mat<do
         size_t theLast = neurons_pred.size() - 1;
         for (size_t i = 0; i < neurons_pred[theLast].size(); ++i)
         {
-            neurons_pred[i][theLast]->activate();
-            y_encode.iloc(r, i) = neurons_pred[i][theLast]->outputSignal;
+            neurons_pred[theLast][i]->activate();
+            y_encode.iloc(r, i) = neurons_pred[theLast][i]->outputSignal;
         }
     }
 
@@ -220,6 +220,7 @@ MultilayerPerception_classification::theta2neuralNetwork(const Mat<double> &thet
         vector<shared_ptr<neuron>> layer;
         for (size_t i = 0; i < theta.iloc(0, c); ++i)
             layer.emplace_back(make_shared<neuron>());
+        neurons.emplace_back(layer);
     }
     for (size_t i = 0; i < neurons.size() - 1; ++i)
         for (size_t j = 0; j < neurons[i].size(); ++j)

@@ -219,7 +219,8 @@ Mat<double> Evaluation_classification::recall() const
     Mat<double> ret(1, managed_confusionMatrix.read().size(Axis::col));
     for (size_t i = 0; i < ret.size(Axis::col); ++i)
     {
-        ret.iloc(0, i)              = managed_confusionMatrix.read().iloc(i, i) * 1.0 / sum_TP_FP.iloc(0, i);
+        if (sum_TP_FP.iloc(0, i)!=0)
+            ret.iloc(0, i) = managed_confusionMatrix.read().iloc(i, i) * 1.0 / sum_TP_FP.iloc(0, i);
         ret.iloc_name(i, Axis::col) = managed_confusionMatrix.read().iloc_name(i, Axis::col);
     }
     ret.iloc_name(0, Axis::row) = "recall";
