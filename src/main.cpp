@@ -166,7 +166,6 @@ int main()
     auto y_test  = x_y["y_test"];
 
     model.train(x_train, y_train);
-    display(model.get_theta());
     auto y_pred = model.predict(x_test);
 
     Evaluation_regression evalution;

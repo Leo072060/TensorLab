@@ -26,44 +26,59 @@ class MultilayerPerception_regression : public RegressionModelBase<double>
         tanh,
         equation
     };
-    double              learning_rate = 0.0003;
-    double              decay_rate;
-    double              increase_rate;
-    double              decay_rate_grad_explosion;
-    double              early_stopping_threshold;
-    double              threshold_sustain_count;
+    enum LossFunction
+    {
+        MSE
+    };
+
+    double              learning_rate     = 0.3;
     Activation          activation_hidden = Activation::sigmoid;
     Activation          activation_output = Activation::sigmoid;
-    size_t              batch_size = 10 ;
-    size_t              iterations = 777;
+    LossFunction        lossFunction      = LossFunction::MSE;
+    size_t              batch_size        = 10;
+    size_t              iterations        = 777;
+    double              tolerance         = 0.1;
     std::vector<size_t> architecture_hiddenLayer;
 
   private:
+    double calLoss(const std::vector<double> &y_target, const std::vector<double> &y_pred) const;
+    double lossFunction_partialDerivative(const double y_target, const double y_pred) const;
+
     class neuron
     {
       public:
         neuron(const Activation type, const double initialThreshold);
 
-        void   connect(const double weight, std::shared_ptr<neuron> other);
-        void   receiveSignal(const double x);
-        double getOutputSignal() const;
-        void   initOutputLayerDeltaAndAdjustThreshold(const double d,const double learning_rate);
+        void   connect(const double w, std::shared_ptr<neuron> other);
+        double getOutputSignal_outputLayer() const;
+        void   setDelta_outputLayer(const double d,const double batchSize);
         void   activate();
         double activation(const double x) const;
         double activation_derivative(const double x) const;
         void   sentSignal() const;
         void   sentSignal(const double signal);
-        void   adjust(const double learning_rate);
+        void   calDelta(const size_t batchSize);
+        void   adjust(const double learningRate);
+        void   resetDelta();
         void   clearSignals();
 
       private:
         double inputSignal;
         double outputSignal;
+
         double threshold;
 
-        std::vector<std::pair<double, std::shared_ptr<neuron>>> synapse;
+        struct Synapse
+        {
+            std::shared_ptr<neuron> link;
+            double                  weight;
+            double                  weight_delta;
+        };
+        std::vector<Synapse> synapses;
 
         double delta;
+        double threshold_delta;
+
         // neuron parameters
         Activation activationType;
     };
