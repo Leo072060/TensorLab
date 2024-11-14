@@ -99,9 +99,6 @@ Mat<double> MultilayerPerception_regression::predict_(const Mat<double> &x, cons
     //     throw runtime_error("Dimension mismatch between x and the model.");
     // }
 
-    display(x);
-    cin.get();
-
     vector<vector<shared_ptr<neuron>>> neurons_pred = neuralNetwork;
 
     size_t theLast = neurons_pred.size() - 1;
@@ -124,8 +121,8 @@ Mat<double> MultilayerPerception_regression::predict_(const Mat<double> &x, cons
         }
         for (size_t i = 0; i < neurons_pred[theLast].size(); ++i)
         {
-            neurons_pred[i][theLast]->activate();
-            y.iloc(r, i) = neurons_pred[i][theLast]->getOutputSignal_outputLayer();
+            neurons_pred[theLast][i]->activate();
+            y.iloc(r, i) = neurons_pred[theLast][i]->getOutputSignal_outputLayer();
         }
     }
 
