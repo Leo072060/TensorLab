@@ -154,10 +154,11 @@ int main()
 
     MultilayerPerception_regression model;
 
-    auto x = data.extract(0, 5, Axis::col);
+    auto x = data.extract(0, 2, Axis::col);
     auto y = data.loc("target", Axis::col);
 
     auto x_y = train_test_split(x, y, 0.2);
+    
 
     auto x_train = x_y["x_train"];
     auto y_train = x_y["y_train"];

@@ -20,7 +20,7 @@ class MultilayerPerception_classification : public MultiClassificationModelBase<
 
   public:
     // model parameters
-    double              learning_rate = 0.0003;
+    double              learning_rate = 0.3;
     size_t              batch_size    = 100;
     size_t              iterations    = 1700;
     std::vector<size_t> architecture_hiddenLayer;

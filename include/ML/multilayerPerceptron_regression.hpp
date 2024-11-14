@@ -32,9 +32,9 @@ class MultilayerPerception_regression : public RegressionModelBase<double>
     double              decay_rate_grad_explosion;
     double              early_stopping_threshold;
     double              threshold_sustain_count;
-    Activation          activation_hidden = Activation::tanh;
-    Activation          activation_output = Activation::equation;
-    size_t              batch_size = 50 ;
+    Activation          activation_hidden = Activation::sigmoid;
+    Activation          activation_output = Activation::sigmoid;
+    size_t              batch_size = 10 ;
     size_t              iterations = 777;
     std::vector<size_t> architecture_hiddenLayer;
 
