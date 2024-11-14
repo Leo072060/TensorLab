@@ -16,7 +16,7 @@
 using namespace std;
 using namespace TL;
 
-#define TEST_MultilayerPerception_regression
+#define TEST_MultilayerPerception_classification
 
 int main()
 {
@@ -154,7 +154,7 @@ int main()
 
     MultilayerPerception_regression model;
 
-    auto x = data.extract(0, 2, Axis::col);
+    auto x = data.extract(0, data.size(Axis::col)-1, Axis::col);
     auto y = data.loc("target", Axis::col);
 
     auto x_y = train_test_split(x, y, 0.2);

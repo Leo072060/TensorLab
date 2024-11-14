@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, classification_report, ConfusionMatrixDisplay
 
-def generate_classification_data(n_samples=1000, n_features=20, n_classes=2, n_informative=2, n_redundant=10):
+def generate_classification_data(n_samples=3000, n_features=5, n_classes=4, n_informative=4, n_redundant=0):
     # 生成分类数据集
     X, y = make_classification(n_samples=n_samples,    # 样本数量
                                n_features=n_features,   # 特征数量
@@ -27,7 +27,7 @@ def generate_classification_data(n_samples=1000, n_features=20, n_classes=2, n_i
     return df
 
 # 生成数据
-df = generate_classification_data(n_samples=10000, n_features=20, n_classes=2, n_informative=5, n_redundant=10)
+df = generate_classification_data(n_samples=3000, n_features=5, n_classes=4, n_informative=4, n_redundant=0)
 
 # 分离特征和目标变量
 X = df.drop('target', axis=1)

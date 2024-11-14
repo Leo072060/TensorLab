@@ -53,9 +53,6 @@ Mat<double> MultilayerPerception_regression::train_(const Mat<double> &x, const 
             {
                 double y_i_pred   = neurons[theLast][i]->getOutputSignal_outputLayer();
                 double y_i_target = y.iloc(sample, i);
-
-                cout << y_i_pred << "?" << y_i_target << endl;
-
                 y_pred.emplace_back(y_i_pred);
                 y_target.emplace_back(y_i_target);
                 neurons[theLast][i]->setDelta_outputLayer(lossFunction_partialDerivative(y_i_target, y_i_pred),
@@ -109,6 +106,8 @@ Mat<double> MultilayerPerception_regression::predict_(const Mat<double> &x, cons
                 e2->clearSignals();
         for (size_t i = 0; i < neurons_pred[0].size(); ++i)
         {
+            neurons_pred[0][i]->sentSignal(x.iloc(r, i));
+            neurons_pred[0][i]->sentSignal(x.iloc(r, i));
             neurons_pred[0][i]->sentSignal(x.iloc(r, i));
         }
         for (size_t i = 1; i < neurons_pred.size(); ++i)

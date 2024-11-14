@@ -31,12 +31,12 @@ class MultilayerPerception_regression : public RegressionModelBase<double>
         MSE
     };
 
-    double              learning_rate     = 0.3;
+    double              learning_rate     = 0.003;
     Activation          activation_hidden = Activation::sigmoid;
     Activation          activation_output = Activation::sigmoid;
     LossFunction        lossFunction      = LossFunction::MSE;
     size_t              batch_size        = 100;
-    size_t              iterations        = 10000;
+    size_t              iterations        = 100000;
     double              tolerance         = 0.1;
     std::vector<size_t> architecture_hiddenLayer;
 

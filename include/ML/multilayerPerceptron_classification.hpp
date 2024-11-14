@@ -18,37 +18,73 @@ class MultilayerPerception_classification : public MultiClassificationModelBase<
   public:
     std::shared_ptr<ClassificationModelBase<double>> clone() const override;
 
-  public:
+    public:
     // model parameters
-    double              learning_rate = 0.3;
-    size_t              batch_size    = 100;
-    size_t              iterations    = 1700;
+    enum Activation
+    {
+        sigmoid,
+        tanh,
+        equation
+    };
+    enum LossFunction
+    {
+        MSE
+    };
+
+    double              learning_rate     = 0.003;
+    Activation          activation_hidden = Activation::sigmoid;
+    Activation          activation_output = Activation::sigmoid;
+    LossFunction        lossFunction      = LossFunction::MSE;
+    size_t              batch_size        = 100;
+    size_t              iterations        = 100000;
+    double              tolerance         = 0.1;
     std::vector<size_t> architecture_hiddenLayer;
 
   private:
+    double calLoss(const std::vector<double> &y_target, const std::vector<double> &y_pred) const;
+    double lossFunction_partialDerivative(const double y_target, const double y_pred) const;
+
     class neuron
     {
       public:
-        double inputSignal;
-        double outputSignal;
-        double threshold;
+        neuron(const Activation type, const double initialThreshold);
+
+        void   connect(const double w, std::shared_ptr<neuron> other);
+        double getOutputSignal_outputLayer() const;
+        void   setDelta_outputLayer(const double d,const double batchSize);
         void   activate();
-        void   sentSignal();
-        void   calAdjustVal(const double learning);
-        void   adjust();
+        double activation(const double x) const;
+        double activation_derivative(const double x) const;
+        void   sentSignal() const;
+        void   sentSignal(const double signal);
+        void   calDelta(const size_t batchSize);
+        void   adjust(const double learningRate);
+        void   resetDelta();
         void   clearSignals();
 
-        std::vector<std::pair<double, std::shared_ptr<neuron>>> synapse;
+      private:
+        double inputSignal;
+        double outputSignal;
 
-        double              g; // g is used for last neurons to adjust
-        std::vector<double> weights_adjusted;
-        double              threshold_adjusted;
+        double threshold;
+
+        struct Synapse
+        {
+            std::shared_ptr<neuron> link;
+            double                  weight;
+            double                  weight_delta;
+        };
+        std::vector<Synapse> synapses;
+
+        double delta;
+        double threshold_delta;
+
+        // neuron parameters
+        Activation activationType;
     };
 
-    std::vector<std::vector<std::shared_ptr<neuron>>> buildNetwork(const Mat<double> &x, const Mat<double> &y);
-    static Mat<double> neuralNetwork2theta(const std::vector<std::vector<std::shared_ptr<neuron>>> neurons,
-                                           const Mat<std::string>                                 &y_unique);
-    static std::vector<std::vector<std::shared_ptr<neuron>>> theta2neuralNetwork(const Mat<double> &theta);
+    std::vector<std::vector<std::shared_ptr<neuron>>> buildNeuralNetwork(const Mat<double> &x, const Mat<double> &y);
+    std::vector<std::vector<std::shared_ptr<neuron>>> neuralNetwork;
 };
 } // namespace TL
 #endif // MULTILAYER_PERCEPTRON_CLASSIFICATION

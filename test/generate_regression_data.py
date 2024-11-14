@@ -8,9 +8,9 @@ np.random.seed(42)
 num_samples = 10000
 feature1 = np.random.rand(num_samples) * 100  # 特征1
 feature2 = np.random.rand(num_samples) * 50   # 特征2
-# feature3 = np.random.rand(num_samples) * 25   # 特征3
-# feature4 = np.random.rand(num_samples) * 10   # 特征4
-# feature5 = np.random.rand(num_samples) * 20   # 特征5
+feature3 = np.random.rand(num_samples) * 25   # 特征3
+feature4 = np.random.rand(num_samples) * 10   # 特征4
+feature5 = np.random.rand(num_samples) * 20   # 特征5
 # feature6 = np.random.rand(num_samples) * 15   # 特征6
 # feature7 = np.random.rand(num_samples) * 30   # 特征7
 noise = np.random.randn(num_samples) * 0.001      # 随机噪声
@@ -27,9 +27,9 @@ target  = (target - target_min) / (target_max - target_min)
 data = pd.DataFrame({
     'feature1': feature1,
     'feature2': feature2,
-    # 'feature3': feature3,
-    # 'feature4': feature4,
-    # 'feature5': feature5,
+    'feature3': feature3,
+    'feature4': feature4,
+    'feature5': feature5,
     'target': target
 })
 
@@ -45,7 +45,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 data = pd.read_csv('regression_data.csv')
 
 # 分割特征和目标变量
-X = data[['feature1', 'feature2']]
+X = data[['feature1', 'feature2', 'feature3', 'feature4', 'feature5']]
 y = data['target']
 
 # 划分训练集和测试集
