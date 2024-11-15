@@ -108,7 +108,6 @@ Mat<double> MultilayerPerception_regression::predict_(const Mat<double> &x, cons
         {
             neurons_pred[0][i]->sentSignal(x.iloc(r, i));
             neurons_pred[0][i]->sentSignal(x.iloc(r, i));
-            neurons_pred[0][i]->sentSignal(x.iloc(r, i));
         }
         for (size_t i = 1; i < neurons_pred.size(); ++i)
         {

@@ -12,11 +12,12 @@
 #include "mat/mat.hpp"
 #include "preprocessor/split.hpp"
 #include "utility/loader.hpp"
+#include "utility/saver.hpp"
 
 using namespace std;
 using namespace TL;
 
-#define TEST_MultilayerPerception_classification
+#define TEST_MultilayerPerception_regression
 
 int main()
 {
@@ -154,11 +155,12 @@ int main()
 
     MultilayerPerception_regression model;
 
-    auto x = data.extract(0, data.size(Axis::col)-1, Axis::col);
+    data = data.extract(0, 500, Axis::row);
+
+    auto x = data.extract(0, data.size(Axis::col) - 1, Axis::col);
     auto y = data.loc("target", Axis::col);
 
     auto x_y = train_test_split(x, y, 0.2);
-    
 
     auto x_train = x_y["x_train"];
     auto y_train = x_y["y_train"];
@@ -167,6 +169,9 @@ int main()
 
     model.train(x_train, y_train);
     auto y_pred = model.predict(x_test);
+
+    csv_Saver saver;
+    saver.save_matrix(x_test.concat(y_test, Axis::col).concat(y_pred, Axis::col), "result.csv");
 
     Evaluation_regression evalution;
     evalution.fit(y_pred, y_test);

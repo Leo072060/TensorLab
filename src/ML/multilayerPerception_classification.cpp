@@ -17,9 +17,10 @@ Mat<double> MultilayerPerception_classification::train_multi(const Mat<double> &
     }
 
     OneHotEncoder encoder;
-    encoder.set_labels(managed_labels.read());
-    Mat<double>                        y_oneHot = encoder.transform(y);
-    vector<vector<shared_ptr<neuron>>> neurons  = buildNeuralNetwork(x, y_oneHot);
+    Mat<double>   y_oneHot = encoder.fit_transform(y);
+    record(managed_labels, encoder.get_labels());
+
+    vector<vector<shared_ptr<neuron>>> neurons = buildNeuralNetwork(x, y_oneHot);
 
     // start training
     for (size_t I = 0; I < iterations; ++I)
@@ -36,6 +37,10 @@ Mat<double> MultilayerPerception_classification::train_multi(const Mat<double> &
         double maxLoss = 0;
         for (const auto sample : samples)
         {
+            for (const auto &e : neurons)
+                for (auto &e2 : e)
+                    e2->clearSignals();
+
             for (size_t i = 0; i < neurons[0].size(); ++i)
             {
                 neurons[0][i]->sentSignal(x.iloc(sample, i));
@@ -63,15 +68,20 @@ Mat<double> MultilayerPerception_classification::train_multi(const Mat<double> &
                                                           batch_size);
             }
 
+            for (auto e : y_target)
+                cout << e << " ";
+            cout << endl;
+            for (auto e : y_pred)
+                cout << e << " ";
+            cout << endl;
+            cin.get();
+
             double loss = calLoss(y_target, y_pred);
             if (loss > maxLoss) maxLoss = loss;
 
             for (long long int i = neurons.size() - 2; i >= 0; --i)
                 for (auto &e : neurons[i])
                     e->calDelta(batch_size);
-            for (long long int i = neurons.size() - 1; i >= 0; --i)
-                for (auto &e : neurons[i])
-                    e->clearSignals();
         }
 
         cout << "epoch: " << I << " - max loss: " << maxLoss << endl;
@@ -106,7 +116,7 @@ Mat<std::string> MultilayerPerception_classification::predict_multi(const Mat<do
     size_t theLast = neurons_pred.size() - 1;
     for (size_t r = 0; r < x.size(Axis::row); ++r)
     {
-        for (auto &e : neurons_pred)
+        for (const auto &e : neurons_pred)
             for (auto &e2 : e)
                 e2->clearSignals();
         for (size_t i = 0; i < neurons_pred[0].size(); ++i)
@@ -146,10 +156,13 @@ Mat<std::string> MultilayerPerception_classification::predict_multi(const Mat<do
         y_oneHot.iloc(r, index_oneHot) = 1;
     }
 
+    display(y_possible);
+    cin.get();
+
     OneHotEncoder encoder;
     encoder.set_labels(managed_labels.read());
     Mat<string> y = encoder.decode(y_oneHot);
-    
+
     return y;
 }
 double MultilayerPerception_classification::calLoss(const std::vector<double> &y_target,
@@ -208,6 +221,8 @@ MultilayerPerception_classification::buildNeuralNetwork(const Mat<double> &x, co
     if (architecture.empty())
     {
         // default architecture
+        architecture.emplace_back(x.size(Axis::col));
+        architecture.emplace_back(x.size(Axis::col) + 3);
         architecture.emplace_back(x.size(Axis::col));
     }
     architecture.insert(architecture.begin(), x.size(Axis::col));

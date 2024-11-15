@@ -18,6 +18,7 @@ class OneHotEncoder : public ManagedClass
     ~OneHotEncoder() = default;
 
     void             set_labels(const Mat<std::string> &labels);
+    Mat<std::string> get_labels() const;
     void             fit(const Mat<std::string> &data);
     Mat<int>         transform(const Mat<std::string> &data) const;
     Mat<int>         fit_transform(const Mat<std::string> &data);

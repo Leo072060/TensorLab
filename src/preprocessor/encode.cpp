@@ -35,6 +35,18 @@ void OneHotEncoder::set_labels(const Mat<std::string> &labels)
 {
     record(managed_labels, labels);
 }
+Mat<std::string> OneHotEncoder::get_labels() const
+{
+    using namespace std;
+
+    if (!managed_labels.isReadable())
+    {
+        cerr << "Error: Labels are not set in the encoder." << endl;
+        throw runtime_error("Fit or set labels first.");
+    }
+
+    return managed_labels.read();
+}
 void OneHotEncoder::fit(const Mat<std::string> &data)
 {
     using namespace std;

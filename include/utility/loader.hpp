@@ -35,14 +35,13 @@ template <class T = double> class csv_Loader : public Loader<T>
   public:
     Mat<T> load_matrix(const std::string &fileName) const override;
 
-  public:
     NameFlag nameFlag = NameFlag::no_name;
 };
 
 template <typename T> Mat<T> csv_Loader<T>::load_matrix(const std::string &fileName) const
 {
     using namespace std;
-    
+
     ifstream file(fileName);
     if (!file.is_open())
     {
@@ -122,7 +121,7 @@ template <typename T> Mat<T> csv_Loader<T>::load_matrix(const std::string &fileN
 
     // store in the matrix
     Mat<T> mat(rowSize, columnSize);
-    
+
     for (size_t i = 0; i < mat.size(Axis::row); ++i)
         for (size_t j = 0; j < mat.size(Axis::col); ++j)
             mat.iloc(i, j) = lines[i][j];
@@ -134,7 +133,7 @@ template <typename T> Mat<T> csv_Loader<T>::load_matrix(const std::string &fileN
             mat.iloc_name(i, Axis::col) = colNames[i];
 
     file.close();
-    
+
     return mat;
 }
 } // namespace TL

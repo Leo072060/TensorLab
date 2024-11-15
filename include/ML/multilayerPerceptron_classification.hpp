@@ -31,7 +31,7 @@ class MultilayerPerception_classification : public MultiClassificationModelBase<
         MSE
     };
 
-    double              learning_rate     = 0.003;
+    double              learning_rate     = 0.03;
     Activation          activation_hidden = Activation::sigmoid;
     Activation          activation_output = Activation::sigmoid;
     LossFunction        lossFunction      = LossFunction::MSE;
