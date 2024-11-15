@@ -36,7 +36,7 @@ class MultilayerPerception_regression : public RegressionModelBase<double>
     Activation          activation_output = Activation::sigmoid;
     LossFunction        lossFunction      = LossFunction::MSE;
     size_t              batch_size        = 200;
-    size_t              iterations        = 60000;
+    size_t              iterations        = 3000;
     double              tolerance         = 0.1;
     std::vector<size_t> architecture_hiddenLayer;
 
@@ -46,21 +46,33 @@ class MultilayerPerception_regression : public RegressionModelBase<double>
 
     class neuron
     {
+      private:
+        struct Synapse
+        {
+            std::shared_ptr<neuron> link;
+            double                  weight;
+            double                  weight_delta;
+        };
+
       public:
         neuron(const Activation type, const double initialThreshold);
 
-        void   connect(const double w, std::shared_ptr<neuron> other);
-        double getOutputSignal_outputLayer() const;
-        void   setDelta_outputLayer(const double d,const double batchSize);
-        void   activate();
-        double activation(const double x) const;
-        double activation_derivative(const double x) const;
-        void   sentSignal() const;
-        void   sentSignal(const double signal);
-        void   calDelta(const size_t batchSize);
-        void   adjust(const double learningRate);
-        void   resetDelta();
-        void   clearSignals();
+        void       connect(const double w, std::shared_ptr<neuron> other);
+        double     getOutputSignal_outputLayer() const;
+        void       setDelta_outputLayer(const double d, const double batchSize);
+        void       activate();
+        double     activation(const double x) const;
+        double     activation_derivative(const double x) const;
+        void       sentSignal() const;
+        void       sentSignal(const double signal);
+        void       calDelta(const size_t batchSize);
+        void       adjust(const double learningRate);
+        void       resetDelta();
+        void       clearSignals();
+        double     getThreshold() const;
+        size_t     synapsesSize() const;
+        Synapse    getSynapse(const size_t i) const;
+        Activation getActivationType() const;
 
       private:
         double inputSignal;
@@ -68,12 +80,6 @@ class MultilayerPerception_regression : public RegressionModelBase<double>
 
         double threshold;
 
-        struct Synapse
-        {
-            std::shared_ptr<neuron> link;
-            double                  weight;
-            double                  weight_delta;
-        };
         std::vector<Synapse> synapses;
 
         double delta;
@@ -83,8 +89,11 @@ class MultilayerPerception_regression : public RegressionModelBase<double>
         Activation activationType;
     };
 
-    std::vector<std::vector<std::shared_ptr<neuron>>> buildNeuralNetwork(const Mat<double> &x, const Mat<double> &y);
+    std::vector<std::vector<std::shared_ptr<neuron>>> buildNeuralNetwork(const Mat<double> &x, const Mat<double> &y) const;
     std::vector<std::vector<std::shared_ptr<neuron>>> neuralNetwork;
+    Mat<double> neuralNetwork2theta(const std::vector<std::vector<std::shared_ptr<neuron>>> &neurons) const;
+    std::vector<std::vector<std::shared_ptr<MultilayerPerception_regression::neuron>>> theta2neuralNetwork(
+        const Mat<double> &theta) const;
 };
 } // namespace TL
 #endif // MULTILAYER_PERCEPTRON_REGRESSION

@@ -38,4 +38,4 @@ def plot_from_csv(file_path, save_path, n):
 # Example usage
 if __name__ == "__main__":
     # Replace 'result.csv' with your CSV file path and 'graph.png' with your desired output file name
-    plot_from_csv("result.csv", "graph.png", n=5)
+    plot_from_csv("result.csv", "graph.png", n=4)

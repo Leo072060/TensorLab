@@ -81,8 +81,7 @@ Mat<double> MultilayerPerception_regression::train_(const Mat<double> &x, const 
             }
     }
 
-    neuralNetwork = neurons;
-    return Mat<double>();
+    return neuralNetwork2theta(neurons);
 }
 Mat<double> MultilayerPerception_regression::predict_(const Mat<double> &x, const Mat<double> &theta) const
 {
@@ -90,13 +89,13 @@ Mat<double> MultilayerPerception_regression::predict_(const Mat<double> &x, cons
 
     Mat<double> y(x.size(Axis::row), 1);
 
-    // if (theta.iloc(0, 0) != x.size(Axis::col))
-    // {
-    //     cerr << "The dimension of x does not match the model's requirement." << endl;
-    //     throw runtime_error("Dimension mismatch between x and the model.");
-    // }
+    if (theta.iloc(0, 0) != x.size(Axis::col))
+    {
+        cerr << "The dimension of x does not match the model's requirement." << endl;
+        throw runtime_error("Dimension mismatch between x and the model.");
+    }
 
-    vector<vector<shared_ptr<neuron>>> neurons_pred = neuralNetwork;
+    vector<vector<shared_ptr<neuron>>> neurons_pred = theta2neuralNetwork(theta);
 
     size_t theLast = neurons_pred.size() - 1;
     for (size_t r = 0; r < x.size(Axis::row); ++r)
@@ -172,7 +171,7 @@ double MultilayerPerception_regression::lossFunction_partialDerivative(const dou
     }
 }
 std::vector<std::vector<std::shared_ptr<MultilayerPerception_regression::neuron>>> MultilayerPerception_regression::
-    buildNeuralNetwork(const Mat<double> &x, const Mat<double> &y)
+    buildNeuralNetwork(const Mat<double> &x, const Mat<double> &y) const
 {
     using namespace std;
 
@@ -232,7 +231,94 @@ std::vector<std::vector<std::shared_ptr<MultilayerPerception_regression::neuron>
 
     return neurons;
 }
+Mat<double> MultilayerPerception_regression::neuralNetwork2theta(
+    const std::vector<std::vector<std::shared_ptr<neuron>>> &neurons) const
+{
+    using namespace std;
 
+    size_t maxSize = 0;
+    for (size_t i = 0; i < neurons.size() - 1; ++i)
+    {
+        double size = (neurons[i].size() * (neurons[i + 1].size() + 1)) + 1;
+        if (size > maxSize) maxSize = size;
+    }
+    Mat<double> theta(maxSize, neurons.size());
+
+    for (size_t i = 0; i < neurons.size(); ++i)
+    {
+        theta.iloc(0, i) = neurons[i].size();
+        for (size_t j = 0; j < neurons[i].size(); ++j)
+        {
+            theta.iloc(j + 1, i) = neurons[i][j]->getThreshold();
+            for (size_t k = 0; k < neurons[i][j]->synapsesSize(); ++k)
+            {
+                theta.iloc(5 * j + 6 + k, i) = neurons[i][j]->getSynapse(k).weight;
+            }
+        }
+    }
+    for (size_t i = 0; i < neurons.size(); ++i)
+    {
+        string activationType = "";
+        switch (neurons[i][0]->getActivationType())
+        {
+        case Activation::equation:
+            activationType = "equation";
+            break;
+        case Activation::sigmoid:
+            activationType = "sigmoid";
+        case Activation::tanh:
+            activationType = "tanh";
+            break;
+        default:
+            cerr << "Error: Unsupported activation function!" << endl;
+            throw std::invalid_argument("Unsupported activation function.");
+        }
+        theta.iloc_name(i, Axis::col) = activationType;
+    }
+
+    string lossFunctionType = "";
+    switch (lossFunction)
+    {
+    case LossFunction::MSE:
+        lossFunctionType = "MSE";
+        break;
+    default:
+        cerr << "Error: Unsupported loss function!" << endl;
+        throw std::invalid_argument("Unsupported loss function.");
+    }
+    theta.iloc_name(0, Axis::row) = lossFunctionType;
+
+    return theta;
+}
+std::vector<std::vector<std::shared_ptr<MultilayerPerception_regression::neuron>>> MultilayerPerception_regression::
+    theta2neuralNetwork(const Mat<double> &theta) const
+{
+    using namespace std;
+
+    vector<vector<shared_ptr<neuron>>> neurons;
+
+    for (size_t c = 0; c < theta.size(Axis::col); ++c)
+    {
+        Activation activationType;
+        if (theta.iloc_name(c, Axis::col) == "equation")
+            activationType = Activation::equation;
+        else if (theta.iloc_name(c, Axis::col) == "sigmoid")
+            activationType = Activation::sigmoid;
+        else if (theta.iloc_name(c, Axis::col) == "tanh")
+            activationType = Activation::tanh;
+
+        vector<shared_ptr<neuron>> layer;
+        for (size_t i = 1; i <= theta.iloc(0, c); ++i)
+            layer.emplace_back(make_shared<neuron>(activationType, theta.iloc(i, c)));
+        neurons.emplace_back(layer);
+    }
+    for (size_t i = 0; i < neurons.size() - 1; ++i)
+        for (size_t j = 0; j < neurons[i].size(); ++j)
+            for (size_t k = 0; k < neurons[i + 1].size(); ++k)
+                neurons[i][j]->connect(theta.iloc(5 * j + 6 + k, i), neurons[i + 1][k]);
+
+    return neurons;
+}
 // for polymorphism
 std::shared_ptr<RegressionModelBase<double>> MultilayerPerception_regression ::clone() const
 {
@@ -350,4 +436,28 @@ void MultilayerPerception_regression::neuron::clearSignals()
 {
     inputSignal  = 0;
     outputSignal = 0;
+}
+double MultilayerPerception_regression::neuron::getThreshold() const
+{
+    return threshold;
+}
+size_t MultilayerPerception_regression::neuron::synapsesSize() const
+{
+    return synapses.size();
+}
+MultilayerPerception_regression::neuron::Synapse MultilayerPerception_regression::neuron::getSynapse(
+    const size_t i) const
+{
+    using namespace std;
+
+    if (i >= synapses.size())
+    {
+        cerr << "Error: Index " << i << " is out of range for synapses." << endl;
+        throw out_of_range("Index is out of range in getSynapse.");
+    }
+    return synapses[i];
+}
+MultilayerPerception_regression::Activation MultilayerPerception_regression::neuron::getActivationType() const
+{
+    return activationType;
 }

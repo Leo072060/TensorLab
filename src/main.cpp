@@ -148,7 +148,7 @@ int main()
 #ifdef TEST_MultilayerPerception_regression
     csv_Loader loader;
 
-    string dataFileName = "regression_data.csv";
+    string dataFileName = "classification_data.csv";
     loader.nameFlag     = col_name;
     Mat data            = loader.load_matrix(dataFileName);
     display_rainbow(data, col_name, 5);

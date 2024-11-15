@@ -1,3 +1,4 @@
+#include <limits>
 #include <random>
 
 #include "ML/multilayerPerceptron_classification.hpp"
@@ -34,7 +35,7 @@ Mat<double> MultilayerPerception_classification::train_multi(const Mat<double> &
             samples.insert(dis(gen));
 
         size_t theLast = neurons.size() - 1;
-        double maxLoss = 0;
+        double maxLoss = -std::numeric_limits<double>::infinity();
         for (const auto sample : samples)
         {
             for (const auto &e : neurons)
@@ -46,11 +47,13 @@ Mat<double> MultilayerPerception_classification::train_multi(const Mat<double> &
                 neurons[0][i]->sentSignal(x.iloc(sample, i));
             }
             for (size_t i = 1; i < neurons.size() - 1; ++i)
+            {
                 for (size_t j = 0; j < neurons[i].size(); ++j)
                 {
                     neurons[i][j]->activate();
                     neurons[i][j]->sentSignal();
                 }
+            }
             for (size_t j = 0; j < neurons[theLast].size(); ++j)
             {
                 neurons[theLast][j]->activate();
@@ -68,13 +71,14 @@ Mat<double> MultilayerPerception_classification::train_multi(const Mat<double> &
                                                           batch_size);
             }
 
-            for (auto e : y_target)
-                cout << e << " ";
-            cout << endl;
-            for (auto e : y_pred)
-                cout << e << " ";
-            cout << endl;
-            cin.get();
+            // DEBUG
+            // for (auto e : y_target)
+            //     cout << e << " ";
+            // cout << endl;
+            // for (auto e : y_pred)
+            //     cout << e << " ";
+            // cout << endl;
+            // cin.get();
 
             double loss = calLoss(y_target, y_pred);
             if (loss > maxLoss) maxLoss = loss;
@@ -121,8 +125,6 @@ Mat<std::string> MultilayerPerception_classification::predict_multi(const Mat<do
                 e2->clearSignals();
         for (size_t i = 0; i < neurons_pred[0].size(); ++i)
         {
-            neurons_pred[0][i]->sentSignal(x.iloc(r, i));
-            neurons_pred[0][i]->sentSignal(x.iloc(r, i));
             neurons_pred[0][i]->sentSignal(x.iloc(r, i));
         }
         for (size_t i = 1; i < neurons_pred.size(); ++i)
@@ -190,6 +192,23 @@ double MultilayerPerception_classification::calLoss(const std::vector<double> &y
         loss = sum / n;
         break;
     }
+    case LossFunction::CrossEntropy: {
+        size_t n = y_target.size();
+        for (size_t i = 0; i < n; ++i)
+        {
+            // Avoid log(0) by checking for small values in y_pred.
+            if (y_pred[i] > 0)
+            {
+                loss -= y_target[i] * std::log(y_pred[i]);
+            }
+            else
+            {
+                cerr << "Error: y_pred is 0, this will cause division by zero." << endl;
+                throw invalid_argument("Division by zero.");
+            }
+        }
+        break;
+    }
     default:
         cerr << "Error: Unsupported loss function!" << endl;
         throw std::invalid_argument("Unsupported loss function.");
@@ -206,9 +225,17 @@ double MultilayerPerception_classification::lossFunction_partialDerivative(const
     {
     case LossFunction::MSE:
         return -(y_target - y_pred);
+    case LossFunction::CrossEntropy: {
+        if (y_pred == 0)
+        {
+            cerr << "Error: y_pred is 0, this will cause division by zero." << endl;
+            throw invalid_argument("Division by zero.");
+        }
+        return -(y_target / y_pred);
+    }
     default:
         cerr << "Error: Unsupported loss function!" << endl;
-        throw std::invalid_argument("Unsupported loss function.");
+        throw invalid_argument("Unsupported loss function.");
     }
 }
 std::vector<std::vector<std::shared_ptr<MultilayerPerception_classification::neuron>>>
@@ -221,8 +248,6 @@ MultilayerPerception_classification::buildNeuralNetwork(const Mat<double> &x, co
     if (architecture.empty())
     {
         // default architecture
-        architecture.emplace_back(x.size(Axis::col));
-        architecture.emplace_back(x.size(Axis::col) + 3);
         architecture.emplace_back(x.size(Axis::col));
     }
     architecture.insert(architecture.begin(), x.size(Axis::col));

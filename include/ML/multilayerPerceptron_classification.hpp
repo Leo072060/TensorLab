@@ -28,15 +28,16 @@ class MultilayerPerception_classification : public MultiClassificationModelBase<
     };
     enum LossFunction
     {
-        MSE
+        MSE,
+        CrossEntropy
     };
 
     double              learning_rate     = 0.03;
     Activation          activation_hidden = Activation::sigmoid;
     Activation          activation_output = Activation::sigmoid;
     LossFunction        lossFunction      = LossFunction::MSE;
-    size_t              batch_size        = 100;
-    size_t              iterations        = 100000;
+    size_t              batch_size        = 700;
+    size_t              iterations        = 30000;
     double              tolerance         = 0.1;
     std::vector<size_t> architecture_hiddenLayer;
 
