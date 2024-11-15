@@ -181,6 +181,7 @@ std::vector<std::vector<std::shared_ptr<MultilayerPerception_regression::neuron>
     {
         // default architecture
         architecture.emplace_back(x.size(Axis::col));
+        architecture.emplace_back(x.size(Axis::col));
     }
     architecture.insert(architecture.begin(), x.size(Axis::col));
     architecture.emplace_back(y.size(Axis::col));
@@ -245,17 +246,25 @@ Mat<double> MultilayerPerception_regression::neuralNetwork2theta(
     Mat<double> theta(maxSize, neurons.size());
 
     for (size_t i = 0; i < neurons.size(); ++i)
+        for (size_t j = 0; j < neurons[i].size(); ++j)
+            theta.iloc(0, i) = neurons[i].size();
+
+    for (size_t i = 0; i < neurons.size(); ++i)
     {
-        theta.iloc(0, i) = neurons[i].size();
         for (size_t j = 0; j < neurons[i].size(); ++j)
         {
             theta.iloc(j + 1, i) = neurons[i][j]->getThreshold();
-            for (size_t k = 0; k < neurons[i][j]->synapsesSize(); ++k)
+            if (i < neurons.size() - 1)
             {
-                theta.iloc(5 * j + 6 + k, i) = neurons[i][j]->getSynapse(k).weight;
+                for (size_t k = 0; k < neurons[i][j]->synapsesSize(); ++k)
+                {
+                    theta.iloc(theta.iloc(0, i) + 1 + theta.iloc(0, i + 1) * j + k, i) =
+                        neurons[i][j]->getSynapse(k).weight;
+                }
             }
         }
     }
+
     for (size_t i = 0; i < neurons.size(); ++i)
     {
         string activationType = "";
@@ -266,6 +275,7 @@ Mat<double> MultilayerPerception_regression::neuralNetwork2theta(
             break;
         case Activation::sigmoid:
             activationType = "sigmoid";
+            break;
         case Activation::tanh:
             activationType = "tanh";
             break;
@@ -315,7 +325,8 @@ std::vector<std::vector<std::shared_ptr<MultilayerPerception_regression::neuron>
     for (size_t i = 0; i < neurons.size() - 1; ++i)
         for (size_t j = 0; j < neurons[i].size(); ++j)
             for (size_t k = 0; k < neurons[i + 1].size(); ++k)
-                neurons[i][j]->connect(theta.iloc(5 * j + 6 + k, i), neurons[i + 1][k]);
+                neurons[i][j]->connect(theta.iloc(theta.iloc(0, i) + 1 + theta.iloc(0, i + 1) * j + k, i),
+                                       neurons[i + 1][k]);
 
     return neurons;
 }
@@ -342,7 +353,7 @@ void MultilayerPerception_regression::neuron::connect(const double w, std::share
 {
     Synapse syn;
     syn.link         = other;
-    syn.weight       = 0;
+    syn.weight       = w;
     syn.weight_delta = 0;
     synapses.push_back(syn);
 }

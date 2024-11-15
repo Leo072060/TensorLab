@@ -9,6 +9,7 @@
 #include "ML/evaluation.hpp"
 #include "ML/linearModel.hpp"
 #include "ML/multilayerPerceptron.hpp"
+#include "ML/multilayerPerceptron_classification_b2m.hpp"
 #include "mat/mat.hpp"
 #include "preprocessor/split.hpp"
 #include "utility/loader.hpp"
@@ -17,7 +18,7 @@
 using namespace std;
 using namespace TL;
 
-#define TEST_MultilayerPerception_regression
+#define TEST_MultilayerPerception_classification_b2m
 
 int main()
 {
@@ -152,7 +153,7 @@ int main()
     loader.nameFlag     = col_name;
     Mat data            = loader.load_matrix(dataFileName);
     display_rainbow(data, col_name, 5);
-
+    cin.get();
     MultilayerPerception_regression model;
 
     data = data.extract(0, 500, Axis::row);
@@ -197,6 +198,32 @@ int main()
     auto y_test  = x_y["y_test"];
 
     MultilayerPerception_classification model;
+    model.train(x_train, y_train);
+    Evaluation_classification evalution;
+    auto                      y_pred = model.predict(x_test);
+    display_rainbow(y_test.concat(y_pred, Axis::col));
+    evalution.fit(y_pred, y_test);
+    evalution.report();
+#endif
+
+#ifdef TEST_MultilayerPerception_classification_b2m
+    csv_Loader loader;
+    string     dataFileName = "classification_data.csv";
+    loader.nameFlag         = col_name;
+    Mat data                = loader.load_matrix(dataFileName);
+    display_rainbow(data, col_name, 5);
+    auto        x = data.extract(0, data.size(Axis::col) - 1, Axis::col);
+    Mat<string> y = data.loc("target", Axis::col);
+    display(x);
+    display(y);
+    auto x_y = train_test_split(x, y, 0.2);
+
+    auto x_train = x_y["x_train"];
+    auto y_train = x_y["y_train"];
+    auto x_test  = x_y["x_test"];
+    auto y_test  = x_y["y_test"];
+
+    MultilayerPerception_classification_b2m model;
     model.train(x_train, y_train);
     Evaluation_classification evalution;
     auto                      y_pred = model.predict(x_test);

@@ -1,5 +1,5 @@
-#ifndef MULTILAYER_PERCEPTRON_REGRESSION
-#define MULTILAYER_PERCEPTRON_REGRESSION
+#ifndef MULTILAYER_PERCEPTRON_REGRESSION_HPP
+#define MULTILAYER_PERCEPTRON_REGRESSION_HPP
 
 #include "ML/_internal/regressionModelBase.hpp"
 
@@ -35,8 +35,8 @@ class MultilayerPerception_regression : public RegressionModelBase<double>
     Activation          activation_hidden = Activation::sigmoid;
     Activation          activation_output = Activation::sigmoid;
     LossFunction        lossFunction      = LossFunction::MSE;
-    size_t              batch_size        = 200;
-    size_t              iterations        = 3000;
+    size_t              batch_size        = 100;
+    size_t              iterations        = 30000;
     double              tolerance         = 0.1;
     std::vector<size_t> architecture_hiddenLayer;
 
@@ -96,4 +96,4 @@ class MultilayerPerception_regression : public RegressionModelBase<double>
         const Mat<double> &theta) const;
 };
 } // namespace TL
-#endif // MULTILAYER_PERCEPTRON_REGRESSION
+#endif // MULTILAYER_PERCEPTRON_REGRESSION_HPP

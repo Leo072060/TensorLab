@@ -1,5 +1,5 @@
-#ifndef MULTILAYER_PERCEPTRON_CLASSIFICATION
-#define MULTILAYER_PERCEPTRON_CLASSIFICATION
+#ifndef MULTILAYER_PERCEPTRON_CLASSIFICATION_HPP
+#define MULTILAYER_PERCEPTRON_CLASSIFICATION_HPP
 
 #include "ML/_internal/multiClassificationModelBase.hpp"
 
@@ -88,4 +88,4 @@ class MultilayerPerception_classification : public MultiClassificationModelBase<
     std::vector<std::vector<std::shared_ptr<neuron>>> neuralNetwork;
 };
 } // namespace TL
-#endif // MULTILAYER_PERCEPTRON_CLASSIFICATION
+#endif // MULTILAYER_PERCEPTRON_CLASSIFICATION_HPP

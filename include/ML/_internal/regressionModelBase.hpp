@@ -26,11 +26,12 @@ template <class T = double> class RegressionModelBase : public ManagedClass
     void   train(const Mat<T> &x, const Mat<T> &y);
     Mat<T> predict(const Mat<T> &x) const;
     Mat<T> get_theta() const;
+    void   set_theta(const Mat<double>& theta);
 
     // hook functions
   protected:
-    virtual Mat<double> train_(const Mat<T> &x, const Mat<T> &y)              = 0;
-    virtual Mat<T> predict_(const Mat<T> &x, const Mat<double> &thetas) const = 0;
+    virtual Mat<double> train_(const Mat<T> &x, const Mat<T> &y)                   = 0;
+    virtual Mat<T>      predict_(const Mat<T> &x, const Mat<double> &thetas) const = 0;
 
     // for polymorphism
   public:
@@ -101,6 +102,9 @@ template <class T> Mat<T> RegressionModelBase<T>::get_theta() const
         throw runtime_error("The model has not been trained.");
     }
     return managed_theta.read();
+}
+template <class T> void RegressionModelBase<T>::set_theta(const Mat<double>& theta) {
+    record(managed_theta,theta);
 }
 } // namespace _internal
 } // namespace TL

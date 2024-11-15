@@ -323,7 +323,7 @@ void MultilayerPerception_classification::neuron::connect(const double w, std::s
 {
     Synapse syn;
     syn.link         = other;
-    syn.weight       = 0;
+    syn.weight       = w;
     syn.weight_delta = 0;
     synapses.push_back(syn);
 }

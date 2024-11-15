@@ -27,7 +27,7 @@ def generate_classification_data(n_samples=3000, n_features=5, n_classes=4, n_in
     return df
 
 # 生成数据
-df = generate_classification_data(n_samples=3000, n_features=4, n_classes=2, n_informative=4, n_redundant=0)
+df = generate_classification_data(n_samples=5000, n_features=4, n_classes=5, n_informative=4, n_redundant=0)
 
 # 分离特征和目标变量
 X = df.drop('target', axis=1)
